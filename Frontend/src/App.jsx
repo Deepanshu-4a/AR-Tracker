@@ -3,6 +3,7 @@ import { Sidebar } from "./components/ui/Sidebar"
 import { Dashboard } from "./components/Dashboard"
 import { Reminders } from "./components/Reminders"
 import { InvoiceManagement } from "./components/InvoiceManagement";
+import { Toaster } from "sonner";
 function App() {
   const [activeTab, setActiveTab] = useState("dashboard");
 

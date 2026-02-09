@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { Sidebar } from "./components/ui/Sidebar"
 import { Dashboard } from "./components/Dashboard"
+import { Reminders } from "./components/Reminders"
 function App() {
   const [activeTab, setActiveTab] = useState("dashboard")
  
@@ -11,6 +12,8 @@ function App() {
     switch (activeTab) {
       case 'dashboard':
         return <Dashboard onNavigate={setActiveTab} />;
+      case 'reminders':
+        return <Reminders />;
       case 'clients':
         // return <EmployeeManagement />;
       case 'invoices':

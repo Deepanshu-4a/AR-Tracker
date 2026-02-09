@@ -1,34 +1,46 @@
 import { useState } from "react"
 import { Sidebar } from "./components/ui/Sidebar"
 import { Dashboard } from "./components/Dashboard"
+import { Reminders } from "./components/Reminders"
+import { InvoiceManagement } from "./components/InvoiceManagement";
 function App() {
-  const [activeTab, setActiveTab] = useState("dashboard")
- 
+  const [activeTab, setActiveTab] = useState("dashboard");
+
   const handleLogout = () => {
-    console.log("Logging out...")
-  }
+    console.log("Logging out...");
+  };
+
+  const handleSelectInvoice = (invoiceId) => {
+    console.log("Selected invoice:", invoiceId);
+  };
   const renderContent = () => {
     switch (activeTab) {
-      case 'dashboard':
+      case "dashboard":
         return <Dashboard onNavigate={setActiveTab} />;
-      case 'clients':
-        // return <EmployeeManagement />;
-      case 'invoices':
-        // return <UserAssignment />;
-      case 'analytics':
-        // return <Analytics />;
+      case 'reminders':
+        return <Reminders />;
+      case "clients":
+      // return <EmployeeManagement />;
+      case "invoices":
+        return <InvoiceManagement onSelectInvoice={handleSelectInvoice} />;
+      case "analytics":
+      // return <Analytics />;
       default:
         return <Dashboard />;
     }
   };
- 
-  return (  
+
+  return (
     <div className="flex h-screen bg-background">
-      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} onLogout={handleLogout} />
+      <Sidebar
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        onLogout={handleLogout}
+      />
       <main className="flex-1 overflow-auto">{renderContent()}</main>
+      <Toaster />
     </div>
-  )
+  );
 }
- 
-export default App
- 
+
+export default App;

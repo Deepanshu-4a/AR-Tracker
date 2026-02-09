@@ -14,7 +14,7 @@ export function Sidebar({ activeTab, setActiveTab, onLogout }) {
     { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
     { id: "clients", label: "Clients", icon: Users },
     { id: "invoices", label: "Invoices", icon: Receipt },
-    { id: "analytics", label: "Analytics", icon: TrendingUp },
+    { id: "reminders", label: "Reminders", icon: TrendingUp },
   ];
  
   return (

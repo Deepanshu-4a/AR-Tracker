@@ -33,9 +33,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 import { InvoiceForm } from "./InvoiceForm";
 import { InvoiceDetail } from "./InvoiceDetail";
 
-/* -----------------------------
-   Invoice Management (Aging)
------------------------------- */
+
 
 export function InvoiceManagement({ onSelectInvoice }) {
   const [searchTerm, setSearchTerm] = useState("");
@@ -82,9 +80,7 @@ export function InvoiceManagement({ onSelectInvoice }) {
     },
   ]);
 
-  /* -----------------------------
-     Helpers
-  ------------------------------ */
+
 
   const getAgingBucket = (daysOverdue) => {
     if (daysOverdue <= 30) return "0–30";
@@ -126,9 +122,7 @@ export function InvoiceManagement({ onSelectInvoice }) {
     toast.success("Reminder sent successfully");
   };
 
-  /* -----------------------------
-     Render
-  ------------------------------ */
+
 
   if (selectedInvoiceId) {
     return (
@@ -203,7 +197,7 @@ export function InvoiceManagement({ onSelectInvoice }) {
         </DialogContent>
       </Dialog>
 
-      {/* Filters */}
+
       <Card className="p-4">
         <div className="flex flex-col sm:flex-row gap-4 sm:items-center">
           <div className="flex-auto relative min-w-0">
@@ -232,7 +226,6 @@ export function InvoiceManagement({ onSelectInvoice }) {
         </div>
       </Card>
 
-      {/* Invoice Table */}
       <Card>
         <Table>
           <TableHeader>
@@ -324,7 +317,7 @@ export function InvoiceManagement({ onSelectInvoice }) {
         )}
       </Card>
 
-      {/* Summary */}
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="p-4 text-center">
           <p className="text-2xl font-semibold text-green-600">

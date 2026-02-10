@@ -34,18 +34,12 @@ import { InvoiceForm } from "./InvoiceForm";
 import { InvoiceDetail } from "./InvoiceDetail";
 
 
-/* -----------------------------
-   Invoice Management (Aging)
------------------------------- */
 
 export function InvoiceManagement({ onSelectInvoice }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [agingFilter, setAgingFilter] = useState("all");
   const [isAddInvoiceOpen, setIsAddInvoiceOpen] = useState(false);
   const [selectedInvoiceId, setSelectedInvoiceId] = useState(null);
-
-
- 
 
   const [invoices, setInvoices] = useState([
     {
@@ -86,9 +80,7 @@ export function InvoiceManagement({ onSelectInvoice }) {
     },
   ]);
 
-  /* -----------------------------
-     Helpers
-  ------------------------------ */
+
 
   const getAgingBucket = (daysOverdue) => {
     if (daysOverdue <= 30) return "0–30";
@@ -99,20 +91,20 @@ export function InvoiceManagement({ onSelectInvoice }) {
   const getAgingBadgeClass = (bucket) => {
     switch (bucket) {
       case "0–30":
-        return "bg-green-50 text-green-700 border-green-200";
+        return "bg-emerald-100 text-emerald-800 border-emerald-300";
       case "31–60":
-        return "bg-orange-50 text-orange-700 border-orange-200";
+        return "bg-amber-100 text-amber-800 border-amber-300";
       case "60+":
-        return "bg-red-50 text-red-700 border-red-200";
+        return "bg-rose-100 text-rose-800 border-rose-300";
       default:
-        return "bg-gray-50 text-gray-700 border-gray-200";
+        return "bg-slate-100 text-slate-800 border-slate-300";
     }
   };
 
   const getRiskBadgeClass = (score) => {
-    if (score >= 80) return "bg-red-50 text-red-700 border-red-200";
-    if (score >= 50) return "bg-orange-50 text-orange-700 border-orange-200";
-    return "bg-green-50 text-green-700 border-green-200";
+    if (score >= 80) return "bg-red-100 text-red-800 border-red-300";
+    if (score >= 50) return "bg-yellow-100 text-yellow-800 border-yellow-300";
+    return "bg-green-100 text-green-800 border-green-300";
   };
 
   const filteredInvoices = invoices.filter((invoice) => {
@@ -130,9 +122,7 @@ export function InvoiceManagement({ onSelectInvoice }) {
     toast.success("Reminder sent successfully");
   };
 
-  /* -----------------------------
-     Render
-  ------------------------------ */
+
 
   if (selectedInvoiceId) {
     return (
@@ -207,35 +197,35 @@ export function InvoiceManagement({ onSelectInvoice }) {
         </DialogContent>
       </Dialog>
 
-      {/* Filters */}
+
       <Card className="p-4">
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex-1 relative">
+        <div className="flex flex-col sm:flex-row gap-4 sm:items-center">
+          <div className="flex-auto relative min-w-0">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               placeholder="Search invoices or clients..."
-              className="pl-10"
+              className="pl-10 w-full"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
 
-          <Select value={agingFilter} onValueChange={setAgingFilter}>
-            <SelectTrigger className="w-[160px]">
-              <SelectValue placeholder="Aging bucket" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Aging</SelectItem>
-              <SelectItem value="0–30">0–30 Days</SelectItem>
-              <SelectItem value="31–60">31–60 Days</SelectItem>
-              <SelectItem value="60+">60+ Days</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex-shrink-0">
+            <Select value={agingFilter} onValueChange={setAgingFilter}>
+              <SelectTrigger className="w-40">
+                <SelectValue placeholder="Aging bucket" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Aging</SelectItem>
+                <SelectItem value="0–30">0–30 Days</SelectItem>
+                <SelectItem value="31–60">31–60 Days</SelectItem>
+                <SelectItem value="60+">60+ Days</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       </Card>
-      
 
-      {/* Invoice Table */}
       <Card>
         <Table>
           <TableHeader>
@@ -271,12 +261,18 @@ export function InvoiceManagement({ onSelectInvoice }) {
                     )}
                   </TableCell>
                   <TableCell>
-                    <Badge className={getAgingBadgeClass(agingBucket)}>
+                    <Badge
+                      variant="outline"
+                      className={getAgingBadgeClass(agingBucket)}
+                    >
                       {agingBucket} Days
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <Badge className={getRiskBadgeClass(invoice.riskScore)}>
+                    <Badge
+                      variant="outline"
+                      className={getRiskBadgeClass(invoice.riskScore)}
+                    >
                       {invoice.riskScore >= 80
                         ? "High Risk"
                         : invoice.riskScore >= 50
@@ -321,7 +317,7 @@ export function InvoiceManagement({ onSelectInvoice }) {
         )}
       </Card>
 
-      {/* Summary */}
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="p-4 text-center">
           <p className="text-2xl font-semibold text-green-600">
@@ -358,5 +354,4 @@ export function InvoiceManagement({ onSelectInvoice }) {
       </div>
     </div>
   );
-  
 }

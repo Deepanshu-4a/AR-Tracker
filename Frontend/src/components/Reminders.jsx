@@ -28,13 +28,14 @@ import {
   CardTitle,
 } from "./ui/card";
 
+import { ConfigureRulesSheet } from "../components/ConfigureRulesSheet";
 export function Reminders() {
   const [items, setItems] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeView, setActiveView] = useState("action");
   const [calendarView, setCalendarView] = useState(false);
   const [calendarDate, setCalendarDate] = useState(new Date());
-
+  const [rulesOpen, setRulesOpen] = useState(false);
   // Mock data
   const actionRequiredReminders = [
     {
@@ -443,10 +444,7 @@ export function Reminders() {
               <h1 className="text-2xl md:text-3xl font-semibold tracking-tight">
                 Reminders
               </h1>
-              <Badge variant="outline" className="gap-1">
-                <Sparkles className="h-3.5 w-3.5" />
-                Automated
-              </Badge>
+             
             </div>
             <p className="text-sm text-muted-foreground mt-1">
               Manage and track payment reminders across all channels
@@ -688,9 +686,13 @@ export function Reminders() {
               Active
             </span>
           </div>
-          <Button size="sm" variant="outline" className="w-full mt-3 rounded-xl">
-            Configure Rules
-          </Button>
+          <Button variant="outline" onClick={() => setRulesOpen(true)}>
+  Configure Rules
+</Button>
+<ConfigureRulesSheet
+  open={rulesOpen}
+  onOpenChange={setRulesOpen}
+/>
         </CardContent>
       </Card>
     </div>

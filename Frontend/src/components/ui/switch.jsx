@@ -1,61 +1,26 @@
-import {
-  DashboardSquare01Icon as LayoutDashboard,
-  UserGroupIcon as Users,
-  Invoice01Icon as Receipt,
-  Settings01Icon as Settings,
-  Logout01Icon as LogOut,
-  TradeUpIcon as TrendingUp,
-} from "hugeicons-react";
-
-import Frame771012_63_612 from "../../imports/one";
-
-export function Sidebar({ activeTab, setActiveTab, onLogout }) {
-  const menuItems = [
-    { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { id: "clients", label: "Clients", icon: Users },
-    { id: "invoices", label: "Invoices", icon: Receipt },
-    { id: "reminders", label: "Reminders", icon: TrendingUp },
-  ];
-
+import * as React from "react";
+import * as SwitchPrimitive from "@radix-ui/react-switch";
+ 
+import { cn } from "./utils";
+ 
+function Switch({ className, ...props }) {
   return (
-    <div className="w-64 bg-white border-r border-border flex flex-col">
-      {/* Header */}
-      <div className="p-6 border-b border-border">
-        <div className="flex items-center gap-3">
-          <div className="w-[40px] h-[40px]">
-            <Frame771012_63_612 />
-          </div>
-          <div>
-            <h2 className="font-semibold">AR TRACKER</h2>
-            
-          </div>
-        </div>
-      </div>
-
-      <nav className="flex-1 px-4 py-6">
-        <ul className="space-y-1">
-          {menuItems.map((item) => {
-            const Icon = item.icon;
-            return (
-              <li key={item.id}>
-                <button
-                  onClick={() => setActiveTab(item.id)}
-                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
-                    activeTab === item.id
-                      ? "bg-orange-50 text-orange-600 border border-orange-200"
-                      : "text-gray-600 hover:bg-gray-50"
-                  }`}
-                >
-                  <Icon className="w-5 h-5" />
-                  <span className="text-sm">{item.label}</span>
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-      </nav>
-
-     
-    </div>
+<SwitchPrimitive.Root
+      data-slot="switch"
+      className={cn(
+        "peer data-[state=checked]:bg-primary data-[state=unchecked]:bg-switch-background focus-visible:border-ring focus-visible:ring-ring/50 dark:data-[state=unchecked]:bg-input/80 inline-flex h-[1.15rem] w-8 shrink-0 items-center rounded-full border border-transparent transition-all outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50",
+        className
+      )}
+      {...props}
+>
+<SwitchPrimitive.Thumb
+        data-slot="switch-thumb"
+        className={cn(
+          "bg-card dark:data-[state=unchecked]:bg-card-foreground dark:data-[state=checked]:bg-primary-foreground pointer-events-none block size-4 rounded-full ring-0 transition-transform data-[state=checked]:translate-x-[calc(100%-2px)] data-[state=unchecked]:translate-x-0"
+        )}
+      />
+</SwitchPrimitive.Root>
   );
 }
+ 
+export { Switch };

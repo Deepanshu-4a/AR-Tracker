@@ -1,8 +1,9 @@
-import { useState } from "react"
-import { Sidebar } from "./components/ui/Sidebar"
-import { Dashboard } from "./components/Dashboard"
-import { Reminders } from "./components/Reminders"
+import { useState } from "react";
+import { Sidebar } from "./components/ui/Sidebar";
+import { Dashboard } from "./components/Dashboard";
+import { Reminders } from "./components/Reminders";
 import { InvoiceManagement } from "./components/InvoiceManagement";
+import { ClientManagement } from "./components/ClientManagement";
 import { Toaster } from "sonner";
 function App() {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -18,10 +19,10 @@ function App() {
     switch (activeTab) {
       case "dashboard":
         return <Dashboard onNavigate={setActiveTab} />;
-      case 'reminders':
+      case "reminders":
         return <Reminders />;
       case "clients":
-      // return <EmployeeManagement />;
+        return <ClientManagement />;
       case "invoices":
         return <InvoiceManagement onSelectInvoice={handleSelectInvoice} />;
       case "analytics":

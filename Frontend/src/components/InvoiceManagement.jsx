@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { toast } from "sonner";
 
 import { Card } from "./ui/card";
@@ -24,22 +24,20 @@ import {
 import {
   PlusSignIcon as Plus,
   Search01Icon as Search,
-  PencilEdit01Icon as Edit,
-  Delete01Icon as Trash2,
-  ViewIcon as Eye,
   Mail01Icon as Send,
+  Tick02Icon as Check,
+  EyeIcon,
 } from "hugeicons-react";
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 import { InvoiceForm } from "./InvoiceForm";
 import { InvoiceDetail } from "./InvoiceDetail";
 
-
-
-export function InvoiceManagement({ onSelectInvoice }) {
+export function InvoiceManagement() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [agingFilter, setAgingFilter] = useState("all");
-  const [isAddInvoiceOpen, setIsAddInvoiceOpen] = useState(false);
+  const [statusFilter, setStatusFilter] = useState("all");
   const [selectedInvoiceId, setSelectedInvoiceId] = useState(null);
+  const [isAddInvoiceOpen, setIsAddInvoiceOpen] = useState(false);
 
   const [invoices, setInvoices] = useState([
     {
@@ -47,82 +45,75 @@ export function InvoiceManagement({ onSelectInvoice }) {
       customer: "Acme Corporation",
       amount: 962500,
       dueDate: "2024-12-15",
-      daysOverdue: 7,
-      riskScore: 85,
-      lastReminderSent: "2024-12-20",
+      daysOutstanding: 7,
+      status: "Sent",
     },
     {
-      id: "INV-2024-003",
+      id: "INV-2024-002",
       customer: "Global Enterprises",
       amount: 1925000,
       dueDate: "2024-11-30",
-      daysOverdue: 22,
-      riskScore: 92,
-      lastReminderSent: "2024-12-15",
+      daysOutstanding: 22,
+      status: "Overdue",
     },
     {
-      id: "INV-2024-005",
+      id: "INV-2024-003",
       customer: "Innovation Labs",
-      amount: 1201200,
+      amount: 420000,
       dueDate: "2024-12-20",
-      daysOverdue: 2,
-      riskScore: 68,
-      lastReminderSent: "2024-12-21",
+      daysOutstanding: 0,
+      status: "Approved",
     },
     {
-      id: "INV-2024-008",
+      id: "INV-2024-004",
       customer: "CloudFirst Inc",
-      amount: 1424500,
-      dueDate: "2024-11-20",
-      daysOverdue: 32,
-      riskScore: 95,
-      lastReminderSent: "2024-12-10",
+      amount: 780000,
+      dueDate: "2024-12-05",
+      daysOutstanding: 0,
+      status: "Draft",
     },
   ]);
 
+  const filteredInvoices = useMemo(() => {
+    return invoices.filter((i) => {
+      const matchesSearch =
+        i.customer.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        i.id.toLowerCase().includes(searchTerm.toLowerCase());
 
+      const matchesStatus = statusFilter === "all" || i.status === statusFilter;
 
-  const getAgingBucket = (daysOverdue) => {
-    if (daysOverdue <= 30) return "0–30";
-    if (daysOverdue <= 60) return "31–60";
-    return "60+";
-  };
+      return matchesSearch && matchesStatus;
+    });
+  }, [invoices, searchTerm, statusFilter]);
 
-  const getAgingBadgeClass = (bucket) => {
-    switch (bucket) {
-      case "0–30":
-        return "bg-emerald-100 text-emerald-800 border-emerald-300";
-      case "31–60":
-        return "bg-amber-100 text-amber-800 border-amber-300";
-      case "60+":
-        return "bg-rose-100 text-rose-800 border-rose-300";
+  const summary = useMemo(() => {
+    const sum = (status) =>
+      invoices
+        .filter((i) => i.status === status)
+        .reduce((s, i) => s + i.amount, 0);
+
+    return {
+      Draft: sum("Draft"),
+      Approved: sum("Approved"),
+      Sent: sum("Sent"),
+      Overdue: sum("Overdue"),
+    };
+  }, [invoices]);
+
+  const statusBadgeClass = (status) => {
+    switch (status) {
+      case "Draft":
+        return "border-slate-300 bg-slate-100 text-slate-700";
+      case "Approved":
+        return "border-blue-300 bg-blue-100 text-blue-700";
+      case "Sent":
+        return "border-emerald-300 bg-emerald-100 text-emerald-700";
+      case "Overdue":
+        return "border-rose-300 bg-rose-100 text-rose-700";
       default:
-        return "bg-slate-100 text-slate-800 border-slate-300";
+        return "border-slate-300 bg-slate-100 text-slate-700";
     }
   };
-
-  const getRiskBadgeClass = (score) => {
-    if (score >= 80) return "bg-red-100 text-red-800 border-red-300";
-    if (score >= 50) return "bg-yellow-100 text-yellow-800 border-yellow-300";
-    return "bg-green-100 text-green-800 border-green-300";
-  };
-
-  const filteredInvoices = invoices.filter((invoice) => {
-    const matchesSearch =
-      invoice.customer.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      invoice.id.toLowerCase().includes(searchTerm.toLowerCase());
-
-    const bucket = getAgingBucket(invoice.daysOverdue);
-    const matchesAging = agingFilter === "all" || bucket === agingFilter;
-
-    return matchesSearch && matchesAging;
-  });
-
-  const handleSendReminder = (id) => {
-    toast.success("Reminder sent successfully");
-  };
-
-
 
   if (selectedInvoiceId) {
     return (
@@ -138,9 +129,9 @@ export function InvoiceManagement({ onSelectInvoice }) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1>Invoice Management</h1>
-          <p className="text-muted-foreground">
-            Track unpaid invoices, aging, and risk exposure
+          <h1 className="text-2xl font-semibold">Invoice Center</h1>
+          <p className="text-sm text-muted-foreground">
+            Turn approved work into invoices and cash
           </p>
         </div>
 
@@ -149,209 +140,169 @@ export function InvoiceManagement({ onSelectInvoice }) {
           onClick={() => setIsAddInvoiceOpen(true)}
         >
           <Plus className="w-4 h-4" />
-          Add Invoice
+          New Invoice
         </Button>
       </div>
 
+      {/* AR Snapshot */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {Object.entries(summary).map(([label, value]) => (
+          <Card key={label} className="p-4">
+            <p className="text-sm text-muted-foreground">{label}</p>
+            <p className="text-xl font-semibold">${value.toLocaleString()}</p>
+          </Card>
+        ))}
+      </div>
+
+      {/* Filters */}
+      <Card className="p-4">
+        <div className="grid grid-cols-[1fr_180px] gap-4 items-center">
+          {/* Search (PRIMARY) */}
+          <div className="relative w-full">
+            <Search className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+            <Input
+              placeholder="Search invoice # or customer"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="
+          h-11
+          w-full
+          pl-12
+          text-base
+          bg-slate-50
+          border-slate-200
+          placeholder:text-slate-400
+          focus-visible:ring-2
+          focus-visible:ring-orange-500/30
+          focus-visible:border-orange-400
+        "
+            />
+          </div>
+
+          {/* Status Filter (SECONDARY) */}
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="h-11 w-[180px]">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Statuses</SelectItem>
+              <SelectItem value="Draft">Draft</SelectItem>
+              <SelectItem value="Approved">Approved</SelectItem>
+              <SelectItem value="Sent">Sent</SelectItem>
+              <SelectItem value="Overdue">Overdue</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </Card>
+
+      {/* Table */}
+      <Card>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Invoice</TableHead>
+              <TableHead>Customer</TableHead>
+              <TableHead>Amount</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Due Date</TableHead>
+              <TableHead>Days Outstanding</TableHead>
+              <TableHead className="w-32">Action</TableHead>
+            </TableRow>
+          </TableHeader>
+
+          <TableBody>
+            {filteredInvoices.map((invoice) => (
+              <TableRow key={invoice.id}>
+                <TableCell className="font-mono">{invoice.id}</TableCell>
+                <TableCell>{invoice.customer}</TableCell>
+                <TableCell className="font-medium">
+                  ${invoice.amount.toLocaleString()}
+                </TableCell>
+                <TableCell>
+                  <Badge
+                    variant="outline"
+                    className={statusBadgeClass(invoice.status)}
+                  >
+                    {invoice.status}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  {new Date(invoice.dueDate).toLocaleDateString()}
+                </TableCell>
+                <TableCell>
+                  {invoice.daysOutstanding > 0
+                    ? `${invoice.daysOutstanding} days`
+                    : "—"}
+                </TableCell>
+                <TableCell>
+                  {invoice.status === "Draft" && (
+                    <Button size="sm" variant="outline">
+                      <Check className="w-4 h-4 mr-1" />
+                      Approve
+                    </Button>
+                  )}
+
+                  {invoice.status === "Approved" && (
+                    <Button
+                      size="sm"
+                      className="bg-orange-500 hover:bg-orange-600"
+                      onClick={() => toast.success("Invoice sent")}
+                    >
+                      <Send className="w-4 h-4 mr-1" />
+                      Send
+                    </Button>
+                  )}
+
+                  {(invoice.status === "Sent" ||
+                    invoice.status === "Overdue") && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setSelectedInvoiceId(invoice.id)}
+                    >
+                      <EyeIcon className="w-4 h-4 mr-1" />
+                      Review
+                    </Button>
+                  )}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+
+        {filteredInvoices.length === 0 && (
+          <div className="p-8 text-center text-muted-foreground">
+            No invoices match your filters
+          </div>
+        )}
+      </Card>
+
+      {/* Add Invoice Dialog */}
       <Dialog open={isAddInvoiceOpen} onOpenChange={setIsAddInvoiceOpen}>
         <DialogContent className="sm:max-w-[700px]">
           <DialogHeader>
-            <DialogTitle>Add New Invoice</DialogTitle>
+            <DialogTitle>New Invoice</DialogTitle>
           </DialogHeader>
-
           <InvoiceForm
             onSubmit={(data) => {
-              const today = new Date();
-
-              const due = new Date(data.dueDate);
-
-              const daysOverdue =
-                due < today
-                  ? Math.floor((today - due) / (1000 * 60 * 60 * 24))
-                  : 0;
-
-              const newInvoice = {
-                id: data.invoiceNumber || `INV-${Date.now()}`,
-
-                customer: data.customer,
-
-                amount: Number(data.amount),
-
-                dueDate: data.dueDate,
-
-                daysOverdue,
-
-                riskScore: daysOverdue > 60 ? 90 : daysOverdue > 30 ? 70 : 40,
-
-                lastReminderSent: null,
-              };
-
-              setInvoices((prev) => [newInvoice, ...prev]);
-
-              toast.success("Invoice created successfully");
-
+              setInvoices((prev) => [
+                {
+                  id: data.invoiceNumber,
+                  customer: data.customer,
+                  amount: Number(data.amount),
+                  dueDate: data.dueDate,
+                  daysOutstanding: 0,
+                  status: "Draft",
+                },
+                ...prev,
+              ]);
+              toast.success("Invoice created");
               setIsAddInvoiceOpen(false);
             }}
             onCancel={() => setIsAddInvoiceOpen(false)}
           />
         </DialogContent>
       </Dialog>
-
-
-      <Card className="p-4">
-        <div className="flex flex-col sm:flex-row gap-4 sm:items-center">
-          <div className="flex-auto relative min-w-0">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              placeholder="Search invoices or clients..."
-              className="pl-10 w-full"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-
-          <div className="flex-shrink-0">
-            <Select value={agingFilter} onValueChange={setAgingFilter}>
-              <SelectTrigger className="w-40">
-                <SelectValue placeholder="Aging bucket" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Aging</SelectItem>
-                <SelectItem value="0–30">0–30 Days</SelectItem>
-                <SelectItem value="31–60">31–60 Days</SelectItem>
-                <SelectItem value="60+">60+ Days</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-      </Card>
-
-      <Card>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Invoice ID</TableHead>
-              <TableHead>Client</TableHead>
-              <TableHead>Amount</TableHead>
-              <TableHead>Due Date</TableHead>
-              <TableHead>Aging</TableHead>
-              <TableHead>Risk</TableHead>
-              <TableHead>Last Reminder</TableHead>
-              <TableHead className="w-24">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-
-          <TableBody>
-            {filteredInvoices.map((invoice) => {
-              const agingBucket = getAgingBucket(invoice.daysOverdue);
-
-              return (
-                <TableRow key={invoice.id}>
-                  <TableCell className="font-mono">{invoice.id}</TableCell>
-                  <TableCell>{invoice.customer}</TableCell>
-                  <TableCell className="font-medium">
-                    ${invoice.amount.toLocaleString()}
-                  </TableCell>
-                  <TableCell>
-                    {new Date(invoice.dueDate).toLocaleDateString()}
-                    {invoice.daysOverdue > 0 && (
-                      <div className="text-xs text-red-600">
-                        {invoice.daysOverdue} days overdue
-                      </div>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant="outline"
-                      className={getAgingBadgeClass(agingBucket)}
-                    >
-                      {agingBucket} Days
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant="outline"
-                      className={getRiskBadgeClass(invoice.riskScore)}
-                    >
-                      {invoice.riskScore >= 80
-                        ? "High Risk"
-                        : invoice.riskScore >= 50
-                          ? "Medium Risk"
-                          : "Low Risk"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
-                    {invoice.lastReminderSent
-                      ? new Date(invoice.lastReminderSent).toLocaleDateString()
-                      : "—"}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setSelectedInvoiceId(invoice.id)}
-                      >
-                        View
-                      </Button>
-                      <Button
-                        size="sm"
-                        className="gap-1 bg-orange-500 hover:bg-orange-600 text-white"
-                        onClick={() => handleSendReminder(invoice.id)}
-                      >
-                        <Send className="w-4 h-4" />
-                        Reminder
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
-
-        {filteredInvoices.length === 0 && (
-          <div className="h-32 flex items-center justify-center text-muted-foreground">
-            No invoices found
-          </div>
-        )}
-      </Card>
-
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="p-4 text-center">
-          <p className="text-2xl font-semibold text-green-600">
-            $
-            {filteredInvoices
-              .filter((i) => i.daysOverdue <= 30)
-              .reduce((s, i) => s + i.amount, 0)
-              .toLocaleString()}
-          </p>
-          <p className="text-sm text-muted-foreground">0–30 Days</p>
-        </Card>
-
-        <Card className="p-4 text-center">
-          <p className="text-2xl font-semibold text-orange-600">
-            $
-            {filteredInvoices
-              .filter((i) => i.daysOverdue > 30 && i.daysOverdue <= 60)
-              .reduce((s, i) => s + i.amount, 0)
-              .toLocaleString()}
-          </p>
-          <p className="text-sm text-muted-foreground">31–60 Days</p>
-        </Card>
-
-        <Card className="p-4 text-center">
-          <p className="text-2xl font-semibold text-red-600">
-            $
-            {filteredInvoices
-              .filter((i) => i.daysOverdue > 60)
-              .reduce((s, i) => s + i.amount, 0)
-              .toLocaleString()}
-          </p>
-          <p className="text-sm text-muted-foreground">60+ Days</p>
-        </Card>
-      </div>
     </div>
   );
 }

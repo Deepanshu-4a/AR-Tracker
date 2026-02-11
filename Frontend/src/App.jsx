@@ -9,7 +9,7 @@ import { Dashboard } from "./components/Dashboard";
 import { Reminders } from "./components/Reminders";
 import { InvoiceManagement } from "./components/InvoiceManagement";
 import { ClientManagement } from "./components/ClientManagement";
-import { Revenue } from "./components/Revenue";
+
 import CashInPage from "./components/CashInPage";
 import CashOutPage from "./components/CashOutPage";
 import { Toaster } from "sonner";
@@ -62,16 +62,7 @@ function App() {
       case "ap-outstanding":
         return <APOutstandingPage onBack={() => setActiveTab("dashboard")} />;
 
-      case "revenue":
-        return (
-          <Revenue
-            onOpenInvoiceCenter={() => console.log("Open Invoice Center")}
-            onOpenPayments={() => console.log("Open Payments & Receivables")}
-            onOpenRecurring={() =>
-              console.log("Open Recurring & Milestone Billing")
-            }
-          />
-        );
+      
 
       case "clients":
         return <ClientManagement />;

@@ -1,32 +1,28 @@
 import { useState } from "react";
 import { Sidebar } from "./components/ui/Sidebar";
 import { Dashboard } from "./components/Dashboard";
-import { Reminders } from "./components/Reminders";
-import { InvoiceManagement } from "./components/InvoiceManagement";
 import { ClientManagement } from "./components/ClientManagement";
+import { RevenueWorkspace } from "./components/RevenueWorkspace";
 import { Toaster } from "sonner";
+
 function App() {
-  const [activeTab, setActiveTab] = useState("dashboard");
+  const [activeTab, setActiveTab] = useState("home");
 
   const handleLogout = () => {
     console.log("Logging out...");
   };
 
-  const handleSelectInvoice = (invoiceId) => {
-    console.log("Selected invoice:", invoiceId);
-  };
   const renderContent = () => {
     switch (activeTab) {
-      case "dashboard":
+      case "home":
         return <Dashboard onNavigate={setActiveTab} />;
-      case "reminders":
-        return <Reminders />;
-      case "clients":
+
+      case "revenue":
+        return <RevenueWorkspace />;
+
+      case "customers":
         return <ClientManagement />;
-      case "invoices":
-        return <InvoiceManagement onSelectInvoice={handleSelectInvoice} />;
-      case "analytics":
-      // return <Analytics />;
+
       default:
         return <Dashboard />;
     }

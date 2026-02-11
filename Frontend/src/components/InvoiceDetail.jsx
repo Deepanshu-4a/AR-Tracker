@@ -8,6 +8,14 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "./ui/table";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -17,81 +25,108 @@ import {
 
 import {
   ArrowLeft01Icon as ArrowLeft,
-  PencilEdit01Icon as Edit,
-  Delete01Icon as Trash2,
-  Download01Icon as Download,
-  Tick02Icon as Check,
-  Cancel01Icon as X,
   Mail01Icon as Send,
+  Tick02Icon as Check,
+  Cancel01Icon as Void,
 } from "hugeicons-react";
 
 export function InvoiceDetail({ invoiceId, onBack }) {
-  const [isEditing, setIsEditing] = useState(false);
-
   /* -----------------------------
-     Mock Invoice Data
+     Mock Invoice Data (v1)
   ------------------------------ */
-  const [invoiceData, setInvoiceData] = useState({
+  const [invoice, setInvoice] = useState({
     id: invoiceId,
+    status: "Approved", // Draft | Approved | Sent | Paid | Void
     customer: "Acme Corporation",
-    amount: 962500,
+    billingTerms: "Net 30",
     issueDate: "2024-11-15",
     dueDate: "2024-12-15",
-    daysOverdue: 7,
-    status: "Unpaid",
-    riskScore: 85,
-    paymentTerms: "Net 30",
-    assignedCollector: "John Smith",
-    lastReminderSent: "2024-12-20",
-    description:
-      "Invoice for Q4 SaaS subscription and enterprise support services.",
-    internalNotes: "Client usually delays payment. Escalate after 30 days.",
+    currency: "USD",
+    lineItems: [
+      {
+        id: "LI-1",
+        description: "Enterprise SaaS Subscription",
+        source: "Milestone",
+        quantity: 1,
+        rate: 750000,
+      },
+      {
+        id: "LI-2",
+        description: "Premium Support",
+        source: "Time",
+        quantity: 40,
+        rate: 5300,
+      },
+    ],
+    adjustments: [],
+    payments: [
+      {
+        id: "PMT-1",
+        date: "2024-12-10",
+        amount: 250000,
+        method: "Wire",
+        reference: "WIRE-44321",
+      },
+    ],
+    auditTrail: [
+      { ts: "2024-11-15", event: "Invoice created" },
+      { ts: "2024-11-16", event: "Invoice approved" },
+      { ts: "2024-11-18", event: "Invoice sent to customer" },
+    ],
   });
 
   /* -----------------------------
-     Helpers
+     Derived Values
   ------------------------------ */
-  const agingBucket =
-    invoiceData.daysOverdue <= 30
-      ? "0–30 Days"
-      : invoiceData.daysOverdue <= 60
-        ? "31–60 Days"
-        : "60+ Days";
+  const subtotal = invoice.lineItems.reduce(
+    (s, i) => s + i.quantity * i.rate,
+    0,
+  );
 
-  const getStatusColor = (status) => {
-    switch (status.toLowerCase()) {
-      case "paid":
-        return "bg-green-50 text-green-700 border-green-200";
-      case "unpaid":
-        return "bg-yellow-50 text-yellow-700 border-yellow-200";
-      case "overdue":
-        return "bg-red-50 text-red-700 border-red-200";
-      default:
-        return "bg-gray-50 text-gray-700 border-gray-200";
-    }
-  };
+  const adjustmentTotal = invoice.adjustments.reduce((s, a) => s + a.amount, 0);
 
-  const getRiskColor = (score) => {
-    if (score >= 80) return "bg-red-50 text-red-700 border-red-200";
-    if (score >= 50) return "bg-orange-50 text-orange-700 border-orange-200";
-    return "bg-green-50 text-green-700 border-green-200";
-  };
+  const paymentsTotal = invoice.payments.reduce((s, p) => s + p.amount, 0);
 
-  const handleFieldChange = (field, value) => {
-    setInvoiceData((prev) => ({ ...prev, [field]: value }));
-  };
+  const total = subtotal + adjustmentTotal;
+  const balanceDue = total - paymentsTotal;
 
-  const handleSave = () => {
-    toast.success("Invoice updated successfully");
-    setIsEditing(false);
-  };
-
-  const handleSendReminder = () => {
-    toast.success("Payment reminder sent");
-    setInvoiceData((prev) => ({
-      ...prev,
-      lastReminderSent: new Date().toISOString().split("T")[0],
+  /* -----------------------------
+     Actions
+  ------------------------------ */
+  const approveInvoice = () => {
+    setInvoice((p) => ({
+      ...p,
+      status: "Approved",
+      auditTrail: [
+        ...p.auditTrail,
+        { ts: new Date().toISOString(), event: "Invoice approved" },
+      ],
     }));
+    toast.success("Invoice approved");
+  };
+
+  const sendInvoice = () => {
+    setInvoice((p) => ({
+      ...p,
+      status: "Sent",
+      auditTrail: [
+        ...p.auditTrail,
+        { ts: new Date().toISOString(), event: "Invoice sent" },
+      ],
+    }));
+    toast.success("Invoice sent");
+  };
+
+  const voidInvoice = () => {
+    setInvoice((p) => ({
+      ...p,
+      status: "Void",
+      auditTrail: [
+        ...p.auditTrail,
+        { ts: new Date().toISOString(), event: "Invoice voided" },
+      ],
+    }));
+    toast.error("Invoice voided");
   };
 
   /* -----------------------------
@@ -108,198 +143,142 @@ export function InvoiceDetail({ invoiceId, onBack }) {
           </Button>
 
           <div>
-            <h1 className="text-2xl font-semibold">Invoice Details</h1>
-            <p className="text-muted-foreground">
-              Invoice ID: {invoiceData.id}
-            </p>
+            <h1 className="text-2xl font-semibold">{invoice.id}</h1>
+            <Badge>{invoice.status}</Badge>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm">
-            <Download className="w-4 h-4 mr-2" />
-            Export
-          </Button>
-
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setIsEditing(!isEditing)}
-          >
-            <Edit className="w-4 h-4 mr-2" />
-            {isEditing ? "Cancel" : "Edit"}
-          </Button>
-
-          {isEditing && (
-            <Button size="sm" onClick={handleSave}>
-              <Check className="w-4 h-4 mr-2" />
-              Save
-            </Button>
-          )}
-
-          <Button variant="destructive" size="sm">
-            <Trash2 className="w-4 h-4 mr-2" />
-            Delete
-          </Button>
+        <div className="text-right">
+          <p className="text-xl font-semibold">${total.toLocaleString()}</p>
+          <p className="text-sm text-muted-foreground">
+            Due {new Date(invoice.dueDate).toLocaleDateString()}
+          </p>
         </div>
       </div>
 
-      {/* Top Summary (from your simple InvoiceDetail) */}
-      <Card>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-6">
+      {/* Customer & Billing Terms */}
+      <Card className="p-6">
+        <h2 className="font-semibold mb-4">Customer & Billing</h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
           <div>
-            <p className="text-xs text-muted-foreground">Client</p>
-            <p className="font-semibold">{invoiceData.customer}</p>
+            <Label>Customer</Label>
+            <p>{invoice.customer}</p>
           </div>
           <div>
-            <p className="text-xs text-muted-foreground">Amount</p>
-            <p className="font-semibold">
-              ${invoiceData.amount.toLocaleString()}
-            </p>
+            <Label>Terms</Label>
+            <p>{invoice.billingTerms}</p>
           </div>
           <div>
-            <p className="text-xs text-muted-foreground">Due Date</p>
-            <p className="font-semibold">
-              {new Date(invoiceData.dueDate).toLocaleDateString()}
-            </p>
+            <Label>Issue Date</Label>
+            <p>{invoice.issueDate}</p>
           </div>
           <div>
-            <p className="text-xs text-muted-foreground">Aging</p>
-            <Badge>{agingBucket}</Badge>
+            <Label>Currency</Label>
+            <p>{invoice.currency}</p>
           </div>
         </div>
       </Card>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main Invoice Info */}
-        <Card className="p-6 lg:col-span-2">
-          <h2 className="text-lg font-semibold mb-6">Invoice Information</h2>
+      {/* Line Items */}
+      <Card>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Description</TableHead>
+              <TableHead>Source</TableHead>
+              <TableHead>Qty</TableHead>
+              <TableHead>Rate</TableHead>
+              <TableHead>Amount</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {invoice.lineItems.map((li) => (
+              <TableRow key={li.id}>
+                <TableCell>{li.description}</TableCell>
+                <TableCell>{li.source}</TableCell>
+                <TableCell>{li.quantity}</TableCell>
+                <TableCell>${li.rate.toLocaleString()}</TableCell>
+                <TableCell>
+                  ${(li.quantity * li.rate).toLocaleString()}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </Card>
 
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label>Issue Date</Label>
-                <Input
-                  type="date"
-                  value={invoiceData.issueDate}
-                  disabled={!isEditing}
-                  onChange={(e) =>
-                    handleFieldChange("issueDate", e.target.value)
-                  }
-                />
-              </div>
-
-              <div>
-                <Label>Payment Terms</Label>
-                <Select
-                  value={invoiceData.paymentTerms}
-                  disabled={!isEditing}
-                  onValueChange={(v) => handleFieldChange("paymentTerms", v)}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Net 15">Net 15</SelectItem>
-                    <SelectItem value="Net 30">Net 30</SelectItem>
-                    <SelectItem value="Net 45">Net 45</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label>Status</Label>
-                <Badge className={getStatusColor(invoiceData.status)}>
-                  {invoiceData.status}
-                </Badge>
-              </div>
-
-              <div>
-                <Label>Risk</Label>
-                <Badge className={getRiskColor(invoiceData.riskScore)}>
-                  {invoiceData.riskScore >= 80
-                    ? "High Risk"
-                    : invoiceData.riskScore >= 50
-                      ? "Medium Risk"
-                      : "Low Risk"}
-                </Badge>
-              </div>
-            </div>
-
-            <div>
-              <Label>Description</Label>
-              <Textarea
-                rows={3}
-                value={invoiceData.description}
-                disabled={!isEditing}
-                onChange={(e) =>
-                  handleFieldChange("description", e.target.value)
-                }
-              />
-            </div>
-
-            <div>
-              <Label>Internal Notes</Label>
-              <Textarea
-                rows={2}
-                value={invoiceData.internalNotes}
-                disabled={!isEditing}
-                onChange={(e) =>
-                  handleFieldChange("internalNotes", e.target.value)
-                }
-              />
-            </div>
+      {/* Totals */}
+      <Card className="p-6">
+        <div className="space-y-2 text-sm">
+          <div className="flex justify-between">
+            <span>Subtotal</span>
+            <span>${subtotal.toLocaleString()}</span>
           </div>
-        </Card>
-
-        {/* Actions & History */}
-        <div className="space-y-6">
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-4">Reminder History</h3>
-            <p className="text-sm text-muted-foreground">
-              {invoiceData.lastReminderSent
-                ? `Last reminder sent on ${new Date(
-                    invoiceData.lastReminderSent,
-                  ).toLocaleDateString()}`
-                : "No reminders sent yet"}
-            </p>
-          </Card>
-
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
-
-            <div className="space-y-3">
-              <Button className="w-full" onClick={handleSendReminder}>
-                <Send className="w-4 h-4 mr-2" />
-                Send Reminder
-              </Button>
-
-              <Button
-                variant="outline"
-                className="w-full hover:bg-green-50"
-                onClick={() => {
-                  handleFieldChange("status", "Paid");
-                  toast.success("Invoice marked as paid");
-                }}
-              >
-                <Check className="w-4 h-4 mr-2" />
-                Mark as Paid
-              </Button>
-
-              <Button
-                variant="outline"
-                className="w-full hover:bg-red-50"
-                onClick={() => {
-                  handleFieldChange("status", "Overdue");
-                  toast.success("Invoice marked overdue");
-                }}
-              >
-                <X className="w-4 h-4 mr-2" />
-                Mark Overdue
-              </Button>
-            </div>
-          </Card>
+          <div className="flex justify-between">
+            <span>Adjustments</span>
+            <span>${adjustmentTotal.toLocaleString()}</span>
+          </div>
+          <div className="flex justify-between font-semibold text-lg">
+            <span>Total</span>
+            <span>${total.toLocaleString()}</span>
+          </div>
+          <div className="flex justify-between text-rose-600">
+            <span>Balance Due</span>
+            <span>${balanceDue.toLocaleString()}</span>
+          </div>
         </div>
+      </Card>
+
+      {/* Payments */}
+      <Card className="p-6">
+        <h3 className="font-semibold mb-4">Payments</h3>
+        {invoice.payments.map((p) => (
+          <div key={p.id} className="flex justify-between text-sm">
+            <span>
+              {p.date} · {p.method}
+            </span>
+            <span>${p.amount.toLocaleString()}</span>
+          </div>
+        ))}
+      </Card>
+
+      {/* Audit Trail */}
+      <Card className="p-6">
+        <h3 className="font-semibold mb-4">Audit Trail</h3>
+        <ul className="text-sm space-y-2">
+          {invoice.auditTrail.map((a, i) => (
+            <li key={i}>
+              {new Date(a.ts).toLocaleDateString()} — {a.event}
+            </li>
+          ))}
+        </ul>
+      </Card>
+
+      {/* Actions */}
+      <div className="flex gap-3 justify-end">
+        {invoice.status === "Draft" && (
+          <Button onClick={approveInvoice}>
+            <Check className="w-4 h-4 mr-2" />
+            Approve Invoice
+          </Button>
+        )}
+
+        {invoice.status === "Approved" && (
+          <Button
+            className="bg-orange-500 hover:bg-orange-600"
+            onClick={sendInvoice}
+          >
+            <Send className="w-4 h-4 mr-2" />
+            Send Invoice
+          </Button>
+        )}
+
+        {invoice.status === "Sent" && (
+          <Button variant="destructive" onClick={voidInvoice}>
+            <Void className="w-4 h-4 mr-2" />
+            Void Invoice
+          </Button>
+        )}
       </div>
     </div>
   );

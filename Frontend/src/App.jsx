@@ -24,7 +24,13 @@ function App() {
   const renderContent = () => {
     switch (activeTab) {
       case "home":
-        return <Dashboard onNavigate={setActiveTab} />;
+  return (
+    <Dashboard
+      activeTab={activeTab}
+      setActiveTab={setActiveTab}
+      onLogout={handleLogout}
+    />
+  );
 
       case "revenue":
         return <RevenueWorkspace />;
@@ -33,27 +39,27 @@ function App() {
         return <ClientManagement />;
 
       case "cash-in":
-        return <CashInPage onBack={() => setActiveTab("dashboard")} />;
+        return <CashInPage onBack={() => setActiveTab("home")} />;
 
       case "automations":
         return <Reminders />;
 
       case "cash-out":
-        return <CashOutPage onBack={() => setActiveTab("dashboard")} />;
+        return <CashOutPage onBack={() => setActiveTab("home")} />;
 
       case "net-margin":
-        return <NetMarginPage onBack={() => setActiveTab("dashboard")} />;
+        return <NetMarginPage onBack={() => setActiveTab("home")} />;
 
       case "ar-outstanding":
-        return <AROutstandingPage onBack={() => setActiveTab("dashboard")} />;
+        return <AROutstandingPage onBack={() => setActiveTab("home")} />;
 
       case "alerts-signals":
         return (
-          <AlertsAndSignalsPage onBack={() => setActiveTab("dashboard")} />
+          <AlertsAndSignalsPage onBack={() => setActiveTab("home")} />
         );
 
       case "ap-outstanding":
-        return <APOutstandingPage onBack={() => setActiveTab("dashboard")} />;
+        return <APOutstandingPage onBack={() => setActiveTab("home")} />;
 
       default:
         return (

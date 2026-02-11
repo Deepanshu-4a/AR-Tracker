@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-import { Textarea } from "./ui/textarea";
 import {
   Select,
   SelectContent,
@@ -10,192 +9,195 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
+import { Card } from "./ui/card";
 
-export function InvoiceForm({ initialData, onSubmit, onCancel }) {
+export function InvoiceForm({
+  initialData,
+  onSubmit,
+  onCancel,
+  customers = [],
+}) {
   const [formData, setFormData] = useState(
     initialData || {
       invoiceNumber: "",
-      customer: "",
-      department: "",
-      amount: "",
+      customerId: "",
+      billingPeriodStart: "",
+      billingPeriodEnd: "",
       issueDate: new Date().toISOString().split("T")[0],
       dueDate: new Date().toISOString().split("T")[0],
       paymentTerms: "Net 30",
-      status: "Unpaid",
-      description: "",
     },
   );
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(formData);
+
+    onSubmit({
+      invoiceNumber: formData.invoiceNumber,
+      customerId: formData.customerId,
+      billingPeriod: {
+        start: formData.billingPeriodStart,
+        end: formData.billingPeriodEnd,
+      },
+      issueDate: formData.issueDate,
+      dueDate: formData.dueDate,
+      paymentTerms: formData.paymentTerms,
+    });
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      {/* Row 1 */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="invoiceNumber">Invoice Number</Label>
-          <Input
-            id="invoiceNumber"
-            placeholder="e.g., INV-2024-012"
-            value={formData.invoiceNumber}
-            onChange={(e) =>
-              setFormData({ ...formData, invoiceNumber: e.target.value })
-            }
-            required
-          />
-        </div>
+    <form onSubmit={handleSubmit} className="max-h-[70vh] flex flex-col">
+      {/* CONTENT */}
+      <div className="flex-1 overflow-auto space-y-4 pr-2">
+        {/* Identity */}
+        <Card className="p-4">
+          <h3 className="font-semibold mb-3">Invoice Identity</h3>
 
-        <div className="space-y-2">
-          <Label htmlFor="customer">Client</Label>
-          <Input
-            id="customer"
-            placeholder="e.g., Acme Corporation"
-            value={formData.customer}
-            onChange={(e) =>
-              setFormData({ ...formData, customer: e.target.value })
-            }
-            required
-          />
-        </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label>Invoice Number</Label>
+              <Input
+                placeholder="INV-2024-012"
+                value={formData.invoiceNumber}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    invoiceNumber: e.target.value,
+                  })
+                }
+                required
+              />
+            </div>
+
+            <div>
+              <Label>Customer</Label>
+              <Select
+                value={formData.customerId}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, customerId: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select customer" />
+                </SelectTrigger>
+                <SelectContent>
+                  {customers.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </Card>
+
+        {/* Billing Period */}
+        <Card className="p-4">
+          <h3 className="font-semibold mb-3">Billing Period</h3>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label>Period Start</Label>
+              <Input
+                type="date"
+                value={formData.billingPeriodStart}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    billingPeriodStart: e.target.value,
+                  })
+                }
+                required
+              />
+            </div>
+
+            <div>
+              <Label>Period End</Label>
+              <Input
+                type="date"
+                value={formData.billingPeriodEnd}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    billingPeriodEnd: e.target.value,
+                  })
+                }
+                required
+              />
+            </div>
+          </div>
+        </Card>
+
+        {/* Dates & Terms */}
+        <Card className="p-4">
+          <h3 className="font-semibold mb-3">Invoice Timing</h3>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label>Issue Date</Label>
+              <Input
+                type="date"
+                value={formData.issueDate}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    issueDate: e.target.value,
+                  })
+                }
+                required
+              />
+            </div>
+
+            <div>
+              <Label>Due Date</Label>
+              <Input
+                type="date"
+                value={formData.dueDate}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    dueDate: e.target.value,
+                  })
+                }
+                required
+              />
+            </div>
+
+            <div className="col-span-2">
+              <Label>Payment Terms</Label>
+              <Select
+                value={formData.paymentTerms}
+                onValueChange={(value) =>
+                  setFormData({
+                    ...formData,
+                    paymentTerms: value,
+                  })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Due on Receipt">Due on Receipt</SelectItem>
+                  <SelectItem value="Net 15">Net 15</SelectItem>
+                  <SelectItem value="Net 30">Net 30</SelectItem>
+                  <SelectItem value="Net 45">Net 45</SelectItem>
+                  <SelectItem value="Net 60">Net 60</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </Card>
       </div>
 
-      {/* Row 2 */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="amount">Invoice Amount ($)</Label>
-          <Input
-            id="amount"
-            type="number"
-            placeholder="0.00"
-            min="0"
-            step="0.01"
-            value={formData.amount}
-            onChange={(e) =>
-              setFormData({ ...formData, amount: e.target.value })
-            }
-            required
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="department">Department</Label>
-          <Select
-            value={formData.department}
-            onValueChange={(value) =>
-              setFormData({ ...formData, department: value })
-            }
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select department" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Sales">Sales</SelectItem>
-              <SelectItem value="Marketing">Marketing</SelectItem>
-              <SelectItem value="Finance">Finance</SelectItem>
-              <SelectItem value="Engineering">Engineering</SelectItem>
-              <SelectItem value="Operations">Operations</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      {/* Row 3 */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="issueDate">Issue Date</Label>
-          <Input
-            id="issueDate"
-            type="date"
-            value={formData.issueDate}
-            onChange={(e) =>
-              setFormData({ ...formData, issueDate: e.target.value })
-            }
-            required
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="dueDate">Due Date</Label>
-          <Input
-            id="dueDate"
-            type="date"
-            value={formData.dueDate}
-            onChange={(e) =>
-              setFormData({ ...formData, dueDate: e.target.value })
-            }
-            required
-          />
-        </div>
-      </div>
-
-      {/* Row 4 */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="paymentTerms">Payment Terms</Label>
-          <Select
-            value={formData.paymentTerms}
-            onValueChange={(value) =>
-              setFormData({ ...formData, paymentTerms: value })
-            }
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select terms" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Due on Receipt">Due on Receipt</SelectItem>
-              <SelectItem value="Net 15">Net 15</SelectItem>
-              <SelectItem value="Net 30">Net 30</SelectItem>
-              <SelectItem value="Net 45">Net 45</SelectItem>
-              <SelectItem value="Net 60">Net 60</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="status">Invoice Status</Label>
-          <Select
-            value={formData.status}
-            onValueChange={(value) =>
-              setFormData({ ...formData, status: value })
-            }
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Unpaid">Unpaid</SelectItem>
-              <SelectItem value="Partially Paid">Partially Paid</SelectItem>
-              <SelectItem value="Paid">Paid</SelectItem>
-              <SelectItem value="Disputed">Disputed</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      {/* Notes */}
-      <div className="space-y-2">
-        <Label htmlFor="description">Internal Notes</Label>
-        <Textarea
-          id="description"
-          placeholder="Payment terms, disputes, client communication notes..."
-          className="min-h-[100px]"
-          value={formData.description}
-          onChange={(e) =>
-            setFormData({ ...formData, description: e.target.value })
-          }
-        />
-      </div>
-
-      {/* Actions */}
-      <div className="flex justify-end gap-2 pt-4">
+      {/* ACTIONS */}
+      <div className="pt-4 border-t flex justify-end gap-3">
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancel
         </Button>
         <Button type="submit" className="bg-orange-500 hover:bg-orange-600">
-          {initialData ? "Update Invoice" : "Create Invoice"}
+          {initialData ? "Update Draft" : "Create Draft"}
         </Button>
       </div>
     </form>

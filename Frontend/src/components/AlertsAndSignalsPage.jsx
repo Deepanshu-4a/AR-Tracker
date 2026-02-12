@@ -65,7 +65,7 @@ export function AlertsAndSignalsPage({
   onBack,
   setActiveTab,
 
-  // Optional drill-down hooks (match your Dashboard props style)
+ 
   onOpenAutomations,
   onOpenIntegrations,
   onOpenAdminAudit,
@@ -73,10 +73,10 @@ export function AlertsAndSignalsPage({
   onOpenInvoice,
 }) {
   const [query, setQuery] = useState("");
-  const [status, setStatus] = useState("open"); // open | acknowledged | resolved | all
-  const [category, setCategory] = useState("all"); // all | Margin | Spend | Automation | Integrations | Admin
-  const [severity, setSeverity] = useState("all"); // all | 5..1
-  const [type, setType] = useState("all"); // all | Signal | Risk | Automation | System | Admin
+  const [status, setStatus] = useState("open"); 
+  const [category, setCategory] = useState("all"); 
+  const [severity, setSeverity] = useState("all"); 
+  const [type, setType] = useState("all"); 
 
   const [selected, setSelected] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -168,7 +168,7 @@ export function AlertsAndSignalsPage({
         },
       },
 
-      // Optional “AR / revenue”-style signal examples (keep or remove)
+     
       {
         id: "sig-6",
         title: "AR aging worsening",

@@ -76,7 +76,7 @@ export function AlertsAndSignalsPage({
   const [status, setStatus] = useState("open"); 
   const [category, setCategory] = useState("all"); 
   const [severity, setSeverity] = useState("all"); 
-  const [type, setType] = useState("all"); 
+  const [type, setType] = useState("all");
 
   const [selected, setSelected] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);

@@ -64,7 +64,7 @@ export function Sidebar({ activeTab, setActiveTab, onLogout }) {
           <div>
             <h2 className="font-semibold tracking-tight">SpendIQ</h2>
             <p className="text-xs text-muted-foreground">
-              Financial Control Tower
+             AR TRACKER
             </p>
           </div>
         </div>

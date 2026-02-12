@@ -29,7 +29,7 @@ export default function CashOutPage({ onBack }) {
   const [method, setMethod] = useState("all");
   const [postedOnly, setPostedOnly] = useState(true);
 
-  /* ------------------ MOCK DATA ------------------ */
+  /* ------------------  DATA ------------------ */
   const rows = useMemo(
     () => [
       {

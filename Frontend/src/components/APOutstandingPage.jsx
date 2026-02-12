@@ -41,7 +41,7 @@ export default function APOutstandingPage({ onBack }) {
   const formatMoney = (n) =>
     n.toLocaleString("en-US", { style: "currency", currency: "USD" });
 
-  /* ------------------ MOCK PAYABLES SUMMARY ------------------ */
+  /* ------------------  PAYABLES SUMMARY ------------------ */
   const aging = useMemo(
     () => [
       { name: "0-30", value: 4.2, pct: 63, count: 38 },
@@ -54,7 +54,7 @@ export default function APOutstandingPage({ onBack }) {
 
   const COLORS = ["#3b82f6", "#f59e0b", "#fb7185", "#ef4444"];
 
-  /* ------------------ MOCK BILLS ------------------ */
+  /* ------------------  BILLS ------------------ */
   const bills = useMemo(
     () => [
       {

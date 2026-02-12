@@ -41,7 +41,7 @@ export default function AROutstandingPage({ onBack }) {
   const formatMoney = (n) =>
     n.toLocaleString("en-US", { style: "currency", currency: "USD" });
 
-  /* ------------------ MOCK AGING SUMMARY ------------------ */
+  /* ------------------  AGING SUMMARY ------------------ */
   const aging = useMemo(
     () => [
       { name: "0-30", value: 13.9, pct: 75, count: 45 },
@@ -54,7 +54,7 @@ export default function AROutstandingPage({ onBack }) {
 
   const COLORS = ["#10b981", "#f59e0b", "#fb7185", "#ef4444"];
 
-  /* ------------------ MOCK INVOICES ------------------ */
+  /* ------------------  INVOICES ------------------ */
   const invoices = useMemo(
     () => [
       {

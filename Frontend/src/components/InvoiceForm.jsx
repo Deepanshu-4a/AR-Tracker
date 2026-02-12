@@ -57,7 +57,7 @@ export function InvoiceForm({
             <div>
               <Label>Invoice Number</Label>
               <Input
-                placeholder="INV-2024-012"
+                placeholder="INV-2026-012"
                 value={formData.invoiceNumber}
                 onChange={(e) =>
                   setFormData({

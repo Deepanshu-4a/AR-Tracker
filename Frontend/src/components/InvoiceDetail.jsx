@@ -39,8 +39,8 @@ export function InvoiceDetail({ invoiceId, onBack }) {
     status: "Approved", // Draft | Approved | Sent | Paid | Void
     customer: "Acme Corporation",
     billingTerms: "Net 30",
-    issueDate: "2024-11-15",
-    dueDate: "2024-12-15",
+    issueDate: "2026-11-15",
+    dueDate: "2026-12-15",
     currency: "USD",
     lineItems: [
       {
@@ -62,16 +62,16 @@ export function InvoiceDetail({ invoiceId, onBack }) {
     payments: [
       {
         id: "PMT-1",
-        date: "2024-12-10",
+        date: "2026-12-10",
         amount: 250000,
         method: "Wire",
         reference: "WIRE-44321",
       },
     ],
     auditTrail: [
-      { ts: "2024-11-15", event: "Invoice created" },
-      { ts: "2024-11-16", event: "Invoice approved" },
-      { ts: "2024-11-18", event: "Invoice sent to customer" },
+      { ts: "2026-11-15", event: "Invoice created" },
+      { ts: "2026-11-16", event: "Invoice approved" },
+      { ts: "2026-11-18", event: "Invoice sent to customer" },
     ],
   });
 

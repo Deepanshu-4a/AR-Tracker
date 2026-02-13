@@ -80,7 +80,7 @@ export default function CashOutPage({ onBack }) {
     []
   );
 
-  /* ------------------ DATE LOGIC ------------------ */
+
   const now = new Date("2026-02-10");
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
   const quarterStartMonth = Math.floor(now.getMonth() / 3) * 3;

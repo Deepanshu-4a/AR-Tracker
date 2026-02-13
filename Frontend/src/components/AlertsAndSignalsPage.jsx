@@ -168,7 +168,7 @@ export function AlertsAndSignalsPage({
         },
       },
 
-      // Optional “AR / revenue”-style signal examples (keep or remove)
+     
       {
         id: "sig-6",
         title: "AR aging worsening",

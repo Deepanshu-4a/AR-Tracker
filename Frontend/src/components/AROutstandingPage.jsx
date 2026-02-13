@@ -35,7 +35,7 @@ export default function AROutstandingPage({ onBack }) {
   const [bucket, setBucket] = useState("all"); // all | 0-30 | 31-60 | 61-90 | 90+
   const [search, setSearch] = useState("");
   const [customer, setCustomer] = useState("all");
-  const [status, setStatus] = useState("open"); // open | overdue | all
+  const [status, setStatus] = useState("open"); 
   const [includeDisputed, setIncludeDisputed] = useState(true);
 
   const formatMoney = (n) =>

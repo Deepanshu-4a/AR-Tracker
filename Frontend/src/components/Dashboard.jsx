@@ -14,7 +14,6 @@ import {
   PlugZap,
   BellRing,
   TriangleAlert,
-  Settings as SettingsLucide,
   CheckCircle2,
   ExternalLink,
 } from "lucide-react";
@@ -36,7 +35,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -45,7 +43,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
 
 import {
   Dialog,
@@ -80,12 +77,38 @@ const actionTone = (cta) => {
   return "bg-slate-100 text-slate-700";
 };
 
+/** ✅ NEW: Profit + Profit Lost model (overdue invoice) */
+const NET_MARGIN_ASSUMPTION = 0.224; // 22.4% from your Net Margin KPI
+const DAILY_PROFIT_LEAK_RATE = 0.01; // 1% per day on PROFIT (safer + realistic than 3% on revenue)
+
+// Profit-aware math:
+// - expectedProfit = amount * margin
+// - profitLeakToDate = expectedProfit * dailyRate * daysOverdue (capped to expectedProfit)
+// - remainingProfitIfPaidToday = expectedProfit - profitLeakToDate
+const calcInvoiceProfitImpact = (
+  amount,
+  daysOverdue,
+  margin = NET_MARGIN_ASSUMPTION,
+  dailyProfitLeakRate = DAILY_PROFIT_LEAK_RATE
+) => {
+  const expectedProfit = amount * margin;
+
+  const rawProfitLeak = expectedProfit * dailyProfitLeakRate * daysOverdue;
+  const profitLeakToDate = Math.min(rawProfitLeak, expectedProfit); // ✅ cap
+
+  const remainingProfitIfPaidToday = Math.max(
+    expectedProfit - profitLeakToDate,
+    0
+  );
+
+  return { expectedProfit, profitLeakToDate, remainingProfitIfPaidToday };
+};
+
 export function Dashboard({
   activeTab,
   setActiveTab,
   onLogout,
 
-  
   onOpenInvoice,
   onOpenCustomer,
   onOpenIntegrations,
@@ -101,7 +124,6 @@ export function Dashboard({
 }) {
   const [activeIndex, setActiveIndex] = useState(null);
 
- 
   const [actionDialogOpen, setActionDialogOpen] = useState(false);
   const [selectedAction, setSelectedAction] = useState(null);
   const [handledIds, setHandledIds] = useState(() => new Set());
@@ -131,8 +153,6 @@ export function Dashboard({
 
   const runPrimaryAction = () => {
     if (!selectedAction) return;
-
-    
     markHandled(selectedAction.id);
     closeActionDialog();
   };
@@ -151,7 +171,6 @@ export function Dashboard({
     return "Open revenue";
   };
 
-  
   const financialSnapshot = useMemo(
     () => [
       {
@@ -161,8 +180,7 @@ export function Dashboard({
         change: "+4.1%",
         trend: "up",
         icon: DollarSign,
-        
-        onClick: () => setActiveTab?.("cash-in"), 
+        onClick: () => setActiveTab?.("cash-in"),
       },
       {
         key: "cash_out_mtd",
@@ -171,8 +189,7 @@ export function Dashboard({
         change: "+1.9%",
         trend: "up",
         icon: TrendingDown,
-       
-        onClick: () => setActiveTab("cash-out"),
+        onClick: () => setActiveTab?.("cash-out"),
       },
       {
         key: "net_margin",
@@ -181,7 +198,6 @@ export function Dashboard({
         change: "-0.8%",
         trend: "down",
         icon: TrendingUp,
-        
         onClick: () => setActiveTab?.("net-margin"),
       },
       {
@@ -191,8 +207,7 @@ export function Dashboard({
         change: "+5.2%",
         trend: "up",
         icon: FileText,
-        
-         onClick: () => setActiveTab?.("ar-outstanding"),
+        onClick: () => setActiveTab?.("ar-outstanding"),
       },
       {
         key: "ap_outstanding",
@@ -201,14 +216,12 @@ export function Dashboard({
         change: "+2.6%",
         trend: "up",
         icon: Clock,
-        
         onClick: () => setActiveTab?.("ap-outstanding"),
       },
     ],
     [setActiveTab]
   );
 
-  
   const actionQueue = useMemo(
     () => [
       {
@@ -314,7 +327,6 @@ export function Dashboard({
     return sortedActionQueue.filter((x) => !handledIds.has(x.id));
   }, [sortedActionQueue, handledIds]);
 
-  
   const alertsAndSignals = useMemo(
     () => [
       {
@@ -359,7 +371,6 @@ export function Dashboard({
     [setActiveTab, onOpenAutomations, onOpenAdminAudit]
   );
 
-  
   const topOutstandingInvoices = useMemo(
     () => [
       {
@@ -419,7 +430,7 @@ export function Dashboard({
     return (
       <div
         style={{ transform: `translate(${shiftX}px, ${shiftY}px)` }}
-        className="text-left rounded-md border bg-background px-3 py-2 shadow-md"
+        className="rounded-xl border bg-background/95 px-3 py-2 shadow-lg backdrop-blur"
       >
         <p className="text-sm font-semibold">{d?.name}</p>
         <p className="text-xs text-muted-foreground">Amount: ${d?.value}M</p>
@@ -430,7 +441,7 @@ export function Dashboard({
 
   const renderAgingLabel = ({ cx, cy, midAngle, outerRadius, payload }) => {
     const RADIAN = Math.PI / 180;
-    const radius = outerRadius + 25;
+    const radius = outerRadius + 26;
     const x = cx + radius * Math.cos(-midAngle * RADIAN);
     const y = cy + radius * Math.sin(-midAngle * RADIAN);
 
@@ -438,7 +449,7 @@ export function Dashboard({
       <text
         x={x}
         y={y}
-        fill="#1f2937"
+        fill="#111827"
         textAnchor={x > cx ? "start" : "end"}
         dominantBaseline="central"
         className="font-semibold text-sm"
@@ -449,22 +460,26 @@ export function Dashboard({
   };
 
   return (
-    <div className="min-h-screen w-full">
-     
+    <div className="min-h-screen w-full bg-[radial-gradient(90%_120%_at_10%_0%,hsl(var(--muted))_0%,transparent_55%),radial-gradient(90%_120%_at_90%_0%,hsl(var(--muted))_0%,transparent_55%)]">
+      {/* Dialog */}
       <Dialog open={actionDialogOpen} onOpenChange={setActionDialogOpen}>
-        <DialogContent className="sm:max-w-[560px]">
+        <DialogContent className="sm:max-w-[580px] rounded-2xl border-border/60 shadow-xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <BellRing className="h-5 w-5 text-orange-600" />
-              {selectedAction?.cta || "Review"}: {selectedAction?.type || ""}
+              <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-orange-50">
+                <BellRing className="h-5 w-5 text-orange-600" />
+              </span>
+              <span className="truncate">
+                {selectedAction?.cta || "Review"}: {selectedAction?.type || ""}
+              </span>
             </DialogTitle>
             <DialogDescription>
-              Confirm the action, or open the source screen for full drill-down.
+              Confirm quickly here, or open the source screen for full drill-down.
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-3">
-            <Card className="border-border/50">
+            <Card className="border-border/60 shadow-sm">
               <CardContent className="p-4 space-y-3">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
@@ -495,7 +510,7 @@ export function Dashboard({
                       )}
                     </div>
 
-                    <p className="mt-3 text-sm text-muted-foreground">
+                    <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
                       <span className="font-medium text-foreground/90">
                         {selectedAction?.entity || "—"}
                       </span>{" "}
@@ -504,18 +519,17 @@ export function Dashboard({
                   </div>
                 </div>
 
-                {/* Extra context for Approve (optional, only shows if present) */}
                 {selectedAction?.cta === "Approve" ? (
                   <>
                     <Separator />
                     <div className="grid grid-cols-2 gap-3 text-sm">
-                      <div className="rounded-lg bg-muted/40 p-3">
+                      <div className="rounded-xl border bg-muted/30 p-3">
                         <p className="text-muted-foreground">Invoice</p>
                         <p className="font-semibold mt-1">
                           {selectedAction?.invoiceNo || "—"}
                         </p>
                       </div>
-                      <div className="rounded-lg bg-muted/40 p-3">
+                      <div className="rounded-xl border bg-muted/30 p-3">
                         <p className="text-muted-foreground">Customer</p>
                         <p className="font-semibold mt-1">
                           {selectedAction?.customerName ||
@@ -523,7 +537,7 @@ export function Dashboard({
                             "—"}
                         </p>
                       </div>
-                      <div className="rounded-lg bg-muted/40 p-3">
+                      <div className="rounded-xl border bg-muted/30 p-3">
                         <p className="text-muted-foreground">Amount</p>
                         <p className="font-semibold mt-1">
                           {formatCurrency(
@@ -531,7 +545,7 @@ export function Dashboard({
                           )}
                         </p>
                       </div>
-                      <div className="rounded-lg bg-muted/40 p-3">
+                      <div className="rounded-xl border bg-muted/30 p-3">
                         <p className="text-muted-foreground">Status</p>
                         <p className="font-semibold mt-1">
                           {selectedAction?.status || "Ready"}
@@ -544,13 +558,16 @@ export function Dashboard({
             </Card>
 
             <p className="text-xs text-muted-foreground">
-              You can keep Home fast by confirming here, or drill down for full
-              details.
+              Tip: confirm here to keep Home fast, or drill down for details.
             </p>
           </div>
 
           <DialogFooter className="gap-2 sm:gap-0">
-            <Button variant="outline" onClick={goToSource} className="rounded-xl">
+            <Button
+              variant="outline"
+              onClick={goToSource}
+              className="rounded-xl border-border/70"
+            >
               <ExternalLink className="h-4 w-4 mr-2" />
               {secondaryActionLabel(selectedAction)}
             </Button>
@@ -563,34 +580,42 @@ export function Dashboard({
         </DialogContent>
       </Dialog>
 
-      <div className="space-y-6 p-4 md:p-6 lg:p-8 bg-linear-to-b from-muted/30 via-background to-background">
+      <div className="mx-auto max-w-[1200px] space-y-5 p-4 md:p-6 lg:p-8">
         {/* Header */}
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
             <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
               Dashboard
             </h1>
-           
+            <p className="mt-1 text-sm text-muted-foreground">
+              Overview of cash flow, AR/AP, and what needs attention today.
+            </p>
           </div>
 
           {/* Profile Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="h-10 gap-2">
+              <Button
+                variant="outline"
+                className="h-10 gap-2 rounded-2xl border-border/70 bg-background/70 shadow-sm hover:bg-accent/40"
+              >
                 <div className="h-7 w-7 rounded-full bg-orange-50 flex items-center justify-center">
                   <User className="h-4 w-4 text-orange-600" />
                 </div>
-                <span className="text-sm font-medium">
+                <span className="text-sm font-medium max-w-[160px] truncate">
                   {user?.name || "User"}
                 </span>
                 <ChevronDown className="h-4 w-4 text-muted-foreground" />
               </Button>
             </DropdownMenuTrigger>
 
-            <DropdownMenuContent align="end" className="w-[260px]">
+            <DropdownMenuContent
+              align="end"
+              className="w-[280px] rounded-2xl border-border/60 shadow-xl"
+            >
               <DropdownMenuLabel className="py-3">
                 <div className="flex items-start gap-3">
-                  <div className="h-10 w-10 rounded-full bg-orange-50 flex items-center justify-center">
+                  <div className="h-10 w-10 rounded-2xl bg-orange-50 flex items-center justify-center">
                     <UserIconHuge className="h-5 w-5 text-orange-600" />
                   </div>
                   <div className="min-w-0">
@@ -632,180 +657,16 @@ export function Dashboard({
           </DropdownMenu>
         </div>
 
-        {/* Row 1: Action Queue + Alerts/Signals */}
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-          {/* Action Queue */}
-          <Card className="shadow-sm border-border/50 xl:col-span-2">
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <BellRing className="h-5 w-5 text-orange-600" />
-                  <span>Action Queue</span>
-                </div>
-                
-              </CardTitle>
-            </CardHeader>
-
-            <CardContent>
-              <div className="space-y-2">
-                {visibleActionQueue.length === 0 ? (
-                  <div className="rounded-lg border bg-background p-6 text-center">
-                    <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50">
-                      <CheckCircle2 className="h-6 w-6 text-emerald-600" />
-                    </div>
-                    <p className="mt-3 font-semibold">All clear</p>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      No actions require attention right now.
-                    </p>
-                  </div>
-                ) : (
-                  visibleActionQueue.map((item) => {
-                    const Icon = item.icon;
-                    return (
-                      <div
-                        key={item.id}
-                        className="flex flex-col md:flex-row md:items-center justify-between gap-3 p-3 border rounded-lg bg-background hover:bg-accent/40 transition-colors"
-                      >
-                        <div className="flex items-start gap-3 flex-1 min-w-0">
-                          <div className="h-10 w-10 rounded-xl bg-orange-50 flex items-center justify-center shrink-0">
-                            <Icon className="h-5 w-5 text-orange-600" />
-                          </div>
-
-                          <div className="min-w-0">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <p className="font-semibold">{item.type}</p>
-                              <Badge variant="secondary" className="text-xs">
-                                {item.entityType}
-                              </Badge>
-                              <Badge
-                                variant="secondary"
-                                className={`text-xs ${actionTone(item.cta)}`}
-                              >
-                                {item.cta}
-                              </Badge>
-
-                              {item.impact ? (
-                                <Badge
-                                  variant="secondary"
-                                  className="text-xs bg-green-100 text-green-700"
-                                >
-                                  Impact: {formatCurrency(item.impact)}
-                                </Badge>
-                              ) : (
-                                <Badge
-                                  variant="secondary"
-                                  className="text-xs bg-slate-100 text-slate-700"
-                                >
-                                  No direct $ impact
-                                </Badge>
-                              )}
-                            </div>
-
-                            <p className="text-sm text-muted-foreground mt-1 truncate">
-                              <span className="font-medium text-foreground/90">
-                                {item.entity}
-                              </span>{" "}
-                              — {item.recommendation}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-2 justify-end">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="rounded-xl"
-                            onClick={() => openActionDialog(item)}
-                          >
-                            {item.cta}
-                          </Button>
-                        </div>
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-
-              <div className="flex items-center justify-between mt-4 pt-4 border-t">
-                <p className="text-xs text-muted-foreground">
-
-                </p>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="rounded-xl"
-                  onClick={() => setActiveTab?.("admin")}
-                >
-                  
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Alerts & Signals */}
-          <Card className="shadow-sm border-border/50">
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <AlertTriangle className="h-5 w-5 text-orange-600" />
-                  <span>Alerts & Signals</span>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-8 rounded-xl"
-                  onClick={() => setActiveTab?.("alerts-signals")}
-                >
-                  View
-                </Button>
-              </CardTitle>
-            </CardHeader>
-
-            <CardContent className="space-y-3">
-              {alertsAndSignals.map((a) => (
-                <button
-                  key={a.id}
-                  onClick={a.onClick}
-                  className="w-full text-left p-3 border rounded-lg hover:bg-accent/40 transition-colors"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="font-semibold truncate">{a.title}</p>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        {a.detail}
-                      </p>
-                    </div>
-                    <Badge
-                      variant="secondary"
-                      className={`${badgeTone(a.tone)} text-xs shrink-0`}
-                    >
-                      {a.badge}
-                    </Badge>
-                  </div>
-                </button>
-              ))}
-
-              <div className="pt-2 border-t">
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                
-                  
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Row 2: Financial Snapshot */}
-        <Card className="shadow-sm border-border/50">
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
+        {/* Financial Snapshot */}
+        <Card className="border-border/60 bg-background/70 shadow-sm rounded-2xl">
+          <CardHeader className="py-3">
+            <CardTitle className="flex items-center justify-between text-base">
               <span>Financial Snapshot</span>
-             
             </CardTitle>
           </CardHeader>
 
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
+          <CardContent className="pt-0 pb-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-3">
               {financialSnapshot.map((m) => {
                 const Icon = m.icon;
                 const isUp = m.trend === "up";
@@ -813,36 +674,39 @@ export function Dashboard({
                   <button
                     key={m.key}
                     onClick={m.onClick}
-                    className="text-left rounded-2xl border bg-background/60 hover:bg-accent/40 transition-colors p-4"
+                    className={[
+                      "group text-left rounded-2xl border border-border/60",
+                      "bg-background/70 shadow-sm",
+                      "hover:bg-accent/40 hover:shadow-md",
+                      "transition-all duration-200",
+                      "px-3 py-3",
+                      "focus:outline-none focus:ring-2 focus:ring-ring/40",
+                    ].join(" ")}
                   >
-                    <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0">
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-xs text-muted-foreground">
                           {m.label}
                         </p>
-                        <p className="text-2xl font-semibold mt-2">{m.value}</p>
+                        <p className="text-xl font-semibold mt-1">{m.value}</p>
 
-                        <div className="flex items-center gap-2 mt-2">
+                        <div className="flex items-center gap-1.5 mt-1.5">
                           {isUp ? (
-                            <ArrowUp className="w-4 h-4 text-green-500" />
+                            <ArrowUp className="w-4 h-4 text-emerald-500" />
                           ) : (
                             <ArrowDown className="w-4 h-4 text-red-500" />
                           )}
                           <span
-                            className={`text-sm font-medium ${
-                              isUp ? "text-green-600" : "text-red-600"
+                            className={`text-xs font-medium ${
+                              isUp ? "text-emerald-600" : "text-red-600"
                             }`}
                           >
                             {m.change}
                           </span>
                         </div>
-
-                        <p className="text-xs text-muted-foreground mt-2">
-                          {m.hint}
-                        </p>
                       </div>
 
-                      <div className="h-10 w-10 rounded-2xl bg-muted/40 flex items-center justify-center shrink-0">
+                      <div className="h-9 w-9 rounded-2xl bg-muted/40 flex items-center justify-center shrink-0 group-hover:bg-muted/55 transition-colors">
                         <Icon className="w-5 h-5 text-foreground/70" />
                       </div>
                     </div>
@@ -853,85 +717,136 @@ export function Dashboard({
           </CardContent>
         </Card>
 
-        {/* Row 3: Compact AR views */}
+        {/* MIDDLE: Top Invoices + Aging Distribution */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Top Outstanding Invoices */}
-          <Card className="shadow-sm border-border/50">
-            <CardHeader>
+          {/* ✅ Top Outstanding Invoices (Profit + Profit Lost) */}
+          <Card className="border-border/60 bg-background/70 shadow-sm rounded-2xl">
+            <CardHeader className="pb-3">
               <CardTitle className="flex items-center justify-between">
                 <span>Top Outstanding Invoices</span>
                 <Button
                   variant="outline"
                   size="sm"
-                  className="h-8 rounded-xl"
-                  
+                  className="h-8 rounded-xl border-border/70"
                 >
                   View All
                 </Button>
               </CardTitle>
             </CardHeader>
 
-            <CardContent>
+            <CardContent className="pt-0">
               <div className="space-y-3">
                 {topOutstandingInvoices.map((invoice) => {
                   const statusBadge = getStatusBadge(invoice.status);
+
+                  const {
+                    expectedProfit,
+                    profitLeakToDate,
+                    remainingProfitIfPaidToday,
+                  } = calcInvoiceProfitImpact(invoice.amount, invoice.daysOverdue);
+
                   return (
                     <button
                       key={invoice.invoiceNo}
                       onClick={() => onOpenInvoice?.(invoice.invoiceNo)}
-                      className="w-full text-left flex items-center justify-between p-3 border rounded-lg hover:bg-accent/50 transition-colors"
+                      className={[
+                        "w-full text-left",
+                        "p-3 rounded-2xl border border-border/60",
+                        "bg-background/70 shadow-sm",
+                        "hover:bg-accent/40 hover:shadow-md",
+                        "transition-all duration-200",
+                        "focus:outline-none focus:ring-2 focus:ring-ring/40",
+                      ].join(" ")}
                       title="Open Invoice Detail"
                     >
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <p className="font-mono text-sm font-semibold">
-                            {invoice.invoiceNo}
-                          </p>
-                          <Badge
-                            variant="secondary"
-                            className={`${statusBadge.color} text-xs px-2 py-0.5 border-0`}
-                          >
-                            {statusBadge.label}
-                          </Badge>
+                      {/* top row */}
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2 mb-1 flex-wrap">
+                            <p className="font-mono text-sm font-semibold">
+                              {invoice.invoiceNo}
+                            </p>
+
+                            <Badge
+                              variant="secondary"
+                              className={`${statusBadge.color} text-xs px-2 py-0.5 border-0`}
+                            >
+                              {statusBadge.label}
+                            </Badge>
+
+                           
+                          </div>
+
+                          <div className="flex items-center gap-3 text-sm text-muted-foreground flex-wrap">
+                            <span className="font-medium">{invoice.client}</span>
+                            <span>•</span>
+                            <span>Due: {invoice.dueDate}</span>
+                            <span>•</span>
+                            <span className="text-red-600 font-medium">
+                              {invoice.daysOverdue} days overdue
+                            </span>
+                          </div>
                         </div>
 
-                        <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                          <span className="font-medium">{invoice.client}</span>
-                          <span>•</span>
-                          <span>Due: {invoice.dueDate}</span>
+                        <div className="text-right shrink-0">
+                          <p className="text-lg font-bold">
+                            {formatCurrency(invoice.amount)}
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            Invoice amount
+                          </p>
                         </div>
                       </div>
 
-                      <div className="text-right">
-                        <p className="text-lg font-bold">
-                          {formatCurrency(invoice.amount)}
-                        </p>
-                        <p className="text-xs text-red-600 font-medium">
-                          {invoice.daysOverdue} days overdue
-                        </p>
+                      {/* ✅ profit metrics */}
+                      <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-2">
+                        <div className="rounded-xl border border-border/60 bg-emerald-50/60 px-3 py-2">
+                          <p className="text-[11px] text-muted-foreground">
+                            Expected profit (if paid)
+                          </p>
+                          <p className="text-sm font-semibold mt-0.5 text-emerald-700">
+                            {formatCurrency(Math.round(expectedProfit))}
+                          </p>
+                        </div>
+
+                        <div className="rounded-xl border border-border/60 bg-red-50/60 px-3 py-2">
+                          <p className="text-[11px] text-muted-foreground">
+                            Profit lost / at risk to date (capped)
+                          </p>
+                          <p className="text-sm font-semibold mt-0.5 text-red-700">
+                            {formatCurrency(Math.round(profitLeakToDate))}
+                          </p>
+                        </div>
+
+                        <div className="rounded-xl border border-border/60 bg-muted/20 px-3 py-2">
+                          <p className="text-[11px] text-muted-foreground">
+                            Remaining profit if paid today
+                          </p>
+                          <p className="text-sm font-semibold mt-0.5">
+                            {formatCurrency(Math.round(remainingProfitIfPaidToday))}
+                          </p>
+                        </div>
                       </div>
                     </button>
                   );
                 })}
               </div>
 
-              <div className="mt-4 pt-4 border-t text-xs text-muted-foreground">
-                Click an invoice to drill into its detail view.
-              </div>
+              
             </CardContent>
           </Card>
 
-          {/* ✅ Invoice Aging Distribution (kept as your original code block) */}
-          <Card className="shadow-sm border-border/50">
-            <CardHeader>
+          {/* Invoice Aging Distribution */}
+          <Card className="border-border/60 bg-background/70 shadow-sm rounded-2xl">
+            <CardHeader className="pb-3">
               <CardTitle className="flex items-center justify-between gap-3">
                 <span>Invoice Aging Distribution</span>
 
                 <Select defaultValue="current">
-                  <SelectTrigger className="w-[120px] h-9 text-sm">
+                  <SelectTrigger className="w-[132px] h-9 text-sm rounded-xl border-border/70">
                     <SelectValue placeholder="Period" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="rounded-xl">
                     <SelectItem value="current">Current</SelectItem>
                     <SelectItem value="quarter">This Quarter</SelectItem>
                     <SelectItem value="year">This Year</SelectItem>
@@ -940,7 +855,7 @@ export function Dashboard({
               </CardTitle>
             </CardHeader>
 
-            <CardContent>
+            <CardContent className="pt-0">
               <div className="space-y-6">
                 <div className="relative flex items-center justify-center">
                   <ResponsiveContainer width="100%" height={220}>
@@ -967,11 +882,7 @@ export function Dashboard({
                           />
                         ))}
                       </Pie>
-                      <Tooltip
-                        content={<AgingTooltip />}
-                        cursor={false}
-                        offset={18}
-                      />
+                      <Tooltip content={<AgingTooltip />} cursor={false} offset={18} />
                     </PieChart>
                   </ResponsiveContainer>
 
@@ -987,7 +898,7 @@ export function Dashboard({
                   {agingData.map((item, index) => (
                     <div
                       key={item.name}
-                      className="flex items-center justify-between p-3.5 rounded-lg bg-accent/30 hover:bg-accent/50 transition-colors"
+                      className="flex items-center justify-between p-3.5 rounded-2xl border border-border/60 bg-accent/20 hover:bg-accent/35 transition-colors"
                     >
                       <div className="flex items-center gap-3 flex-1">
                         <div
@@ -1039,83 +950,171 @@ export function Dashboard({
           </Card>
         </div>
 
-        {/* Row 4: Admin-first quick links */}
-        {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <button
-            onClick={() => {
-              setActiveTab?.("integrations");
-              onOpenIntegrations?.();
-            }}
-            className="text-left"
-          >
-            <Card className="shadow-sm border-border/50 hover:shadow-md transition-shadow">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <PlugZap className="h-5 w-5 text-blue-600" />
-                  Integrations Health
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  2 systems connected · 1 error · last sync 12 min ago
-                </p>
-                <p className="text-xs text-muted-foreground mt-2">
-                  Drill into event logs & data ownership mapping.
-                </p>
-              </CardContent>
-            </Card>
-          </button>
+        {/* BOTTOM: Action Queue + Alerts */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+          {/* Action Queue */}
+          <Card className="xl:col-span-2 border-border/60 bg-background/70 shadow-sm rounded-2xl">
+            <CardHeader className="py-3">
+              <CardTitle className="flex items-center justify-between text-base">
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-orange-50">
+                    <BellRing className="h-4.5 w-4.5 text-orange-600" />
+                  </span>
+                  <span>Action Queue</span>
+                </div>
+              </CardTitle>
+            </CardHeader>
 
-          <button
-            onClick={() => {
-              setActiveTab?.("admin");
-              onOpenAdminUsers?.();
-            }}
-            className="text-left"
-          >
-            <Card className="shadow-sm border-border/50 hover:shadow-md transition-shadow">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <ShieldCheck className="h-5 w-5 text-emerald-600" />
-                  Users & Roles
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  2 pending role assignments · 8 active users
-                </p>
-                <p className="text-xs text-muted-foreground mt-2">
-                  Manage permissions and role-based controls.
-                </p>
-              </CardContent>
-            </Card>
-          </button>
+            <CardContent className="pt-0 pb-3">
+              <div className="max-h-[240px] overflow-y-auto pr-1 [scrollbar-gutter:stable]">
+                <div className="space-y-2">
+                  {visibleActionQueue.length === 0 ? (
+                    <div className="rounded-2xl border border-border/60 bg-background/70 p-5 text-center shadow-sm">
+                      <div className="mx-auto inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-50">
+                        <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+                      </div>
+                      <p className="mt-2 font-semibold">All clear</p>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        No actions require attention right now.
+                      </p>
+                    </div>
+                  ) : (
+                    visibleActionQueue.map((item) => {
+                      const Icon = item.icon;
+                      return (
+                        <div
+                          key={item.id}
+                          className={[
+                            "flex flex-col md:flex-row md:items-center justify-between gap-2",
+                            "px-3 py-2.5",
+                            "rounded-2xl border border-border/60",
+                            "bg-background/70 shadow-sm",
+                            "hover:bg-accent/40 hover:shadow-md",
+                            "transition-all duration-200",
+                          ].join(" ")}
+                        >
+                          <div className="flex items-start gap-3 flex-1 min-w-0">
+                            <div className="h-9 w-9 rounded-2xl bg-orange-50 flex items-center justify-center shrink-0">
+                              <Icon className="h-4.5 w-4.5 text-orange-600" />
+                            </div>
 
-          <button
-            onClick={() => {
-              setActiveTab?.("admin");
-              onOpenAdminAudit?.();
-            }}
-            className="text-left"
-          >
-            <Card className="shadow-sm border-border/50 hover:shadow-md transition-shadow">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BellRing className="h-5 w-5 text-orange-600" />
-                  Audit & Notifications
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  5 permission changes · 3 automation failures (24h)
-                </p>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  Drill into audit logs and notification settings.
-                </p>
-              </CardContent>
-            </Card>
-          </button>
-        </div> */}
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <p className="font-semibold text-sm">
+                                  {item.type}
+                                </p>
+                                <Badge variant="secondary" className="text-[11px]">
+                                  {item.entityType}
+                                </Badge>
+                                <Badge
+                                  variant="secondary"
+                                  className={`text-[11px] ${actionTone(item.cta)}`}
+                                >
+                                  {item.cta}
+                                </Badge>
+
+                                {item.impact ? (
+                                  <Badge
+                                    variant="secondary"
+                                    className="text-[11px] bg-green-100 text-green-700"
+                                  >
+                                    Impact: {formatCurrency(item.impact)}
+                                  </Badge>
+                                ) : (
+                                  <Badge
+                                    variant="secondary"
+                                    className="text-[11px] bg-slate-100 text-slate-700"
+                                  >
+                                    No direct $ impact
+                                  </Badge>
+                                )}
+                              </div>
+
+                              <p className="text-xs text-muted-foreground mt-0.5 truncate">
+                                <span className="font-medium text-foreground/90">
+                                  {item.entity}
+                                </span>{" "}
+                                — {item.recommendation}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2 justify-end">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="rounded-xl h-8 px-3"
+                              onClick={() => openActionDialog(item)}
+                            >
+                              {item.cta}
+                            </Button>
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Alerts & Signals */}
+          <Card className="border-border/60 bg-background/70 shadow-sm rounded-2xl">
+            <CardHeader className="py-3">
+              <CardTitle className="flex items-center justify-between text-base">
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-orange-50">
+                    <AlertTriangle className="h-4.5 w-4.5 text-orange-600" />
+                  </span>
+                  <span>Alerts & Signals</span>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 rounded-xl border-border/70"
+                  onClick={() => setActiveTab?.("alerts-signals")}
+                >
+                  View
+                </Button>
+              </CardTitle>
+            </CardHeader>
+
+            <CardContent className="pt-0 pb-3">
+              <div className="max-h-[240px] overflow-y-auto pr-1 [scrollbar-gutter:stable] space-y-2.5">
+                {alertsAndSignals.map((a) => (
+                  <button
+                    key={a.id}
+                    onClick={a.onClick}
+                    className={[
+                      "w-full text-left",
+                      "px-3 py-2.5",
+                      "rounded-2xl border border-border/60",
+                      "bg-background/70 shadow-sm",
+                      "hover:bg-accent/40 hover:shadow-md",
+                      "transition-all duration-200",
+                      "focus:outline-none focus:ring-2 focus:ring-ring/40",
+                    ].join(" ")}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="font-semibold text-sm truncate">{a.title}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {a.detail}
+                        </p>
+                      </div>
+                      <Badge
+                        variant="secondary"
+                        className={`${badgeTone(a.tone)} text-[11px] shrink-0`}
+                      >
+                        {a.badge}
+                      </Badge>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );

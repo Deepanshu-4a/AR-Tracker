@@ -41,11 +41,7 @@ export default function APOutstandingPage({ onBack }) {
   const formatMoney = (n) =>
     n.toLocaleString("en-US", { style: "currency", currency: "USD" });
 
-<<<<<<< HEAD
-  /* ------------------ PAYABLES SUMMARY ------------------ */
-=======
   /* ------------------  PAYABLES SUMMARY ------------------ */
->>>>>>> f748bd6e8b41a5afda9033d81ab797b792098ee5
   const aging = useMemo(
     () => [
       { name: "0-30", value: 4.2, pct: 63, count: 38 },

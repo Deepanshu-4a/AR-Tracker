@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Sidebar } from "./components/ui/Sidebar";
 import { Dashboard } from "./components/Dashboard";
-import { ClientManagement } from "./components/ClientManagement";
+import { CustomerWorkspace } from "./components/CustomerWorkspace";
 import { RevenueWorkspace } from "./components/RevenueWorkspace";
 import CashInPage from "./components/CashInPage";
 import CashOutPage from "./components/CashOutPage";
@@ -39,7 +39,7 @@ function App() {
         return <RevenueWorkspace />;
 
       case "customers":
-        return <ClientManagement />;
+        return <CustomerWorkspace />;
 
       case "cash-in":
         return <CashInPage onBack={() => setActiveTab("home")} />;

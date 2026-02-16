@@ -1,18 +1,18 @@
 import { useState } from "react";
 import { Sidebar } from "./components/ui/Sidebar";
-import { Dashboard } from "./components/Dashboard";
+import { Dashboard } from "./components/dashboard/Dashboard";
 import { ClientManagement } from "./components/ClientManagement";
 import { RevenueWorkspace } from "./components/RevenueWorkspace";
-import CashInPage from "./components/CashInPage";
-import CashOutPage from "./components/CashOutPage";
-import NetMarginPage from "./components/NetMarginPage";
-import AROutstandingPage from "./components/AROutstandingPage";
-import APOutstandingPage from "./components/APOutstandingPage";
-import { AlertsAndSignalsPage } from "./components/AlertsAndSignalsPage";
+import CashInPage from "./components/dashboard/CashInPage";
+import CashOutPage from "./components/dashboard/CashOutPage";
+import NetMarginPage from "./components/dashboard/NetMarginPage";
+import AROutstandingPage from "./components/dashboard/AROutstandingPage";
+import APOutstandingPage from "./components/dashboard/APOutstandingPage";
+import { AlertsAndSignalsPage } from "./components/dashboard/AlertsAndSignalsPage";
 import Reminders from "./components/Reminders";
 import { Toaster } from "sonner";
 import { Menu } from "lucide-react";
-
+import ActionQueuePage from "./components/dashboard/ActionQueuePage";
 function App() {
   const [activeTab, setActiveTab] = useState("home");
 
@@ -40,6 +40,11 @@ function App() {
 
       case "customers":
         return <ClientManagement />;
+      
+      case "action-queue":
+  return (
+    <ActionQueuePage setActiveTab={setActiveTab} />
+  );
 
       case "cash-in":
         return <CashInPage onBack={() => setActiveTab("home")} />;

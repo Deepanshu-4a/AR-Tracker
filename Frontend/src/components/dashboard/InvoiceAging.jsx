@@ -260,7 +260,7 @@ export function InvoiceAging() {
                     />
                   ))}
                 </Pie>
-                <Tooltip content={<AgingTooltip />} cursor={false} offset={18} />
+                <Tooltip content={<AgingTooltip />} cursor={false} position={{ x: 300, y: 10 }} offset={18} />
               </PieChart>
             </ResponsiveContainer>
 

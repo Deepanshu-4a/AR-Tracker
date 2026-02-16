@@ -79,17 +79,13 @@ const actionTone = (cta) => {
 
 /** ✅ NEW: Profit + Profit Lost model (overdue invoice) */
 const NET_MARGIN_ASSUMPTION = 0.224; // 22.4% from your Net Margin KPI
-const DAILY_PROFIT_LEAK_RATE = 0.01; // 1% per day on PROFIT (safer + realistic than 3% on revenue)
+const DAILY_PROFIT_LEAK_RATE = 0.01; // 1% per day on PROFIT
 
-// Profit-aware math:
-// - expectedProfit = amount * margin
-// - profitLeakToDate = expectedProfit * dailyRate * daysOverdue (capped to expectedProfit)
-// - remainingProfitIfPaidToday = expectedProfit - profitLeakToDate
 const calcInvoiceProfitImpact = (
   amount,
   daysOverdue,
   margin = NET_MARGIN_ASSUMPTION,
-  dailyProfitLeakRate = DAILY_PROFIT_LEAK_RATE
+  dailyProfitLeakRate = DAILY_PROFIT_LEAK_RATE,
 ) => {
   const expectedProfit = amount * margin;
 
@@ -98,7 +94,7 @@ const calcInvoiceProfitImpact = (
 
   const remainingProfitIfPaidToday = Math.max(
     expectedProfit - profitLeakToDate,
-    0
+    0,
   );
 
   return { expectedProfit, profitLeakToDate, remainingProfitIfPaidToday };
@@ -117,12 +113,57 @@ export function Dashboard({
   onOpenAdminAudit,
 
   user = {
-    name: "Deepanshu Sharma",
-    email: "deepanshu@example.com",
+    name: "4A Employee",
+    email: "4AEmployee@example.com",
     role: "Admin",
   },
 }) {
   const [activeIndex, setActiveIndex] = useState(null);
+  const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
+
+const formatMoneyFull = (amount) => {
+  if (typeof amount === "string") return amount;
+  return `$${Math.round(amount).toLocaleString()}`;
+};
+const BILLED_AGING = [
+  // daysLate = average lateness inside that bucket
+  { name: "0–30 Days", value: 13.9, percentage: 75, count: 45, avgDaysLate: 5 },
+  { name: "31–60 Days", value: 2.8, percentage: 15, count: 12, avgDaysLate: 25 },
+  { name: "60+ Days", value: 1.8, percentage: 10, count: 8, avgDaysLate: 67 },
+];
+const CASH_TIMING = [
+  { name: "Next 7 days", value: 4.6, percentage: 25, count: 18, daysToCollect: 3, rangeLabel: "0–7 days" },
+  { name: "8–30 days", value: 7.4, percentage: 40, count: 26, daysToCollect: 19, rangeLabel: "8–30 days" },
+  { name: "31–60 days", value: 4.1, percentage: 22, count: 13, daysToCollect: 45, rangeLabel: "31–60 days" },
+  { name: "60+ days", value: 2.4, percentage: 13, count: 8, daysToCollect: 90, rangeLabel: "60+ days" },
+];
+const bucketEconomics = (amountDollars, delayDays) => {
+  const expectedProfit = amountDollars * NET_MARGIN_ASSUMPTION;
+  const costToServe = amountDollars - expectedProfit;
+
+  const rawLeak = expectedProfit * DAILY_PROFIT_LEAK_RATE * delayDays;
+  const profitLeak = Math.min(rawLeak, expectedProfit);
+  const profitIfCollected = Math.max(expectedProfit - profitLeak, 0);
+
+  return { expectedProfit, costToServe, profitLeak, profitIfCollected };
+};
+const sumEconomics = (rows, delayKey) => {
+  return rows.reduce(
+    (acc, r) => {
+      const amount = (r.value || 0) * 1_000_000; // value is in $M
+      const days = r[delayKey] || 0;
+      const e = bucketEconomics(amount, days);
+      acc.amount += amount;
+      acc.expectedProfit += e.expectedProfit;
+      acc.costToServe += e.costToServe;
+      acc.profitLeak += e.profitLeak;
+      acc.profitIfCollected += e.profitIfCollected;
+      return acc;
+    },
+    { amount: 0, expectedProfit: 0, costToServe: 0, profitLeak: 0, profitIfCollected: 0 },
+  );
+};
+const [agingMode, setAgingMode] = useState("billed");
 
   const [actionDialogOpen, setActionDialogOpen] = useState(false);
   const [selectedAction, setSelectedAction] = useState(null);
@@ -219,7 +260,7 @@ export function Dashboard({
         onClick: () => setActiveTab?.("ap-outstanding"),
       },
     ],
-    [setActiveTab]
+    [setActiveTab],
   );
 
   const actionQueue = useMemo(
@@ -313,7 +354,7 @@ export function Dashboard({
       onOpenIntegrations,
       onOpenAutomations,
       onOpenAdminUsers,
-    ]
+    ],
   );
 
   const sortedActionQueue = useMemo(() => {
@@ -368,7 +409,7 @@ export function Dashboard({
         },
       },
     ],
-    [setActiveTab, onOpenAutomations, onOpenAdminAudit]
+    [setActiveTab, onOpenAutomations, onOpenAdminAudit],
   );
 
   const topOutstandingInvoices = useMemo(
@@ -398,17 +439,12 @@ export function Dashboard({
         status: "late",
       },
     ],
-    []
+    [],
   );
 
-  const agingData = useMemo(
-    () => [
-      { name: "0-30 Days", value: 13.9, percentage: 75, count: 45 },
-      { name: "31-60 Days", value: 2.8, percentage: 15, count: 12 },
-      { name: "60+ Days", value: 1.8, percentage: 10, count: 8 },
-    ],
-    []
-  );
+  const agingData = useMemo(() => {
+  return agingMode === "billed" ? BILLED_AGING : CASH_TIMING;
+}, [agingMode]);
 
   const COLORS = ["#10b981", "#f59e0b", "#ef4444"];
 
@@ -421,27 +457,56 @@ export function Dashboard({
   };
 
   const AgingTooltip = ({ active, payload }) => {
-    if (!active || !payload?.length) return null;
-    const d = payload[0].payload;
-    const idx = payload[0].payload?.name === "0-30 Days" ? 0 : -1;
-    const shiftX = idx === 0 ? 90 : 0;
-    const shiftY = idx === 0 ? 10 : 0;
+  if (!active || !payload?.length) return null;
 
-    return (
-      <div
-        style={{ transform: `translate(${shiftX}px, ${shiftY}px)` }}
-        className="rounded-xl border bg-background/95 px-3 py-2 shadow-lg backdrop-blur"
-      >
-        <p className="text-sm font-semibold">{d?.name}</p>
-        <p className="text-xs text-muted-foreground">Amount: ${d?.value}M</p>
-        <p className="text-xs text-muted-foreground">Share: {d?.percentage}%</p>
+  const d = payload[0].payload;
+  const amount = (d?.value || 0) * 1_000_000;
+
+  const delayDays =
+    agingMode === "billed" ? (d?.avgDaysLate || 0) : (d?.daysToCollect || 0);
+
+  const econ = bucketEconomics(amount, delayDays);
+
+  return (
+    <div className="rounded-xl border bg-background/95 px-3 py-2 shadow-lg backdrop-blur">
+      <p className="text-sm font-semibold">{d?.name}</p>
+
+      <p className="text-xs text-muted-foreground">
+        Amount: ${d?.value}M • Share: {d?.percentage}% • Invoices: {d?.count}
+      </p>
+
+      <div className="mt-2 space-y-1">
+        {agingMode === "cash" ? (
+          <p className="text-xs text-muted-foreground">
+            Expected receive: {d?.rangeLabel} (avg {delayDays}d)
+          </p>
+        ) : (
+          <p className="text-xs text-muted-foreground">
+            Avg lateness: {delayDays} days (profit leakage model)
+          </p>
+        )}
+
+        <p className="text-xs">
+          Cost: <span className="font-medium">{formatMoneyFull(econ.costToServe)}</span>
+        </p>
+        <p className="text-xs">
+          Expected profit: <span className="font-medium">{formatMoneyFull(econ.expectedProfit)}</span>
+        </p>
+        <p className="text-xs text-red-600">
+          Profit at risk: <span className="font-semibold">{formatMoneyFull(econ.profitLeak)}</span>
+        </p>
+        <p className="text-xs text-emerald-700">
+          Profit if collected: <span className="font-semibold">{formatMoneyFull(econ.profitIfCollected)}</span>
+        </p>
       </div>
-    );
-  };
+    </div>
+  );
+};
+
 
   const renderAgingLabel = ({ cx, cy, midAngle, outerRadius, payload }) => {
     const RADIAN = Math.PI / 180;
-    const radius = outerRadius + 26;
+    const radius = outerRadius + 13; // slightly tighter
     const x = cx + radius * Math.cos(-midAngle * RADIAN);
     const y = cy + radius * Math.sin(-midAngle * RADIAN);
 
@@ -452,7 +517,7 @@ export function Dashboard({
         fill="#111827"
         textAnchor={x > cx ? "start" : "end"}
         dominantBaseline="central"
-        className="font-semibold text-sm"
+        className="font-semibold text-[12px]"
       >
         {`${payload?.percentage ?? 0}%`}
       </text>
@@ -474,7 +539,8 @@ export function Dashboard({
               </span>
             </DialogTitle>
             <DialogDescription>
-              Confirm quickly here, or open the source screen for full drill-down.
+              Confirm quickly here, or open the source screen for full
+              drill-down.
             </DialogDescription>
           </DialogHeader>
 
@@ -541,7 +607,9 @@ export function Dashboard({
                         <p className="text-muted-foreground">Amount</p>
                         <p className="font-semibold mt-1">
                           {formatCurrency(
-                            selectedAction?.amount ?? selectedAction?.impact ?? 0
+                            selectedAction?.amount ??
+                              selectedAction?.impact ??
+                              0,
                           )}
                         </p>
                       </div>
@@ -580,13 +648,11 @@ export function Dashboard({
         </DialogContent>
       </Dialog>
 
-      <div className="mx-auto max-w-[1200px] space-y-5 p-4 md:p-6 lg:p-8">
+      <div className="p-6 space-y-5">
         {/* Header */}
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
-              Dashboard
-            </h1>
+            <h1 className="text-2xl font-semibold">Dashboard</h1>
             <p className="mt-1 text-sm text-muted-foreground">
               Overview of cash flow, AR/AP, and what needs attention today.
             </p>
@@ -719,7 +785,7 @@ export function Dashboard({
 
         {/* MIDDLE: Top Invoices + Aging Distribution */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* ✅ Top Outstanding Invoices (Profit + Profit Lost) */}
+          {/* Top Outstanding Invoices */}
           <Card className="border-border/60 bg-background/70 shadow-sm rounded-2xl">
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center justify-between">
@@ -728,6 +794,7 @@ export function Dashboard({
                   variant="outline"
                   size="sm"
                   className="h-8 rounded-xl border-border/70"
+                  onClick={() => setActiveTab?.("revenue")}
                 >
                   View All
                 </Button>
@@ -743,7 +810,10 @@ export function Dashboard({
                     expectedProfit,
                     profitLeakToDate,
                     remainingProfitIfPaidToday,
-                  } = calcInvoiceProfitImpact(invoice.amount, invoice.daysOverdue);
+                  } = calcInvoiceProfitImpact(
+                    invoice.amount,
+                    invoice.daysOverdue,
+                  );
 
                   return (
                     <button
@@ -759,7 +829,6 @@ export function Dashboard({
                       ].join(" ")}
                       title="Open Invoice Detail"
                     >
-                      {/* top row */}
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
                           <div className="flex items-center gap-2 mb-1 flex-wrap">
@@ -773,12 +842,12 @@ export function Dashboard({
                             >
                               {statusBadge.label}
                             </Badge>
-
-                           
                           </div>
 
                           <div className="flex items-center gap-3 text-sm text-muted-foreground flex-wrap">
-                            <span className="font-medium">{invoice.client}</span>
+                            <span className="font-medium">
+                              {invoice.client}
+                            </span>
                             <span>•</span>
                             <span>Due: {invoice.dueDate}</span>
                             <span>•</span>
@@ -798,7 +867,6 @@ export function Dashboard({
                         </div>
                       </div>
 
-                      {/* ✅ profit metrics */}
                       <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-2">
                         <div className="rounded-xl border border-border/60 bg-emerald-50/60 px-3 py-2">
                           <p className="text-[11px] text-muted-foreground">
@@ -811,7 +879,7 @@ export function Dashboard({
 
                         <div className="rounded-xl border border-border/60 bg-red-50/60 px-3 py-2">
                           <p className="text-[11px] text-muted-foreground">
-                            Profit lost / at risk to date (capped)
+                            Profit lost
                           </p>
                           <p className="text-sm font-semibold mt-0.5 text-red-700">
                             {formatCurrency(Math.round(profitLeakToDate))}
@@ -820,10 +888,12 @@ export function Dashboard({
 
                         <div className="rounded-xl border border-border/60 bg-muted/20 px-3 py-2">
                           <p className="text-[11px] text-muted-foreground">
-                            Remaining profit if paid today
+                            Remaining profit
                           </p>
                           <p className="text-sm font-semibold mt-0.5">
-                            {formatCurrency(Math.round(remainingProfitIfPaidToday))}
+                            {formatCurrency(
+                              Math.round(remainingProfitIfPaidToday),
+                            )}
                           </p>
                         </div>
                       </div>
@@ -831,123 +901,234 @@ export function Dashboard({
                   );
                 })}
               </div>
-
-              
             </CardContent>
           </Card>
 
-          {/* Invoice Aging Distribution */}
-          <Card className="border-border/60 bg-background/70 shadow-sm rounded-2xl">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center justify-between gap-3">
-                <span>Invoice Aging Distribution</span>
+          {/* ✅ Invoice Aging Distribution (COMPACT) */}
+        {/* ✅ Invoice Aging: Two-fold view (Billed vs Cash Timing) */}
+<Card className="border-border/60 bg-background/70 shadow-sm rounded-2xl">
+  <CardHeader className="pb-3">
+    <CardTitle className="flex items-center justify-between gap-3">
+      <div className="flex flex-col">
+        <span>Invoice Aging</span>
+        <span className="text-xs font-normal text-muted-foreground">
+          {agingMode === "billed"
+            ? "Billed / recognized revenue vs outstanding AR (cash not received yet)"
+            : "Cash timing forecast — when money comes in + profit erosion from delays"}
+        </span>
+      </div>
 
-                <Select defaultValue="current">
-                  <SelectTrigger className="w-[132px] h-9 text-sm rounded-xl border-border/70">
-                    <SelectValue placeholder="Period" />
-                  </SelectTrigger>
-                  <SelectContent className="rounded-xl">
-                    <SelectItem value="current">Current</SelectItem>
-                    <SelectItem value="quarter">This Quarter</SelectItem>
-                    <SelectItem value="year">This Year</SelectItem>
-                  </SelectContent>
-                </Select>
-              </CardTitle>
-            </CardHeader>
+      <div className="flex items-center gap-2">
+        <Button
+          variant={agingMode === "billed" ? "default" : "outline"}
+          size="sm"
+          className="h-8 rounded-xl"
+          onClick={() => setAgingMode("billed")}
+        >
+          Billed
+        </Button>
+        <Button
+          variant={agingMode === "cash" ? "default" : "outline"}
+          size="sm"
+          className="h-8 rounded-xl"
+          onClick={() => setAgingMode("cash")}
+        >
+          Recievables
+        </Button>
 
-            <CardContent className="pt-0">
-              <div className="space-y-6">
-                <div className="relative flex items-center justify-center">
-                  <ResponsiveContainer width="100%" height={220}>
-                    <PieChart>
-                      <Pie
-                        data={agingData}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={60}
-                        outerRadius={85}
-                        paddingAngle={3}
-                        dataKey="value"
-                        label={renderAgingLabel}
-                        labelLine
-                        onMouseEnter={(_, idx) => setActiveIndex(idx)}
-                        onMouseLeave={() => setActiveIndex(null)}
-                      >
-                        {agingData.map((_, index) => (
-                          <Cell
-                            key={`cell-${index}`}
-                            fill={COLORS[index % COLORS.length]}
-                            stroke="hsl(var(--background))"
-                            strokeWidth={2}
-                          />
-                        ))}
-                      </Pie>
-                      <Tooltip content={<AgingTooltip />} cursor={false} offset={18} />
-                    </PieChart>
-                  </ResponsiveContainer>
+        <Select defaultValue="current">
+          <SelectTrigger className="w-[132px] h-8 text-sm rounded-xl border-border/70">
+            <SelectValue placeholder="Period" />
+          </SelectTrigger>
+          <SelectContent className="rounded-xl">
+            <SelectItem value="current">Current</SelectItem>
+            <SelectItem value="quarter">This Quarter</SelectItem>
+            <SelectItem value="year">This Year</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+    </CardTitle>
+  </CardHeader>
 
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <div className="text-center">
-                      <p className="text-2xl font-bold">$18.5M</p>
-                      <p className="text-xs text-muted-foreground">Total AR</p>
-                    </div>
-                  </div>
-                </div>
+  <CardContent className="pt-0">
+    {/** summary economics */}
+    {(() => {
+      const totals =
+        agingMode === "billed"
+          ? sumEconomics(BILLED_AGING, "avgDaysLate")
+          : sumEconomics(CASH_TIMING, "daysToCollect");
 
-                <div className="space-y-2.5">
-                  {agingData.map((item, index) => (
-                    <div
-                      key={item.name}
-                      className="flex items-center justify-between p-3.5 rounded-2xl border border-border/60 bg-accent/20 hover:bg-accent/35 transition-colors"
-                    >
-                      <div className="flex items-center gap-3 flex-1">
-                        <div
-                          className="h-4 w-4 rounded-sm flex-shrink-0"
-                          style={{ backgroundColor: COLORS[index] }}
-                        />
-                        <span className="text-sm font-medium min-w-[90px]">
-                          {item.name}
-                        </span>
-                      </div>
+      const headlineLeft =
+        agingMode === "billed" ? "Recognized (billed)" : "Expected cash inflow";
 
-                      <div className="flex items-center gap-8 text-sm">
-                        <div className="text-center min-w-[60px]">
-                          <p className="font-semibold text-base">{item.count}</p>
-                          <p className="text-xs text-muted-foreground mt-0.5">
-                            invoices
-                          </p>
-                        </div>
+      const headlineValue =
+        agingMode === "billed"
+          ? formatCurrency(totals.amount)
+          : formatCurrency(totals.amount);
 
-                        <div className="text-right min-w-[70px]">
-                          <p className="font-bold text-base">${item.value}M</p>
-                          <p className="text-xs text-muted-foreground mt-0.5">
-                            {item.percentage}%
-                          </p>
-                        </div>
-                      </div>
-                    </div>
+      return (
+        <div className="space-y-4">
+          {/* chart */}
+          <div className="relative flex items-center justify-center">
+            <ResponsiveContainer width="100%" height={190}>
+              <PieChart>
+                <Pie
+                  data={agingData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={50}
+                  outerRadius={78}
+                  paddingAngle={3}
+                  dataKey="value"
+                  label={renderAgingLabel}
+                  labelLine
+                  onMouseEnter={(_, idx) => setActiveIndex(idx)}
+                  onMouseLeave={() => setActiveIndex(null)}
+                >
+                  {agingData.map((_, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={COLORS[index % COLORS.length]}
+                      stroke="hsl(var(--background))"
+                      strokeWidth={2}
+                    />
                   ))}
+                </Pie>
+                <Tooltip content={<AgingTooltip />} cursor={false} offset={18} position={{ x: 300, y: 50 }}   />
+              </PieChart>
+            </ResponsiveContainer>
+
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="text-center">
+                <p className="text-xl font-bold">{headlineValue}</p>
+                <p className="text-[11px] text-muted-foreground">
+                  {headlineLeft}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* list */}
+          <div className="space-y-2">
+            {agingData.map((item, index) => {
+              const amount = (item.value || 0) * 1_000_000;
+              const delayDays =
+                agingMode === "billed"
+                  ? (item.avgDaysLate || 0)
+                  : (item.daysToCollect || 0);
+
+              const econ = bucketEconomics(amount, delayDays);
+
+              return (
+                <div
+                  key={item.name}
+                  className="flex items-center justify-between px-3 py-2 rounded-2xl border border-border/60 bg-accent/20 hover:bg-accent/35 transition-colors"
+                >
+                  <div className="flex items-center gap-2.5 flex-1">
+                    <div
+                      className="h-3.5 w-3.5 rounded-sm flex-shrink-0"
+                      style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                    />
+                    <div className="min-w-0">
+                      <p className="text-[13px] font-medium">{item.name}</p>
+
+                      <p className="text-[11px] text-muted-foreground">
+                        {agingMode === "cash"
+                          ? `Receive: ${item.rangeLabel} (avg ${delayDays}d)`
+                          : `Avg lateness: ${delayDays}d`}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-5 text-[12px]">
+                    <div className="text-right min-w-[72px]">
+                      <p className="font-bold">${item.value}M</p>
+                      <p className="text-[11px] text-muted-foreground">
+                        {item.percentage}% • {item.count} inv
+                      </p>
+                    </div>
+
+                    <div className="text-right min-w-[92px]">
+                      <p className="font-semibold text-emerald-700">
+                        {formatCurrency(Math.round(econ.profitIfCollected))}
+                      </p>
+                      <p className="text-[11px] text-red-600">
+                        -{formatCurrency(Math.round(econ.profitLeak))} risk
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* bottom economics: cost / profit / leakage */}
+          <div className="grid grid-cols-3 gap-3 pt-3 border-t">
+            <div className="rounded-2xl border border-border/60 bg-background/70 p-3">
+              <p className="text-[11px] text-muted-foreground">Cost (deal economics)</p>
+              <p className="text-base font-semibold mt-1">
+                {formatCurrency(Math.round(totals.costToServe))}
+              </p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">
+                What you’re “spending” to deliver
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-border/60 bg-emerald-50/60 p-3">
+              <p className="text-[11px] text-muted-foreground">Expected profit</p>
+              <p className="text-base font-semibold mt-1 text-emerald-700">
+                {formatCurrency(Math.round(totals.expectedProfit))}
+              </p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">
+                If collected on-time
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-border/60 bg-red-50/60 p-3">
+              <p className="text-[11px] text-muted-foreground">Profit at risk (delay)</p>
+              <p className="text-base font-semibold mt-1 text-red-700">
+                {formatCurrency(Math.round(totals.profitLeak))}
+              </p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">
+                Leakage due to late cash receipt
+              </p>
+            </div>
+          </div>
+
+          {/* extra “what will we receive” headline when in cash mode */}
+          {agingMode === "cash" ? (
+            <div className="rounded-2xl border border-border/60 bg-muted/20 p-3">
+              <p className="text-[11px] text-muted-foreground">
+                Forecast: cash + profit you’ll actually realize
+              </p>
+              <div className="mt-1 flex items-end justify-between gap-3 flex-wrap">
+                <div>
+                  <p className="text-sm font-semibold">
+                    Expected cash to receive: {formatCurrency(Math.round(totals.amount))}
+                  </p>
+                  <p className="text-[11px] text-muted-foreground">
+                    (same as AR total, but staged by timing buckets)
+                  </p>
                 </div>
 
-                <div className="grid grid-cols-3 gap-4 pt-4 border-t">
-                  <div className="text-center py-2">
-                    <p className="text-xl font-bold text-green-600">75%</p>
-                    <p className="text-xs text-muted-foreground mt-1">Current</p>
-                  </div>
-                  <div className="text-center border-x py-2">
-                    <p className="text-xl font-bold text-orange-600">15%</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      31–60 Days
-                    </p>
-                  </div>
-                  <div className="text-center py-2">
-                    <p className="text-xl font-bold text-red-600">10%</p>
-                    <p className="text-xs text-muted-foreground mt-1">60+ Days</p>
-                  </div>
+                <div className="text-right">
+                  <p className="text-sm font-semibold text-emerald-700">
+                    Profit if collected as forecast:{" "}
+                    {formatCurrency(Math.round(totals.profitIfCollected))}
+                  </p>
+                  <p className="text-[11px] text-red-600">
+                    Profit erosion baked in: -{formatCurrency(Math.round(totals.profitLeak))}
+                  </p>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          ) : null}
+        </div>
+      );
+    })()}
+  </CardContent>
+</Card>
+
         </div>
 
         {/* BOTTOM: Action Queue + Alerts */}
@@ -962,98 +1143,109 @@ export function Dashboard({
                   </span>
                   <span>Action Queue</span>
                 </div>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 rounded-xl border-border/70"
+                  onClick={() => setActiveTab?.("action-queue")}
+                >
+                  View All
+                </Button>
               </CardTitle>
             </CardHeader>
 
             <CardContent className="pt-0 pb-3">
-              <div className="max-h-[240px] overflow-y-auto pr-1 [scrollbar-gutter:stable]">
-                <div className="space-y-2">
-                  {visibleActionQueue.length === 0 ? (
-                    <div className="rounded-2xl border border-border/60 bg-background/70 p-5 text-center shadow-sm">
-                      <div className="mx-auto inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-50">
-                        <CheckCircle2 className="h-5 w-5 text-emerald-600" />
-                      </div>
-                      <p className="mt-2 font-semibold">All clear</p>
-                      <p className="mt-1 text-sm text-muted-foreground">
-                        No actions require attention right now.
-                      </p>
+              {/* ✅ scrollbar removed */}
+              <div className="space-y-2">
+                {visibleActionQueue.length === 0 ? (
+                  <div className="rounded-2xl border border-border/60 bg-background/70 p-5 text-center shadow-sm">
+                    <div className="mx-auto inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-50">
+                      <CheckCircle2 className="h-5 w-5 text-emerald-600" />
                     </div>
-                  ) : (
-                    visibleActionQueue.map((item) => {
-                      const Icon = item.icon;
-                      return (
-                        <div
-                          key={item.id}
-                          className={[
-                            "flex flex-col md:flex-row md:items-center justify-between gap-2",
-                            "px-3 py-2.5",
-                            "rounded-2xl border border-border/60",
-                            "bg-background/70 shadow-sm",
-                            "hover:bg-accent/40 hover:shadow-md",
-                            "transition-all duration-200",
-                          ].join(" ")}
-                        >
-                          <div className="flex items-start gap-3 flex-1 min-w-0">
-                            <div className="h-9 w-9 rounded-2xl bg-orange-50 flex items-center justify-center shrink-0">
-                              <Icon className="h-4.5 w-4.5 text-orange-600" />
-                            </div>
+                    <p className="mt-2 font-semibold">All clear</p>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      No actions require attention right now.
+                    </p>
+                  </div>
+                ) : (
+                  visibleActionQueue.map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <div
+                        key={item.id}
+                        className={[
+                          "flex flex-col md:flex-row md:items-center justify-between gap-2",
+                          "px-3 py-2.5",
+                          "rounded-2xl border border-border/60",
+                          "bg-background/70 shadow-sm",
+                          "hover:bg-accent/40 hover:shadow-md",
+                          "transition-all duration-200",
+                        ].join(" ")}
+                      >
+                        <div className="flex items-start gap-3 flex-1 min-w-0">
+                          <div className="h-9 w-9 rounded-2xl bg-orange-50 flex items-center justify-center shrink-0">
+                            <Icon className="h-4.5 w-4.5 text-orange-600" />
+                          </div>
 
-                            <div className="min-w-0">
-                              <div className="flex items-center gap-2 flex-wrap">
-                                <p className="font-semibold text-sm">
-                                  {item.type}
-                                </p>
-                                <Badge variant="secondary" className="text-[11px]">
-                                  {item.entityType}
-                                </Badge>
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <p className="font-semibold text-sm">
+                                {item.type}
+                              </p>
+                              <Badge
+                                variant="secondary"
+                                className="text-[11px]"
+                              >
+                                {item.entityType}
+                              </Badge>
+                              <Badge
+                                variant="secondary"
+                                className={`text-[11px] ${actionTone(item.cta)}`}
+                              >
+                                {item.cta}
+                              </Badge>
+
+                              {item.impact ? (
                                 <Badge
                                   variant="secondary"
-                                  className={`text-[11px] ${actionTone(item.cta)}`}
+                                  className="text-[11px] bg-green-100 text-green-700"
                                 >
-                                  {item.cta}
+                                  Impact: {formatCurrency(item.impact)}
                                 </Badge>
-
-                                {item.impact ? (
-                                  <Badge
-                                    variant="secondary"
-                                    className="text-[11px] bg-green-100 text-green-700"
-                                  >
-                                    Impact: {formatCurrency(item.impact)}
-                                  </Badge>
-                                ) : (
-                                  <Badge
-                                    variant="secondary"
-                                    className="text-[11px] bg-slate-100 text-slate-700"
-                                  >
-                                    No direct $ impact
-                                  </Badge>
-                                )}
-                              </div>
-
-                              <p className="text-xs text-muted-foreground mt-0.5 truncate">
-                                <span className="font-medium text-foreground/90">
-                                  {item.entity}
-                                </span>{" "}
-                                — {item.recommendation}
-                              </p>
+                              ) : (
+                                <Badge
+                                  variant="secondary"
+                                  className="text-[11px] bg-slate-100 text-slate-700"
+                                >
+                                  No direct $ impact
+                                </Badge>
+                              )}
                             </div>
-                          </div>
 
-                          <div className="flex items-center gap-2 justify-end">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="rounded-xl h-8 px-3"
-                              onClick={() => openActionDialog(item)}
-                            >
-                              {item.cta}
-                            </Button>
+                            <p className="text-xs text-muted-foreground mt-0.5 truncate">
+                              <span className="font-medium text-foreground/90">
+                                {item.entity}
+                              </span>{" "}
+                              — {item.recommendation}
+                            </p>
                           </div>
                         </div>
-                      );
-                    })
-                  )}
-                </div>
+
+                        <div className="flex items-center gap-2 justify-end">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="rounded-xl h-8 px-3"
+                            onClick={() => openActionDialog(item)}
+                          >
+                            {item.cta}
+                          </Button>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
               </div>
             </CardContent>
           </Card>
@@ -1074,13 +1266,14 @@ export function Dashboard({
                   className="h-8 rounded-xl border-border/70"
                   onClick={() => setActiveTab?.("alerts-signals")}
                 >
-                  View
+                  View All
                 </Button>
               </CardTitle>
             </CardHeader>
 
             <CardContent className="pt-0 pb-3">
-              <div className="max-h-[240px] overflow-y-auto pr-1 [scrollbar-gutter:stable] space-y-2.5">
+              {/* ✅ scrollbar removed */}
+              <div className="space-y-2.5">
                 {alertsAndSignals.map((a) => (
                   <button
                     key={a.id}
@@ -1097,7 +1290,9 @@ export function Dashboard({
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <p className="font-semibold text-sm truncate">{a.title}</p>
+                        <p className="font-semibold text-sm truncate">
+                          {a.title}
+                        </p>
                         <p className="text-xs text-muted-foreground mt-0.5">
                           {a.detail}
                         </p>

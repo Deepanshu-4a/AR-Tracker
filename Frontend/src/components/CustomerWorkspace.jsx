@@ -1,30 +1,13 @@
 import { useState } from "react";
 import { CustomerCenter } from "./CustomerCenter";
-import { CustomerSegments } from "./CustomerSegments";
-import { CustomerCollections } from "./CustomerCollections";
-import { CustomerCredit } from "./CustomerCredit";
+
 
 const CUSTOMER_TABS = [
   {
     id: "center",
     label: "Customer Center",
     Component: CustomerCenter,
-  },
-  {
-    id: "segments",
-    label: "Segments & Risk",
-    Component: CustomerSegments,
-  },
-  {
-    id: "collections",
-    label: "Collections",
-    Component: CustomerCollections,
-  },
-  {
-    id: "credit",
-    label: "Credit & Exposure",
-    Component: CustomerCredit,
-  },
+  }
 ];
 
 export function CustomerWorkspace() {

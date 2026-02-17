@@ -190,10 +190,7 @@ export function PaymentSettingsTab(props) {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="standard">Standard</SelectItem>
-                <SelectItem value="preferred">Preferred</SelectItem>
-                <SelectItem value="vip">VIP</SelectItem>
-                <SelectItem value="wholesale">Wholesale</SelectItem>
+               
               </SelectContent>
             </Select>
           </Row>

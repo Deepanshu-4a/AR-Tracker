@@ -1,12 +1,3 @@
-// ✅ PaymentSettingsTab.jsx
-// “Do it more” = make it EVEN more compact so ZIP row always fits (no scroll)
-// Changes vs prior:
-// - smaller panel header + padding
-// - smaller row gaps + smaller input height (h-8)
-// - tighter label column (150px)
-// - reduced spacing between top form and panels
-// - reduced space inside Online Payments
-
 "use client";
 
 import { useMemo } from "react";
@@ -36,7 +27,7 @@ export function PaymentSettingsTab(props) {
       paymentTerms: "net_30",
       priceLevel: "standard",
       preferredDelivery: "email",
-      preferredPaymentMethod: "none",
+      preferredPaymentMethod: "cash",
 
       cardNumber: "",
       expMonth: "",
@@ -57,7 +48,34 @@ export function PaymentSettingsTab(props) {
   const onlyDigits = (v) => (v || "").replace(/[^\d]/g, "");
   const clampLen = (v, n) => (v || "").slice(0, n);
 
-  // ✅ Even tighter row
+  const PAYMENT_TERMS = [
+    { value: "add_new_terms", label: "< Add New >" },
+    { value: "1_10_net_30", label: "1% 10 Net 30" },
+    { value: "2_10_net_30", label: "2% 10 Net 30" },
+    { value: "consignment", label: "Consignment" },
+    { value: "due_on_receipt", label: "Due on receipt" },
+    { value: "net_15", label: "Net 15" },
+    { value: "net_30", label: "Net 30" },
+    { value: "net_33", label: "Net 33" },
+    { value: "net_45", label: "Net 45" },
+    { value: "net_60", label: "Net 60" },
+    { value: "net45_alt", label: "Net45" },
+  ];
+
+  // ✅ Updated preferred payment method options to match screenshot
+  const PREFERRED_PAYMENT_METHODS = [
+    { value: "add_new_pmt", label: "< Add New >" },
+    { value: "cash", label: "Cash" },
+    { value: "check", label: "Check" },
+    { value: "amex", label: "American Express" },
+    { value: "discover", label: "Discover" },
+    { value: "mastercard", label: "MasterCard" },
+    { value: "visa", label: "Visa" },
+    { value: "debit_card", label: "Debit Card" },
+    { value: "gift_card", label: "Gift Card" },
+    { value: "e_check", label: "E-Check" },
+  ];
+
   const Row = ({ label, children }) => (
     <div className="grid grid-cols-[150px_minmax(0,1fr)] items-center gap-2 min-w-0">
       <Label className="text-[11px] text-muted-foreground leading-4 break-words">
@@ -83,7 +101,6 @@ export function PaymentSettingsTab(props) {
 
   return (
     <div className="w-full min-w-0">
-      {/* Top 2-column form (more compact) */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-x-10 gap-y-3 min-w-0">
         <div className="space-y-2.5 min-w-0">
           <Row label="ACCOUNT NO.">
@@ -97,17 +114,20 @@ export function PaymentSettingsTab(props) {
           <Row label="PAYMENT TERMS">
             <Select
               value={d.paymentTerms}
-              onValueChange={(v) => update("paymentTerms", v)}
+              onValueChange={(v) => {
+                if (v === "add_new_terms") return; // placeholder behavior
+                update("paymentTerms", v);
+              }}
             >
               <SelectTrigger className={selectCls}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="due_on_receipt">Due on receipt</SelectItem>
-                <SelectItem value="net_15">Net 15</SelectItem>
-                <SelectItem value="net_30">Net 30</SelectItem>
-                <SelectItem value="net_45">Net 45</SelectItem>
-                <SelectItem value="net_60">Net 60</SelectItem>
+                {PAYMENT_TERMS.map((t) => (
+                  <SelectItem key={t.value} value={t.value}>
+                    {t.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </Row>
@@ -132,17 +152,20 @@ export function PaymentSettingsTab(props) {
           <Row label="PREFERRED PAYMENT METHOD">
             <Select
               value={d.preferredPaymentMethod}
-              onValueChange={(v) => update("preferredPaymentMethod", v)}
+              onValueChange={(v) => {
+                if (v === "add_new_pmt") return; // placeholder behavior
+                update("preferredPaymentMethod", v);
+              }}
             >
               <SelectTrigger className={selectCls}>
-                <SelectValue />
+                <SelectValue placeholder="—" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">—</SelectItem>
-                <SelectItem value="ach">Bank Transfer (ACH)</SelectItem>
-                <SelectItem value="card">Credit Card</SelectItem>
-                <SelectItem value="check">Check</SelectItem>
-                <SelectItem value="wire">Wire</SelectItem>
+                {PREFERRED_PAYMENT_METHODS.map((m) => (
+                  <SelectItem key={m.value} value={m.value}>
+                    {m.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </Row>
@@ -177,7 +200,6 @@ export function PaymentSettingsTab(props) {
         </div>
       </div>
 
-      {/* Bottom panels (tighter) */}
       <div className="mt-4 grid grid-cols-1 xl:grid-cols-2 gap-5 min-w-0">
         <Panel title="CREDIT CARD INFORMATION">
           <div className="space-y-2.5 min-w-0">
@@ -186,7 +208,7 @@ export function PaymentSettingsTab(props) {
                 className={inputCls}
                 value={d.cardNumber}
                 onChange={(e) =>
-                  update("cardNumber", clampLen(onlyDigits(e.target.value), 19))
+                  update("cardNumber", (clampLen(onlyDigits(e.target.value), 19)))
                 }
                 placeholder="•••• •••• •••• ••••"
               />
@@ -230,7 +252,6 @@ export function PaymentSettingsTab(props) {
               />
             </Row>
 
-            {/* ✅ ZIP now guaranteed to fit */}
             <Row label="ZIP / POSTAL CODE">
               <Input
                 className={inputCls}

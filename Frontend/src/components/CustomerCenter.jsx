@@ -4,12 +4,6 @@ import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from "./ui/dropdown-menu";
-import {
   Table,
   TableHeader,
   TableRow,
@@ -22,11 +16,14 @@ import { Avatar, AvatarFallback } from "./ui/avatar";
 import { Search01Icon as Search } from "hugeicons-react";
 import { Users, Plus, Download } from "lucide-react";
 
+import { CreateCustomerModal } from "./customers/CreateCustomerModal";
+
 export function CustomerCenter() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
 
-  // Mock Data (replace later with API)
+  // Mock Data
   const customers = [
     {
       id: "CL001",
@@ -108,35 +105,32 @@ export function CustomerCenter() {
       </div>
 
       {/* TOOLBAR */}
-      <Card className="p-4 flex justify-between items-center">
-        <div className="relative w-80">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            placeholder="Search customers..."
-            className="pl-10"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
+      <Card className="p-4">
+        <div className="flex items-center justify-between gap-4">
+          <div className="relative w-full max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              placeholder="Search customers..."
+              className="pl-10 h-10"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
 
-        <div className="flex gap-2">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button>
-                <Plus className="w-4 h-4 mr-2" />
-                New Customer
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuItem>New Customer</DropdownMenuItem>
-              <DropdownMenuItem>Import Customers</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div className="flex items-center gap-2">
+            <Button
+              className="bg-orange-500 hover:bg-orange-600"
+              onClick={() => setIsCreateOpen(true)}
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              New Customer
+            </Button>
 
-          <Button variant="outline">
-            <Download className="w-4 h-4 mr-2" />
-            Export
-          </Button>
+            <Button variant="outline">
+              <Download className="w-4 h-4 mr-2" />
+              Export
+            </Button>
+          </div>
         </div>
       </Card>
 
@@ -165,12 +159,14 @@ export function CustomerCenter() {
                       {getInitials(customer.name)}
                     </AvatarFallback>
                   </Avatar>
+
                   <div className="flex-1">
                     <p className="font-medium">{customer.name}</p>
                     <p className="text-xs text-muted-foreground">
                       ${customer.arBalance.toLocaleString()}
                     </p>
                   </div>
+
                   <Badge className={getRiskColor(customer.risk)}>
                     {customer.risk}
                   </Badge>
@@ -241,6 +237,9 @@ export function CustomerCenter() {
           )}
         </Card>
       </div>
+
+      {/* ✅ CREATE CUSTOMER MODAL */}
+      <CreateCustomerModal open={isCreateOpen} onOpenChange={setIsCreateOpen} />
     </div>
   );
 }

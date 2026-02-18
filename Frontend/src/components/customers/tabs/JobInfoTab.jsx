@@ -1,6 +1,5 @@
 "use client";
 
-import { useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -11,42 +10,33 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-export function JobInfoTab(props) {
-  const data = props.data ?? props.formData?.jobInfo ?? {};
-
-  const onDataChange =
-    props.onDataChange ??
-    ((next) => props.setFormData?.((prev) => ({ ...prev, jobInfo: next })));
-
-  const d = useMemo(
-    () => ({
-      jobDescription: "",
-      jobType: "",
-      jobStatus: "none",
-      startDate: "",
-      projectedEndDate: "",
-      endDate: "",
-      ...(data || {}),
-    }),
-    [data],
-  );
-
-  const update = (key, value) => {
-    onDataChange?.({ ...d, [key]: value });
-  };
-
-  // ✅ Clean neutral dropdown (NO orange highlight)
-  const selectItemCls =
-    "cursor-pointer data-[highlighted]:bg-muted/50 data-[highlighted]:text-foreground";
-
-  const Row = ({ label, children }) => (
+/* 🔒 Move Row outside for stability */
+function Row({ label, children }) {
+  return (
     <div className="grid grid-cols-[160px_minmax(0,1fr)] items-center gap-3">
       <Label className="text-xs text-muted-foreground">{label}</Label>
       {children}
     </div>
   );
+}
+
+export function JobInfoTab({ formData, setFormData }) {
+  const d = formData.jobInfo ?? {};
+
+  const update = (key, value) => {
+    setFormData((prev) => ({
+      ...prev,
+      jobInfo: {
+        ...(prev.jobInfo ?? {}),
+        [key]: value,
+      },
+    }));
+  };
 
   const inputCls = "h-9 w-full rounded-lg";
+
+  const selectItemCls =
+    "cursor-pointer data-[highlighted]:bg-muted/50 data-[highlighted]:text-foreground";
 
   return (
     <div className="space-y-6 max-w-3xl">
@@ -54,14 +44,17 @@ export function JobInfoTab(props) {
       <Row label="JOB DESCRIPTION">
         <Input
           className={inputCls}
-          value={d.jobDescription}
+          value={d.jobDescription ?? ""}
           onChange={(e) => update("jobDescription", e.target.value)}
         />
       </Row>
 
       {/* JOB TYPE */}
       <Row label="JOB TYPE">
-        <Select value={d.jobType} onValueChange={(v) => update("jobType", v)}>
+        <Select
+          value={d.jobType ?? ""}
+          onValueChange={(v) => update("jobType", v)}
+        >
           <SelectTrigger className={inputCls}>
             <SelectValue placeholder="Select job type" />
           </SelectTrigger>
@@ -79,7 +72,7 @@ export function JobInfoTab(props) {
       {/* JOB STATUS */}
       <Row label="JOB STATUS">
         <Select
-          value={d.jobStatus}
+          value={d.jobStatus ?? "none"}
           onValueChange={(v) => update("jobStatus", v)}
         >
           <SelectTrigger className={inputCls}>
@@ -113,7 +106,7 @@ export function JobInfoTab(props) {
         <Input
           type="date"
           className={inputCls}
-          value={d.startDate}
+          value={d.startDate ?? ""}
           onChange={(e) => update("startDate", e.target.value)}
         />
       </Row>
@@ -123,7 +116,7 @@ export function JobInfoTab(props) {
         <Input
           type="date"
           className={inputCls}
-          value={d.projectedEndDate}
+          value={d.projectedEndDate ?? ""}
           onChange={(e) => update("projectedEndDate", e.target.value)}
         />
       </Row>
@@ -133,7 +126,7 @@ export function JobInfoTab(props) {
         <Input
           type="date"
           className={inputCls}
-          value={d.endDate}
+          value={d.endDate ?? ""}
           onChange={(e) => update("endDate", e.target.value)}
         />
       </Row>

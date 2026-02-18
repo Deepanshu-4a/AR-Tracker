@@ -1,6 +1,5 @@
 "use client";
 
-import { useMemo } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -12,54 +11,52 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-export function SalesTaxSettingsTab(props) {
-  const data = props.data ?? props.formData?.salesTax ?? {};
-  const onDataChange =
-    props.onDataChange ??
-    ((next) => props.setFormData?.((prev) => ({ ...prev, salesTax: next })));
+const DEFAULTS = {
+  taxCode: "none",
+  taxItem: "none",
+  resaleNo: "",
+};
 
-  const d = useMemo(
-    () => ({
-      taxCode: "none",
-      taxItem: "none",
-      resaleNo: "",
-      ...(data || {}),
-    }),
-    [data],
-  );
+const TAX_CODES = [
+  { value: "none", label: "—" },
+  { value: "taxable", label: "Taxable" },
+  { value: "non_taxable", label: "Non-taxable" },
+  { value: "out_of_state", label: "Out of state" },
+];
 
-  const update = (key, value) => onDataChange?.({ ...d, [key]: value });
+const TAX_ITEMS = [
+  { value: "none", label: "—" },
+  { value: "sales_tax", label: "Sales Tax" },
+  { value: "vat", label: "VAT" },
+  { value: "gst", label: "GST" },
+];
 
-  // Example options (you can wire to your actual tax setup later)
-  const TAX_CODES = [
-    { value: "none", label: "—" },
-    { value: "taxable", label: "Taxable" },
-    { value: "non_taxable", label: "Non-taxable" },
-    { value: "out_of_state", label: "Out of state" },
-  ];
-
-  const TAX_ITEMS = [
-    { value: "none", label: "—" },
-    { value: "sales_tax", label: "Sales Tax" },
-    { value: "vat", label: "VAT" },
-    { value: "gst", label: "GST" },
-  ];
-
-  const Row = ({ label, children }) => (
+// ✅ Outside the component — stable identity, no remount on render
+function Row({ label, children }) {
+  return (
     <div className="grid grid-cols-[110px_minmax(0,1fr)] items-center gap-4 min-w-0">
       <Label className="text-[11px] text-muted-foreground">{label}</Label>
       <div className="min-w-0">{children}</div>
     </div>
   );
+}
+
+export function SalesTaxSettingsTab(props) {
+  const data = props.data ?? props.formData?.salesTax ?? {};
+  const d = { ...DEFAULTS, ...data };
+
+  const onDataChange =
+    props.onDataChange ??
+    ((next) => props.setFormData?.((prev) => ({ ...prev, salesTax: next })));
+
+  const update = (key, value) => onDataChange?.({ ...d, [key]: value });
 
   const handleAddTaxCode = () => {
-    // placeholder for "add new tax code" flow
     console.log("Add Tax Code clicked");
   };
 
   return (
     <div className="w-full h-full min-w-0">
-      {/* keep everything aligned to the top-left like QuickBooks */}
       <div className="max-w-[620px] space-y-3">
         <Row label="TAX CODE">
           <div className="flex items-center gap-2 min-w-0">
@@ -76,7 +73,6 @@ export function SalesTaxSettingsTab(props) {
               </SelectContent>
             </Select>
 
-            {/* small add button like screenshot */}
             <Button
               type="button"
               variant="outline"

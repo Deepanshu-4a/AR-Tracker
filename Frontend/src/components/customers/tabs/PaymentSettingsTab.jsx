@@ -1,6 +1,5 @@
 "use client";
 
-import { useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -13,70 +12,67 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-export function PaymentSettingsTab(props) {
-  const data = props.data ?? props.formData?.paymentSettings ?? {};
-  const onDataChange =
-    props.onDataChange ??
-    ((next) =>
-      props.setFormData?.((prev) => ({ ...prev, paymentSettings: next })));
+const DEFAULTS = {
+  accountNo: "",
+  creditLimit: "",
+  paymentTerms: "net_30",
+  priceLevel: "standard",
+  preferredDelivery: "email",
+  preferredPaymentMethod: "cash",
+  cardNumber: "",
+  expMonth: "",
+  expYear: "",
+  nameOnCard: "",
+  billingAddress: "",
+  billingZip: "",
+  allowOnlineCard: false,
+  allowOnlineAch: false,
+};
 
-  const d = useMemo(
-    () => ({
-      accountNo: "",
-      creditLimit: "",
-      paymentTerms: "net_30",
-      priceLevel: "standard",
-      preferredDelivery: "email",
-      preferredPaymentMethod: "cash",
+const PAYMENT_TERMS = [
+  { value: "add_new_terms", label: "< Add New >" },
+  { value: "1_10_net_30", label: "1% 10 Net 30" },
+  { value: "2_10_net_30", label: "2% 10 Net 30" },
+  { value: "consignment", label: "Consignment" },
+  { value: "due_on_receipt", label: "Due on receipt" },
+  { value: "net_15", label: "Net 15" },
+  { value: "net_30", label: "Net 30" },
+  { value: "net_33", label: "Net 33" },
+  { value: "net_45", label: "Net 45" },
+  { value: "net_60", label: "Net 60" },
+  { value: "net45_alt", label: "Net45" },
+];
 
-      cardNumber: "",
-      expMonth: "",
-      expYear: "",
-      nameOnCard: "",
-      billingAddress: "",
-      billingZip: "",
+const PREFERRED_PAYMENT_METHODS = [
+  { value: "add_new_pmt", label: "< Add New >" },
+  { value: "cash", label: "Cash" },
+  { value: "check", label: "Check" },
+  { value: "amex", label: "American Express" },
+  { value: "discover", label: "Discover" },
+  { value: "mastercard", label: "MasterCard" },
+  { value: "visa", label: "Visa" },
+  { value: "debit_card", label: "Debit Card" },
+  { value: "gift_card", label: "Gift Card" },
+  { value: "e_check", label: "E-Check" },
+];
 
-      allowOnlineCard: false,
-      allowOnlineAch: false,
-      ...(data || {}),
-    }),
-    [data],
-  );
+const PRICE_LEVELS = [
+  { value: "standard", label: "Standard" },
+  { value: "preferred", label: "Preferred" },
+  { value: "vip", label: "VIP" },
+  { value: "wholesale", label: "Wholesale" },
+];
 
-  const update = (key, value) => onDataChange?.({ ...d, [key]: value });
+const DELIVERY_METHODS = [
+  { value: "email", label: "E-mail" },
+  { value: "print", label: "Print" },
+  { value: "email_and_print", label: "E-mail + Print" },
+  { value: "portal", label: "Customer Portal" },
+];
 
-  const onlyDigits = (v) => (v || "").replace(/[^\d]/g, "");
-  const clampLen = (v, n) => (v || "").slice(0, n);
-
-  const PAYMENT_TERMS = [
-    { value: "add_new_terms", label: "< Add New >" },
-    { value: "1_10_net_30", label: "1% 10 Net 30" },
-    { value: "2_10_net_30", label: "2% 10 Net 30" },
-    { value: "consignment", label: "Consignment" },
-    { value: "due_on_receipt", label: "Due on receipt" },
-    { value: "net_15", label: "Net 15" },
-    { value: "net_30", label: "Net 30" },
-    { value: "net_33", label: "Net 33" },
-    { value: "net_45", label: "Net 45" },
-    { value: "net_60", label: "Net 60" },
-    { value: "net45_alt", label: "Net45" },
-  ];
-
-  // ✅ Updated preferred payment method options to match screenshot
-  const PREFERRED_PAYMENT_METHODS = [
-    { value: "add_new_pmt", label: "< Add New >" },
-    { value: "cash", label: "Cash" },
-    { value: "check", label: "Check" },
-    { value: "amex", label: "American Express" },
-    { value: "discover", label: "Discover" },
-    { value: "mastercard", label: "MasterCard" },
-    { value: "visa", label: "Visa" },
-    { value: "debit_card", label: "Debit Card" },
-    { value: "gift_card", label: "Gift Card" },
-    { value: "e_check", label: "E-Check" },
-  ];
-
-  const Row = ({ label, children }) => (
+// ✅ Defined OUTSIDE the component — never recreated on render, no focus loss
+function Row({ label, children }) {
+  return (
     <div className="grid grid-cols-[150px_minmax(0,1fr)] items-center gap-2 min-w-0">
       <Label className="text-[11px] text-muted-foreground leading-4 break-words">
         {label}
@@ -84,8 +80,10 @@ export function PaymentSettingsTab(props) {
       <div className="min-w-0">{children}</div>
     </div>
   );
+}
 
-  const Panel = ({ title, children }) => (
+function Panel({ title, children }) {
+  return (
     <div className="min-w-0 border rounded-xl bg-background overflow-hidden">
       <div className="px-3 py-2 border-b bg-muted/10">
         <p className="text-[11px] font-semibold tracking-wide text-muted-foreground">
@@ -95,9 +93,30 @@ export function PaymentSettingsTab(props) {
       <div className="p-3 min-w-0">{children}</div>
     </div>
   );
+}
 
-  const inputCls = "h-8 w-full min-w-0 rounded-xl";
-  const selectCls = "h-8 w-full min-w-0 rounded-xl";
+const inputCls = "h-8 w-full min-w-0 rounded-xl";
+const selectCls = "h-8 w-full min-w-0 rounded-xl";
+const onlyDigits = (v) => (v || "").replace(/[^\d]/g, "");
+const clampLen = (v, n) => (v || "").slice(0, n);
+
+export function PaymentSettingsTab(props) {
+  const data = props.data ?? props.formData?.paymentSettings ?? {};
+  const d = { ...DEFAULTS, ...data };
+
+  const update = (key, value) => {
+    if (props.onDataChange) {
+      props.onDataChange({ ...d, [key]: value });
+      return;
+    }
+    props.setFormData?.((prev) => ({
+      ...prev,
+      paymentSettings: {
+        ...(prev.paymentSettings || {}),
+        [key]: value,
+      },
+    }));
+  };
 
   return (
     <div className="w-full min-w-0">
@@ -115,7 +134,7 @@ export function PaymentSettingsTab(props) {
             <Select
               value={d.paymentTerms}
               onValueChange={(v) => {
-                if (v === "add_new_terms") return; // placeholder behavior
+                if (v === "add_new_terms") return;
                 update("paymentTerms", v);
               }}
             >
@@ -141,10 +160,11 @@ export function PaymentSettingsTab(props) {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="email">E-mail</SelectItem>
-                <SelectItem value="print">Print</SelectItem>
-                <SelectItem value="email_and_print">E-mail + Print</SelectItem>
-                <SelectItem value="portal">Customer Portal</SelectItem>
+                {DELIVERY_METHODS.map((m) => (
+                  <SelectItem key={m.value} value={m.value}>
+                    {m.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </Row>
@@ -153,7 +173,7 @@ export function PaymentSettingsTab(props) {
             <Select
               value={d.preferredPaymentMethod}
               onValueChange={(v) => {
-                if (v === "add_new_pmt") return; // placeholder behavior
+                if (v === "add_new_pmt") return;
                 update("preferredPaymentMethod", v);
               }}
             >
@@ -190,7 +210,11 @@ export function PaymentSettingsTab(props) {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-               
+                {PRICE_LEVELS.map((p) => (
+                  <SelectItem key={p.value} value={p.value}>
+                    {p.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </Row>
@@ -205,7 +229,7 @@ export function PaymentSettingsTab(props) {
                 className={inputCls}
                 value={d.cardNumber}
                 onChange={(e) =>
-                  update("cardNumber", (clampLen(onlyDigits(e.target.value), 19)))
+                  update("cardNumber", clampLen(onlyDigits(e.target.value), 19))
                 }
                 placeholder="•••• •••• •••• ••••"
               />

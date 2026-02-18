@@ -56,7 +56,7 @@ export function CreateCustomerModal({ open, onOpenChange }) {
           }
         `}
       >
-        {/* ===== HEADER (FILLED WITH APP COLOR) ===== */}
+        {/* ===== HEADER ===== */}
         <div
           className={`
             relative flex items-center px-6 py-3
@@ -64,12 +64,10 @@ export function CreateCustomerModal({ open, onOpenChange }) {
             ${isMaximized ? "" : "rounded-t-xl"}
           `}
         >
-          {/* Centered Title */}
           <h3 className="absolute left-1/2 -translate-x-1/2 text-sm font-semibold tracking-wide">
             New Customer
           </h3>
 
-          {/* Window Controls */}
           <div className="ml-auto flex items-center gap-2">
             <button className="size-8 flex items-center justify-center rounded-md hover:bg-white/20 transition">
               <Minus size={14} />
@@ -94,22 +92,20 @@ export function CreateCustomerModal({ open, onOpenChange }) {
         {/* ===== TOP SECTION ===== */}
         <div className="px-8 py-3 border-b">
           <div className="grid grid-cols-12 gap-4 items-end">
-            {/* Customer Name */}
             <div className="col-span-6">
               <Label className="text-xs">Customer Name</Label>
               <Input
                 className="h-8"
                 value={formData.customerName}
                 onChange={(e) =>
-                  setFormData({
-                    ...formData,
+                  setFormData((prev) => ({
+                    ...prev,
                     customerName: e.target.value,
-                  })
+                  }))
                 }
               />
             </div>
 
-            {/* Opening Balance */}
             <div className="col-span-3">
               <Label className="text-xs">Opening Balance</Label>
               <Input
@@ -117,15 +113,14 @@ export function CreateCustomerModal({ open, onOpenChange }) {
                 className="h-8"
                 value={formData.openingBalance}
                 onChange={(e) =>
-                  setFormData({
-                    ...formData,
+                  setFormData((prev) => ({
+                    ...prev,
                     openingBalance: e.target.value,
-                  })
+                  }))
                 }
               />
             </div>
 
-            {/* AS OF Date */}
             <div className="col-span-2">
               <Label className="text-xs">As Of</Label>
               <Input
@@ -133,15 +128,14 @@ export function CreateCustomerModal({ open, onOpenChange }) {
                 className="h-8"
                 value={formData.asOfDate}
                 onChange={(e) =>
-                  setFormData({
-                    ...formData,
+                  setFormData((prev) => ({
+                    ...prev,
                     asOfDate: e.target.value,
-                  })
+                  }))
                 }
               />
             </div>
 
-            {/* Help */}
             <div className="col-span-1 flex items-center">
               <button className="text-xs text-primary hover:underline">
                 Help
@@ -169,36 +163,42 @@ export function CreateCustomerModal({ open, onOpenChange }) {
             ))}
           </div>
 
-          {/* Content */}
+          {/* Content (ALL TABS STAY MOUNTED) */}
           <div className="flex-1 p-6 bg-card overflow-hidden">
-            {activeTab === "address" && (
+            <div
+              className={activeTab === "address" ? "block h-full" : "hidden"}
+            >
               <AddressInfoTab formData={formData} setFormData={setFormData} />
-            )}
+            </div>
 
-            {activeTab === "payment" && (
+            <div
+              className={activeTab === "payment" ? "block h-full" : "hidden"}
+            >
               <PaymentSettingsTab
                 formData={formData}
                 setFormData={setFormData}
               />
-            )}
+            </div>
 
-            {activeTab === "tax" && (
+            <div className={activeTab === "tax" ? "block h-full" : "hidden"}>
               <SalesTaxSettingsTab
                 formData={formData}
                 setFormData={setFormData}
               />
-            )}
+            </div>
 
-            {activeTab === "additional" && (
+            <div
+              className={activeTab === "additional" ? "block h-full" : "hidden"}
+            >
               <AdditionalInfoTab
                 formData={formData}
                 setFormData={setFormData}
               />
-            )}
+            </div>
 
-            {activeTab === "job" && (
+            <div className={activeTab === "job" ? "block h-full" : "hidden"}>
               <JobInfoTab formData={formData} setFormData={setFormData} />
-            )}
+            </div>
           </div>
         </div>
 

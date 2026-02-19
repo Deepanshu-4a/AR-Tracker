@@ -80,29 +80,7 @@ export function CustomerCenter() {
   return (
     <div className="space-y-6">
       {/* KPI ROW */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="p-5">
-          <p className="text-sm text-muted-foreground">Total Customers</p>
-          <p className="text-2xl font-semibold">{customers.length}</p>
-        </Card>
-
-        <Card className="p-5">
-          <p className="text-sm text-muted-foreground">Total AR Balance</p>
-          <p className="text-2xl font-semibold">${totalAR.toLocaleString()}</p>
-        </Card>
-
-        <Card className="p-5">
-          <p className="text-sm text-muted-foreground">Avg Days to Pay</p>
-          <p className="text-2xl font-semibold">{avgDays.toFixed(0)} days</p>
-        </Card>
-
-        <Card className="p-5">
-          <p className="text-sm text-muted-foreground">High Risk Customers</p>
-          <p className="text-2xl font-semibold">
-            {customers.filter((c) => c.risk === "High").length}
-          </p>
-        </Card>
-      </div>
+      
 
       {/* TOOLBAR */}
       <Card className="p-4">

@@ -15,7 +15,7 @@ import { Menu } from "lucide-react";
 import ActionQueuePage from "./components/dashboard/ActionQueuePage";
 function App() {
   const [activeTab, setActiveTab] = useState("home");
-
+  
   // 🧠 NEW STATES
   const [sidebarOpen, setSidebarOpen] = useState(true); // mobile
   const [collapsed, setCollapsed] = useState(false); // desktop icon mode

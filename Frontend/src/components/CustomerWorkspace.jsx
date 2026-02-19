@@ -1,17 +1,33 @@
+// ==============================
+// CustomerWorkspace.jsx
+// ==============================
 import { useState } from "react";
 import { CustomerCenter } from "./CustomerCenter";
-
+import { InvoiceDetail } from "./InvoiceDetail";
 
 const CUSTOMER_TABS = [
   {
     id: "center",
     label: "Customer Center",
     Component: CustomerCenter,
-  }
+  },
 ];
 
 export function CustomerWorkspace() {
   const [activeTab, setActiveTab] = useState("center");
+  const [activeInvoiceId, setActiveInvoiceId] = useState(null);
+
+  // Workspace-level routing (same idea as RevenueWorkspace)
+  if (activeTab === "invoice-detail") {
+    return (
+      <div className="p-6">
+        <InvoiceDetail
+          invoiceId={activeInvoiceId}
+          onBack={() => setActiveTab("center")}
+        />
+      </div>
+    );
+  }
 
   const ActiveComponent =
     CUSTOMER_TABS.find((t) => t.id === activeTab)?.Component ?? CustomerCenter;
@@ -42,7 +58,12 @@ export function CustomerWorkspace() {
       </div>
 
       {/* Active Tab Content */}
-      <ActiveComponent />
+      <ActiveComponent
+        onViewInvoice={(invoiceId) => {
+          setActiveInvoiceId(invoiceId);
+          setActiveTab("invoice-detail");
+        }}
+      />
     </div>
   );
 }

@@ -1,4 +1,7 @@
-import { useState, useMemo } from "react";
+// ==============================
+// CustomerCenter.jsx (UPDATED)
+// ==============================
+import { useMemo, useState } from "react";
 import { Card } from "./ui/card";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
@@ -7,13 +10,14 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "./ui/tabs";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import { Search01Icon as Search } from "hugeicons-react";
 import { Users, Plus, Download, FileText } from "lucide-react";
-
-import { CreateCustomerModal } from "./customers/CreateCustomerModal";
 import { CreateEstimateModal } from "./CreateEstimateModal";
 import { CustomerOverview } from "./CustomerOverview";
 import { RightSidePanel } from "./shared/RightSidePanel";
+import { CustomerPayments } from "./CustomerPayments"; // <-- new import
+import { CreateCustomerModal } from "./customers/CreateCustomerModal";
+import { CustomerInvoices } from "./CustomerInvoices"; // <-- adjust path if needed
 
-export function CustomerCenter() {
+export function CustomerCenter({ onViewInvoice }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -55,7 +59,7 @@ export function CustomerCenter() {
     return customers.filter((c) =>
       c.name.toLowerCase().includes(searchTerm.toLowerCase()),
     );
-  }, [searchTerm]);
+  }, [searchTerm, customers]);
 
   const getRiskColor = (risk) => {
     if (risk === "High") return "bg-red-100 text-red-700";
@@ -135,9 +139,7 @@ export function CustomerCenter() {
               >
                 <div className="flex items-center gap-3">
                   <Avatar>
-                    <AvatarFallback>
-                      {getInitials(customer.name)}
-                    </AvatarFallback>
+                    <AvatarFallback>{getInitials(customer.name)}</AvatarFallback>
                   </Avatar>
 
                   <div className="flex-1">
@@ -163,7 +165,7 @@ export function CustomerCenter() {
               <TabsList className="mb-4">
                 <TabsTrigger value="overview">Overview</TabsTrigger>
                 <TabsTrigger value="invoices">Invoices</TabsTrigger>
-                <TabsTrigger value="payments">Payments</TabsTrigger>
+                <TabsTrigger value="payments">Payment History</TabsTrigger>
                 <TabsTrigger value="billing">Billing Profile</TabsTrigger>
               </TabsList>
 
@@ -171,14 +173,21 @@ export function CustomerCenter() {
                 <CustomerOverview customer={selectedCustomer} />
               </TabsContent>
 
+              {/*  UPDATED: invoices tab now routes to InvoiceDetail via onViewInvoice */}
               <TabsContent value="invoices">
-                <p>Invoice history will go here.</p>
+                <CustomerInvoices
+                  customerId={selectedCustomer.id}
+                  customerName={selectedCustomer.name}
+                  onViewInvoice={onViewInvoice}
+                />
               </TabsContent>
 
-              <TabsContent value="payments">
-                <p>Payment history will go here.</p>
-              </TabsContent>
-
+             <TabsContent value="payments">
+  <CustomerPayments
+    customerId={selectedCustomer.id}
+    customerName={selectedCustomer.name}
+  />
+</TabsContent>
               <TabsContent value="billing">
                 <p>Billing profile settings here.</p>
               </TabsContent>
@@ -198,7 +207,7 @@ export function CustomerCenter() {
       {/* CREATE CUSTOMER MODAL */}
       <CreateCustomerModal open={isCreateOpen} onOpenChange={setIsCreateOpen} />
 
-      {/* ✅ ESTIMATE MODAL */}
+     
       <CreateEstimateModal
         open={isEstimateOpen}
         onOpenChange={setIsEstimateOpen}

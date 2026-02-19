@@ -39,7 +39,7 @@ export function RightSidePanel({ customer, invoice, balanceDue, total }) {
 
   /* ================= EXPANDED ================= */
   return (
-    <div className="w-96 flex-shrink-0">
+    <div className="w-76 flex-shrink-0">
       <div className="sticky top-6 h-[calc(100vh-3rem)]">
         <div className="bg-card border border-border/60 rounded-2xl shadow-lg h-full flex flex-col overflow-hidden">
           {/* HEADER */}

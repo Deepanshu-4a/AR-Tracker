@@ -3,27 +3,24 @@ import { Card } from "./ui/card";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
-import {
-  Table,
-  TableHeader,
-  TableRow,
-  TableHead,
-  TableBody,
-  TableCell,
-} from "./ui/table";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "./ui/tabs";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import { Search01Icon as Search } from "hugeicons-react";
-import { Users, Plus, Download } from "lucide-react";
+import { Users, Plus, Download, FileText } from "lucide-react";
 
 import { CreateCustomerModal } from "./customers/CreateCustomerModal";
+import { CreateEstimateModal } from "./CreateEstimateModal";
+import { CustomerOverview } from "./CustomerOverview";
+import { RightSidePanel } from "./shared/RightSidePanel";
 
 export function CustomerCenter() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [isEstimateOpen, setIsEstimateOpen] = useState(false);
 
-  // Mock Data
+  /* ================= MOCK DATA ================= */
+
   const customers = [
     {
       id: "CL001",
@@ -60,10 +57,6 @@ export function CustomerCenter() {
     );
   }, [searchTerm]);
 
-  const totalAR = customers.reduce((s, c) => s + c.arBalance, 0);
-  const avgDays =
-    customers.reduce((s, c) => s + c.avgDaysToPay, 0) / customers.length;
-
   const getRiskColor = (risk) => {
     if (risk === "High") return "bg-red-100 text-red-700";
     if (risk === "Medium") return "bg-yellow-100 text-yellow-700";
@@ -77,11 +70,10 @@ export function CustomerCenter() {
       .join("")
       .toUpperCase();
 
+  /* ================= UI ================= */
+
   return (
     <div className="space-y-6">
-      {/* KPI ROW */}
-      
-
       {/* TOOLBAR */}
       <Card className="p-4">
         <div className="flex items-center justify-between gap-4">
@@ -96,6 +88,16 @@ export function CustomerCenter() {
           </div>
 
           <div className="flex items-center gap-2">
+            {/* ✅ NEW CREATE ESTIMATE BUTTON */}
+            <Button
+              variant="outline"
+              disabled={!selectedCustomer}
+              onClick={() => setIsEstimateOpen(true)}
+            >
+              <FileText className="w-4 h-4 mr-2" />
+              Create Estimate
+            </Button>
+
             <Button
               className="bg-orange-500 hover:bg-orange-600"
               onClick={() => setIsCreateOpen(true)}
@@ -113,9 +115,9 @@ export function CustomerCenter() {
       </Card>
 
       {/* MAIN LAYOUT */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* CUSTOMER LIST */}
-        <Card className="p-4 lg:col-span-1">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_2fr_1fr] gap-6">
+        {/* ================= CUSTOMER LIST ================= */}
+        <Card className="p-4">
           <h2 className="mb-4 font-semibold">
             Customers ({filteredCustomers.length})
           </h2>
@@ -154,8 +156,8 @@ export function CustomerCenter() {
           </div>
         </Card>
 
-        {/* CUSTOMER PROFILE PANEL */}
-        <Card className="p-6 lg:col-span-2">
+        {/* ================= CUSTOMER PROFILE ================= */}
+        <Card className="p-6">
           {selectedCustomer ? (
             <Tabs defaultValue="overview">
               <TabsList className="mb-4">
@@ -166,33 +168,7 @@ export function CustomerCenter() {
               </TabsList>
 
               <TabsContent value="overview">
-                <h3 className="text-lg font-semibold">
-                  {selectedCustomer.name}
-                </h3>
-                <p className="text-muted-foreground">
-                  {selectedCustomer.email}
-                </p>
-                <p className="text-muted-foreground">
-                  {selectedCustomer.phone}
-                </p>
-
-                <div className="mt-4 grid grid-cols-2 gap-4">
-                  <Card className="p-4">
-                    <p className="text-sm text-muted-foreground">AR Balance</p>
-                    <p className="text-xl font-semibold">
-                      ${selectedCustomer.arBalance.toLocaleString()}
-                    </p>
-                  </Card>
-
-                  <Card className="p-4">
-                    <p className="text-sm text-muted-foreground">
-                      Avg Days to Pay
-                    </p>
-                    <p className="text-xl font-semibold">
-                      {selectedCustomer.avgDaysToPay} days
-                    </p>
-                  </Card>
-                </div>
+                <CustomerOverview customer={selectedCustomer} />
               </TabsContent>
 
               <TabsContent value="invoices">
@@ -214,10 +190,20 @@ export function CustomerCenter() {
             </div>
           )}
         </Card>
+
+        {/* ================= RIGHT SIDE PANEL ================= */}
+        <RightSidePanel customer={selectedCustomer} />
       </div>
 
-      {/* ✅ CREATE CUSTOMER MODAL */}
+      {/* CREATE CUSTOMER MODAL */}
       <CreateCustomerModal open={isCreateOpen} onOpenChange={setIsCreateOpen} />
+
+      {/* ✅ ESTIMATE MODAL */}
+      <CreateEstimateModal
+        open={isEstimateOpen}
+        onOpenChange={setIsEstimateOpen}
+        customer={selectedCustomer}
+      />
     </div>
   );
 }

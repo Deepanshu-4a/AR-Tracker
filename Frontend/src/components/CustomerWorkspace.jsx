@@ -4,6 +4,9 @@
 import { useState } from "react";
 import { CustomerCenter } from "./CustomerCenter";
 import { InvoiceDetail } from "./InvoiceDetail";
+import { CustomerRegistry } from "./CustomerRegistry";
+
+
 
 const CUSTOMER_TABS = [
   {
@@ -11,6 +14,11 @@ const CUSTOMER_TABS = [
     label: "Customer Center",
     Component: CustomerCenter,
   },
+  {
+    id: "registry",
+    label : "Customer Registry",
+    Component : CustomerRegistry,
+  }
 ];
 
 export function CustomerWorkspace() {

@@ -15,10 +15,8 @@ import { CustomerOverview } from "./CustomerOverview";
 import { RightSidePanel } from "./shared/RightSidePanel";
 import { CustomerPayments } from "./CustomerPayments";
 import { CreateCustomerModal } from "./customers/CreateCustomerModal";
-import { CustomerInvoices } from "./CustomerInvoices";
-import { CustomerBillingRules } from "./CustomerBillingProfile";
-
-import { CustomerRegistry } from "./CustomerRegistry";
+import { CustomerInvoices } from "./CustomerInvoices"; // <-- adjust path if needed
+import { CustomerBillingRules } from "./CustomerBillingRules";
 
 export function CustomerCenter({ onViewInvoice }) {
   const [searchTerm, setSearchTerm] = useState("");
@@ -208,11 +206,6 @@ export function CustomerCenter({ onViewInvoice }) {
 
               <TabsContent value="billing">
                 <CustomerBillingRules customer={selectedCustomer} />
-              </TabsContent>
-
-              {/* ✅ NEW CONTENT */}
-              <TabsContent value="registry">
-                <CustomerRegistry customers={customers} />
               </TabsContent>
             </Tabs>
           ) : (

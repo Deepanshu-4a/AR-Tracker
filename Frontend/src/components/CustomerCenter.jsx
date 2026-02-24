@@ -90,7 +90,6 @@ import { CustomerPayments } from "./CustomerPayments";
 import { CreateCustomerModal } from "./customers/CreateCustomerModal";
 import { CustomerInvoices } from "./CustomerInvoices";
 
-
 import { CustomerRegistry } from "./CustomerRegistry";
 
 export function CustomerCenter({ onViewInvoice }) {
@@ -281,6 +280,11 @@ export function CustomerCenter({ onViewInvoice }) {
 
               <TabsContent value="billing">
                 <CustomerBillingProfile customer={selectedCustomer} />
+              </TabsContent>
+
+              {/* ✅ NEW CONTENT */}
+              <TabsContent value="registry">
+                <CustomerRegistry customers={customers} />
               </TabsContent>
 
               {/* ✅ NEW CONTENT */}

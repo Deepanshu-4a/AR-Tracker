@@ -212,7 +212,10 @@ const FROZEN_LEFT = {
 
 const PAGE_SIZE = 10;
 
-export function CustomerRegistry({ customers: propCustomers }) {
+export function CustomerRegistry({
+  customers: propCustomers,
+  onSelectCustomer,
+}) {
   // ✅ bring CustomerCenter toolbar features in here (search + create)
   const [searchTerm, setSearchTerm] = useState("");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -236,8 +239,10 @@ export function CustomerRegistry({ customers: propCustomers }) {
 
   // ✅ Apply filters (kept as-is)
   const filteredRows = useMemo(() => {
-    if (activeFilter === "with") return baseRows.filter((r) => (r.placements ?? 0) > 0);
-    if (activeFilter === "without") return baseRows.filter((r) => (r.placements ?? 0) === 0);
+    if (activeFilter === "with")
+      return baseRows.filter((r) => (r.placements ?? 0) > 0);
+    if (activeFilter === "without")
+      return baseRows.filter((r) => (r.placements ?? 0) === 0);
     return baseRows;
   }, [baseRows, activeFilter]);
 
@@ -320,9 +325,13 @@ export function CustomerRegistry({ customers: propCustomers }) {
     left: frozen ? left : undefined,
     zIndex: frozen ? 30 : 2,
     background: "#f4f7fb",
-    minWidth: w, maxWidth: w, width: w,
+    minWidth: w,
+    maxWidth: w,
+    width: w,
     padding: "11px 12px",
-    fontSize: 12, fontWeight: 600, color: "#64748b",
+    fontSize: 12,
+    fontWeight: 600,
+    color: "#64748b",
     textAlign: "left",
     whiteSpace: "nowrap",
     borderBottom: "2px solid #e2e8f0",
@@ -336,7 +345,9 @@ export function CustomerRegistry({ customers: propCustomers }) {
     left: frozen ? left : undefined,
     zIndex: frozen ? 20 : 1,
     background: frozen ? rowBg : "inherit",
-    minWidth: w, maxWidth: w, width: w,
+    minWidth: w,
+    maxWidth: w,
+    width: w,
     padding: "10px 12px",
     borderBottom: "1px solid #eef2f7",
     borderRight: isLastFrozen ? "none" : "1px solid #eef2f7",
@@ -419,33 +430,31 @@ export function CustomerRegistry({ customers: propCustomers }) {
       `}</style>
 
       <div className="space-y-3">
-       <div className=" w-[46%]">
-      <Card className="p-4">
-  <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-    <div className="relative w-full lg:max-w-md">
-      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-      <Input
-        placeholder="Search customers..."
-        className="pl-10 h-10 w-full"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-      />
-    </div>
+        <div className=" w-[46%]">
+          <Card className="p-4">
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+              <div className="relative w-full lg:max-w-md">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search customers..."
+                  className="pl-10 h-10 w-full"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
 
-    <div className="flex items-center gap-2 flex-wrap justify-end">
-      <Button
-        className="bg-orange-500 hover:bg-orange-600"
-        onClick={() => setIsCreateOpen(true)}
-      >
-        <Plus className="w-4 h-4 mr-2" />
-        New Customer
-      </Button>
-
-      
-    </div>
-  </div>
-</Card>
-</div>
+              <div className="flex items-center gap-2 flex-wrap justify-end">
+                <Button
+                  className="bg-orange-500 hover:bg-orange-600"
+                  onClick={() => setIsCreateOpen(true)}
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  New Customer
+                </Button>
+              </div>
+            </div>
+          </Card>
+        </div>
         {/* ✅ REGISTRY TABLE (your existing registry, unchanged) */}
         <div
           style={{
@@ -486,10 +495,16 @@ export function CustomerRegistry({ customers: propCustomers }) {
             >
               <thead>
                 <tr>
-                  <th style={th(true, FROZEN_W.name, FROZEN_LEFT.name)}>Business Name <FilterIcon /></th>
-                  <th style={th(true, FROZEN_W.id, FROZEN_LEFT.id)}>Client ID <FilterIcon /></th>
+                  <th style={th(true, FROZEN_W.name, FROZEN_LEFT.name)}>
+                    Business Name <FilterIcon />
+                  </th>
+                  <th style={th(true, FROZEN_W.id, FROZEN_LEFT.id)}>
+                    Client ID <FilterIcon />
+                  </th>
                   <th style={th(true, FROZEN_W.menu, FROZEN_LEFT.menu)}></th>
-                  <th style={th(true, FROZEN_W.email, FROZEN_LEFT.email, true)}>Email <FilterIcon /></th>
+                  <th style={th(true, FROZEN_W.email, FROZEN_LEFT.email, true)}>
+                    Email <FilterIcon />
+                  </th>
 
                   {SCROLL_COLS.map((c) => (
                     <th key={c.key} style={th(false, c.w)}>
@@ -505,31 +520,72 @@ export function CustomerRegistry({ customers: propCustomers }) {
                   const rowBg = absoluteIndex % 2 === 0 ? "#fff" : "#f9fafb";
 
                   return (
-                    <tr key={r.id} className="cr-row" style={{ background: rowBg }}>
+                    <tr
+                      key={r.id}
+                      className="cr-row cursor-pointer"
+                      style={{ background: rowBg }}
+                      onClick={() => onSelectCustomer?.(r)}
+                    >
                       <td
-                        style={td(true, FROZEN_W.name, FROZEN_LEFT.name, rowBg, {
-                          fontSize: 13,
-                          fontWeight: 600,
-                          color: "#475569",
-                          letterSpacing: "-0.01em",
-                        })}
+                        style={td(
+                          true,
+                          FROZEN_W.name,
+                          FROZEN_LEFT.name,
+                          rowBg,
+                          {
+                            fontSize: 13,
+                            fontWeight: 600,
+                            color: "#475569",
+                            letterSpacing: "-0.01em",
+                          },
+                        )}
                         title={r.name}
                       >
                         {r.name}
                       </td>
 
-                      <td style={td(true, FROZEN_W.id, FROZEN_LEFT.id, rowBg, { fontSize: 13, color: "#374151" })}>
+                      <td
+                        style={td(true, FROZEN_W.id, FROZEN_LEFT.id, rowBg, {
+                          fontSize: 13,
+                          color: "#374151",
+                        })}
+                      >
                         {r.id}
                       </td>
 
-                      <td style={td(true, FROZEN_W.menu, FROZEN_LEFT.menu, rowBg, { padding: "0 4px" })}>
-                        <button style={{ background:"none", border:"none", cursor:"pointer", color:"#94a3b8", fontSize:18, padding:"0 4px", lineHeight:1 }}>
+                      <td
+                        style={td(
+                          true,
+                          FROZEN_W.menu,
+                          FROZEN_LEFT.menu,
+                          rowBg,
+                          { padding: "0 4px" },
+                        )}
+                      >
+                        <button
+                          style={{
+                            background: "none",
+                            border: "none",
+                            cursor: "pointer",
+                            color: "#94a3b8",
+                            fontSize: 18,
+                            padding: "0 4px",
+                            lineHeight: 1,
+                          }}
+                        >
                           ⋮
                         </button>
                       </td>
 
                       <td
-                        style={td(true, FROZEN_W.email, FROZEN_LEFT.email, rowBg, { fontSize: 13, color: "#374151" }, true)}
+                        style={td(
+                          true,
+                          FROZEN_W.email,
+                          FROZEN_LEFT.email,
+                          rowBg,
+                          { fontSize: 13, color: "#374151" },
+                          true,
+                        )}
                         title={r.email}
                       >
                         {r.email}
@@ -540,25 +596,36 @@ export function CustomerRegistry({ customers: propCustomers }) {
 
                         if (c.key === "status") {
                           content = (
-                            <span style={{
-                              display:"inline-flex",
-                              alignItems:"center",
-                              padding:"2px 9px",
-                              borderRadius:20,
-                              fontSize:11,
-                              fontWeight:500,
-                              background: r.status === "Active" ? "#dcfce7" : "#fee2e2",
-                              color: r.status === "Active" ? "#16a34a" : "#dc2626",
-                            }}>
+                            <span
+                              style={{
+                                display: "inline-flex",
+                                alignItems: "center",
+                                padding: "2px 9px",
+                                borderRadius: 20,
+                                fontSize: 11,
+                                fontWeight: 500,
+                                background:
+                                  r.status === "Active" ? "#dcfce7" : "#fee2e2",
+                                color:
+                                  r.status === "Active" ? "#16a34a" : "#dc2626",
+                              }}
+                            >
                               {r.status}
                             </span>
                           );
                         }
 
-                        if (c.key === "placements") content = <PlacementIcon count={r.placements} />;
+                        if (c.key === "placements")
+                          content = <PlacementIcon count={r.placements} />;
 
                         return (
-                          <td key={c.key} style={td(false, c.w, undefined, rowBg, { fontSize: 13, color: "#374151" })}>
+                          <td
+                            key={c.key}
+                            style={td(false, c.w, undefined, rowBg, {
+                              fontSize: 13,
+                              color: "#374151",
+                            })}
+                          >
                             {content}
                           </td>
                         );
@@ -571,7 +638,13 @@ export function CustomerRegistry({ customers: propCustomers }) {
           </div>
 
           {/* slider */}
-          <div style={{ padding: "8px 16px 5px", borderTop: "1px solid #e8edf3", background: "#f4f7fb" }}>
+          <div
+            style={{
+              padding: "8px 16px 5px",
+              borderTop: "1px solid #e8edf3",
+              background: "#f4f7fb",
+            }}
+          >
             <input
               ref={sliderRef}
               type="range"
@@ -599,12 +672,25 @@ export function CustomerRegistry({ customers: propCustomers }) {
             }}
           >
             <span>
-              {totalRows === 0 ? "0–0" : `${startIdx + 1}–${endIdx}`} of {totalRows}
+              {totalRows === 0 ? "0–0" : `${startIdx + 1}–${endIdx}`} of{" "}
+              {totalRows}
             </span>
 
             <div style={{ display: "flex", gap: 3, alignItems: "center" }}>
-              <button onClick={goFirst} disabled={page === 1} style={pagerBtn(page === 1)}>«</button>
-              <button onClick={goPrev}  disabled={page === 1} style={pagerBtn(page === 1)}>‹</button>
+              <button
+                onClick={goFirst}
+                disabled={page === 1}
+                style={pagerBtn(page === 1)}
+              >
+                «
+              </button>
+              <button
+                onClick={goPrev}
+                disabled={page === 1}
+                style={pagerBtn(page === 1)}
+              >
+                ‹
+              </button>
 
               {getPageButtons(page, totalPages).map((p) => (
                 <button
@@ -621,11 +707,21 @@ export function CustomerRegistry({ customers: propCustomers }) {
                 </button>
               ))}
 
-              <button onClick={goNext} disabled={page === totalPages} style={pagerBtn(page === totalPages)}>›</button>
-              <button onClick={goLast} disabled={page === totalPages} style={pagerBtn(page === totalPages)}>»</button>
+              <button
+                onClick={goNext}
+                disabled={page === totalPages}
+                style={pagerBtn(page === totalPages)}
+              >
+                ›
+              </button>
+              <button
+                onClick={goLast}
+                disabled={page === totalPages}
+                style={pagerBtn(page === totalPages)}
+              >
+                »
+              </button>
             </div>
-
-            <span style={{ fontSize: 11 }}>Copyright © 2012–2026 CEIPAL · WF Ver18.92</span>
           </div>
         </div>
       </div>

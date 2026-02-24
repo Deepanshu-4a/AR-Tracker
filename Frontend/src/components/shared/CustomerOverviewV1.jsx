@@ -4,24 +4,28 @@ import { cn } from "../ui/utils";
 export function CustomerOverviewV1({ customer }) {
   if (!customer) return null;
 
+  // 🔒 Normalize numeric values safely
+  const arBalance = Number(customer?.arBalance ?? 0);
+  const avgDaysToPay = Number(customer?.avgDaysToPay ?? 0);
+
   const creditLimit = 500000;
   const openInvoices = 14;
   const lastPayment = 24000;
   const oldestInvoiceDays = 67;
   const disputes = 2;
 
-  const overdue = Math.floor(customer.arBalance * 0.28);
-  const current = Math.max(0, customer.arBalance - overdue);
+  const overdue = Math.floor(arBalance * 0.28);
+  const current = Math.max(0, arBalance - overdue);
 
-  const utilization = creditLimit ? customer.arBalance / creditLimit : 0;
+  const utilization = creditLimit ? arBalance / creditLimit : 0;
   const utilizationPct = Math.min(100, Math.round(utilization * 100));
-  const availableCredit = Math.max(0, creditLimit - customer.arBalance);
+  const availableCredit = Math.max(0, creditLimit - arBalance);
 
   const riskScore = Math.min(
     100,
     Math.round(
-      (customer.arBalance ? overdue / customer.arBalance : 0) * 40 +
-        (customer.avgDaysToPay / 90) * 40 +
+      (arBalance ? overdue / arBalance : 0) * 40 +
+        (avgDaysToPay / 90) * 40 +
         utilization * 20,
     ),
   );
@@ -46,9 +50,7 @@ export function CustomerOverviewV1({ customer }) {
     d90: Math.floor(overdue * 0.2),
   };
 
-  const overduePct = customer.arBalance
-    ? Math.round((overdue / customer.arBalance) * 100)
-    : 0;
+  const overduePct = arBalance ? Math.round((overdue / arBalance) * 100) : 0;
 
   return (
     <div className="space-y-5">
@@ -74,7 +76,7 @@ export function CustomerOverviewV1({ customer }) {
         <div className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
           <KpiTile
             label="AR Balance"
-            value={`$${customer.arBalance.toLocaleString()}`}
+            value={`$${arBalance.toLocaleString()}`}
           />
           <KpiTile
             label="Available Credit"
@@ -101,10 +103,7 @@ export function CustomerOverviewV1({ customer }) {
               label="Credit Limit"
               value={`$${creditLimit.toLocaleString()}`}
             />
-            <DataTile
-              label="Avg Days To Pay"
-              value={`${customer.avgDaysToPay}d`}
-            />
+            <DataTile label="Avg Days To Pay" value={`${avgDaysToPay}d`} />
             <DataTile label="Disputes" value={`${disputes}`} />
           </div>
 
@@ -163,28 +162,15 @@ export function CustomerOverviewV1({ customer }) {
       <section className="rounded-xl border border-border bg-card p-5">
         <SectionTitle title="Aging Breakdown" />
 
-        {/* FIXED FLEX BAR */}
         <div className="mt-4 h-4 w-full overflow-hidden rounded-full bg-muted/60 flex">
           <Segment
             value={aging.current}
-            total={customer.arBalance}
+            total={arBalance}
             color="bg-emerald-500"
           />
-          <Segment
-            value={aging.d30}
-            total={customer.arBalance}
-            color="bg-amber-400"
-          />
-          <Segment
-            value={aging.d60}
-            total={customer.arBalance}
-            color="bg-orange-500"
-          />
-          <Segment
-            value={aging.d90}
-            total={customer.arBalance}
-            color="bg-red-500"
-          />
+          <Segment value={aging.d30} total={arBalance} color="bg-amber-400" />
+          <Segment value={aging.d60} total={arBalance} color="bg-orange-500" />
+          <Segment value={aging.d90} total={arBalance} color="bg-red-500" />
         </div>
 
         <div className="mt-4 grid grid-cols-2 gap-4 text-sm md:grid-cols-4">
@@ -241,9 +227,7 @@ function SignalRow({ label, value, alert }) {
 
 function Segment({ value, total, color }) {
   const width = total ? (value / total) * 100 : 0;
-
   if (width <= 0) return null;
-
   return <div className={cn("h-full", color)} style={{ width: `${width}%` }} />;
 }
 
@@ -252,7 +236,7 @@ function Legend({ label, value, alert }) {
     <div>
       <p className="text-xs text-muted-foreground">{label}</p>
       <p className={cn("font-medium", alert && "text-red-700")}>
-        ${value.toLocaleString()}
+        ${Number(value ?? 0).toLocaleString()}
       </p>
     </div>
   );

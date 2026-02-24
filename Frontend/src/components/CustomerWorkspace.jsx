@@ -1,7 +1,3 @@
-// ==============================
-// CustomerWorkspace.jsx
-// ==============================
-
 import { useState } from "react";
 import { CustomerCenter } from "./CustomerCenter";
 import { InvoiceDetail } from "./InvoiceDetail";
@@ -9,16 +5,8 @@ import { CustomerRegistry } from "./CustomerRegistry";
 import { CustomerDetail } from "./CustomerDetail";
 
 const CUSTOMER_TABS = [
-  {
-    id: "center",
-    label: "Customer Center",
-    Component: CustomerCenter,
-  },
-  {
-    id: "registry",
-    label: "Customer Registry",
-    Component: CustomerRegistry,
-  },
+  { id: "center", label: "Customer Center" },
+  { id: "registry", label: "Customer Registry" },
 ];
 
 export function CustomerWorkspace() {
@@ -27,9 +15,9 @@ export function CustomerWorkspace() {
   const [activeCustomer, setActiveCustomer] = useState(null);
 
   // -----------------------------
-  // Customer Detail View
+  // CUSTOMER DETAIL VIEW
   // -----------------------------
-  if (activeTab === "customer-detail") {
+  if (activeTab === "customer-detail" && activeCustomer) {
     return (
       <div className="px-10 py-8">
         <CustomerDetail
@@ -45,22 +33,22 @@ export function CustomerWorkspace() {
   }
 
   // -----------------------------
-  // Invoice Detail View
+  // INVOICE DETAIL VIEW
   // -----------------------------
-  if (activeTab === "invoice-detail") {
+  if (activeTab === "invoice-detail" && activeInvoiceId) {
     return (
       <div className="p-6">
         <InvoiceDetail
           invoiceId={activeInvoiceId}
-          onBack={() => setActiveTab("center")}
+          onBack={() => setActiveTab("customer-detail")}
         />
       </div>
     );
   }
 
-  const ActiveComponent =
-    CUSTOMER_TABS.find((t) => t.id === activeTab)?.Component ?? CustomerCenter;
-
+  // -----------------------------
+  // NORMAL TAB VIEWS
+  // -----------------------------
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
@@ -86,17 +74,24 @@ export function CustomerWorkspace() {
         </div>
       </div>
 
-      {/* Active Tab Content */}
-      <ActiveComponent
-        onViewInvoice={(invoiceId) => {
-          setActiveInvoiceId(invoiceId);
-          setActiveTab("invoice-detail");
-        }}
-        onViewCustomer={(customer) => {
-          setActiveCustomer(customer); // ✅ store full object
-          setActiveTab("customer-detail");
-        }}
-      />
+      {/* Content */}
+      {activeTab === "center" && (
+        <CustomerCenter
+          onViewCustomer={(customer) => {
+            setActiveCustomer(customer);
+            setActiveTab("customer-detail");
+          }}
+        />
+      )}
+
+      {activeTab === "registry" && (
+        <CustomerRegistry
+          onSelectCustomer={(customer) => {
+            setActiveCustomer(customer);
+            setActiveTab("customer-detail");
+          }}
+        />
+      )}
     </div>
   );
 }

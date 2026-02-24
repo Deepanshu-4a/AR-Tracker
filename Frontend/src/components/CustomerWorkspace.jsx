@@ -1,12 +1,12 @@
 // ==============================
 // CustomerWorkspace.jsx
 // ==============================
+
 import { useState } from "react";
 import { CustomerCenter } from "./CustomerCenter";
 import { InvoiceDetail } from "./InvoiceDetail";
 import { CustomerRegistry } from "./CustomerRegistry";
-
-
+import { CustomerDetail } from "./CustomerDetail";
 
 const CUSTOMER_TABS = [
   {
@@ -16,16 +16,37 @@ const CUSTOMER_TABS = [
   },
   {
     id: "registry",
-    label : "Customer Registry",
-    Component : CustomerRegistry,
-  }
+    label: "Customer Registry",
+    Component: CustomerRegistry,
+  },
 ];
 
 export function CustomerWorkspace() {
   const [activeTab, setActiveTab] = useState("center");
   const [activeInvoiceId, setActiveInvoiceId] = useState(null);
+  const [activeCustomer, setActiveCustomer] = useState(null);
 
-  // Workspace-level routing (same idea as RevenueWorkspace)
+  // -----------------------------
+  // Customer Detail View
+  // -----------------------------
+  if (activeTab === "customer-detail") {
+    return (
+      <div className="px-10 py-8">
+        <CustomerDetail
+          customer={activeCustomer}
+          onBack={() => setActiveTab("registry")}
+          onViewInvoice={(invoiceId) => {
+            setActiveInvoiceId(invoiceId);
+            setActiveTab("invoice-detail");
+          }}
+        />
+      </div>
+    );
+  }
+
+  // -----------------------------
+  // Invoice Detail View
+  // -----------------------------
   if (activeTab === "invoice-detail") {
     return (
       <div className="p-6">
@@ -70,6 +91,10 @@ export function CustomerWorkspace() {
         onViewInvoice={(invoiceId) => {
           setActiveInvoiceId(invoiceId);
           setActiveTab("invoice-detail");
+        }}
+        onViewCustomer={(customer) => {
+          setActiveCustomer(customer); // ✅ store full object
+          setActiveTab("customer-detail");
         }}
       />
     </div>

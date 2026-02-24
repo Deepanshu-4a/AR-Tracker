@@ -45,14 +45,14 @@ export function Sidebar({
       <button
         key={item.id}
         onClick={() => setActiveTab(item.id)}
-        className={`group w-full flex items-center ${
-          collapsed ? "justify-center px-0" : "gap-3 px-4"
-        } py-2 rounded-lg transition-all
-        ${
-          isActive
-            ? "bg-orange-50 text-orange-600"
-            : "text-slate-600 hover:bg-slate-100"
-        }`}
+        className={`group w-full flex items-center
+          ${collapsed ? "justify-center px-0" : "gap-3 px-3"}
+          py-2 rounded-lg transition-all
+          ${
+            isActive
+              ? "bg-orange-50 text-orange-600"
+              : "text-slate-600 hover:bg-slate-100"
+          }`}
       >
         <Icon className="w-5 h-5 shrink-0" />
         {!collapsed && (
@@ -74,25 +74,26 @@ export function Sidebar({
 
       {/* Sidebar */}
       <aside
-        className={`fixed md:relative z-50 h-full bg-white border-r 
-        transition-all duration-300 ease-in-out flex flex-col
-        ${
-          sidebarOpen
-            ? collapsed
-              ? "w-20"
-              : "w-64"
-            : "w-0 -translate-x-full md:translate-x-0"
-        }`}
+        className={`
+          fixed md:relative z-50 h-full bg-white border-r
+          transition-all duration-300 ease-in-out flex flex-col
+          ${collapsed ? "w-[72px]" : "w-[224px]"}
+          ${
+            sidebarOpen
+              ? "translate-x-0"
+              : " -translate-x-full md:translate-x-0"
+          }
+        `}
       >
         {/* Header */}
         <div
-          className={`h-16 flex items-center ${
-            collapsed ? "justify-center" : "justify-between px-5"
-          }`}
+          className={`h-16 flex items-center border-b
+            ${collapsed ? "justify-center" : "justify-between px-4"}
+          `}
         >
           {!collapsed && (
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 flex items-center justify-center shrink-0">
+              <div className="w-8 h-8 flex items-center justify-center shrink-0">
                 <Frame771012_63_612 />
               </div>
 
@@ -123,19 +124,20 @@ export function Sidebar({
         {/* Navigation */}
         <nav
           className={`flex-1 ${
-            collapsed ? "px-2" : "px-3"
+            collapsed ? "px-2" : "px-2.5"
           } py-6 space-y-1 overflow-y-auto`}
         >
           {navItems.map(renderItem)}
         </nav>
 
         {/* Footer */}
-        <div className="p-4 border-t">
+        <div className="p-3 border-t">
           <button
             onClick={onLogout}
-            className={`w-full flex items-center ${
-              collapsed ? "justify-center px-0" : "gap-3 px-3"
-            } py-2 rounded-lg hover:bg-slate-100 text-slate-600 transition-colors`}
+            className={`w-full flex items-center
+              ${collapsed ? "justify-center px-0" : "gap-3 px-3"}
+              py-2 rounded-lg hover:bg-slate-100
+              text-slate-600 transition-colors`}
           >
             <LogOut className="w-5 h-5" />
             {!collapsed && <span className="text-sm">Log out</span>}

@@ -10,15 +10,15 @@ import AROutstandingPage from "./components/dashboard/AROutstandingPage";
 import APOutstandingPage from "./components/dashboard/APOutstandingPage";
 import { AlertsAndSignalsPage } from "./components/dashboard/AlertsAndSignalsPage";
 import Reminders from "./components/Reminders";
+import ActionQueuePage from "./components/dashboard/ActionQueuePage";
 import { Toaster } from "sonner";
 import { Menu } from "lucide-react";
-import ActionQueuePage from "./components/dashboard/ActionQueuePage";
+
 function App() {
   const [activeTab, setActiveTab] = useState("home");
-  
-  // 🧠 NEW STATES
-  const [sidebarOpen, setSidebarOpen] = useState(true); // mobile
-  const [collapsed, setCollapsed] = useState(false); // desktop icon mode
+
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
 
   const handleLogout = () => {
     console.log("Logging out...");
@@ -40,10 +40,9 @@ function App() {
 
       case "customers":
         return <CustomerWorkspace />;
+
       case "action-queue":
-  return (
-    <ActionQueuePage setActiveTab={setActiveTab} />
-  );
+        return <ActionQueuePage setActiveTab={setActiveTab} />;
 
       case "cash-in":
         return <CashInPage onBack={() => setActiveTab("home")} />;
@@ -78,8 +77,8 @@ function App() {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
-      {/* Sidebar */}
+    <div className="flex h-screen bg-muted/30 overflow-hidden">
+      {/* ================= SIDEBAR ================= */}
       <Sidebar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -90,20 +89,26 @@ function App() {
         setCollapsed={setCollapsed}
       />
 
-      {/* Main Content Wrapper */}
-      <div className="flex-1 flex flex-col">
-        {/* Top Bar (Hamburger for mobile) */}
-        <div className="h-14 border-b flex items-center px-4">
+      {/* ================= MAIN AREA ================= */}
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Top Bar */}
+        <div className="h-14 shrink-0 border-b bg-background flex items-center px-6">
           <button
             onClick={() => setSidebarOpen(true)}
-            className="md:hidden p-2 rounded-lg hover:bg-muted"
+            className="md:hidden p-2 rounded-lg hover:bg-muted transition"
           >
             <Menu className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Page Content */}
-        <main className="flex-1 overflow-auto p-6">{renderContent()}</main>
+        {/* Page Container */}
+        <div className="flex-1 overflow-hidden">
+          <div className="h-full overflow-y-auto">
+            <div className="mx-auto max-w-[1600px] px-8 py-8">
+              {renderContent()}
+            </div>
+          </div>
+        </div>
       </div>
 
       <Toaster />

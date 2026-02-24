@@ -73,7 +73,7 @@ export function CustomerOverview({ customer }) {
           </Badge>
         </div>
 
-        <div className="grid grid-cols-3 gap-6 text-sm">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-sm">
           <HeaderStat
             label="AR Balance"
             value={`$${customer.arBalance.toLocaleString()}`}
@@ -93,7 +93,7 @@ export function CustomerOverview({ customer }) {
       <Card className="p-5">
         <SectionTitle title="Financial Snapshot" />
 
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <KPI label="Overdue" value={`$${overdue.toLocaleString()}`} danger />
           <KPI
             label="Credit Limit"

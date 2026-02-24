@@ -1,4 +1,3 @@
-
 import { useMemo } from "react";
 
 import { Card } from "./ui/card";
@@ -18,14 +17,18 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { FileText, MoreVertical, Send, Eye, Download, Plus } from "lucide-react";
+import { FileText, MoreVertical, Send, Eye, Download } from "lucide-react";
 
 export function CustomerInvoices({ customerId, customerName, onViewInvoice }) {
-  // Mock invoice data (ONLY Draft / Sent)
+  /* ================= MOCK DATA ================= */
+
+  // Invoices are relational (tagged with project + job)
   const invoices = [
     {
       id: "INV-10234",
       customerId: "CL001",
+      projectId: "P1001",
+      jobId: "J1001",
       period: "Jan 2026",
       amount: 125000,
       status: "Sent",
@@ -33,6 +36,8 @@ export function CustomerInvoices({ customerId, customerName, onViewInvoice }) {
     {
       id: "INV-10212",
       customerId: "CL001",
+      projectId: "P1001",
+      jobId: "J1002",
       period: "Dec 2025",
       amount: 98000,
       status: "Sent",
@@ -40,6 +45,8 @@ export function CustomerInvoices({ customerId, customerName, onViewInvoice }) {
     {
       id: "INV-10188",
       customerId: "CL001",
+      projectId: "P1002",
+      jobId: "J1003",
       period: "Nov 2025",
       amount: 67000,
       status: "Draft",
@@ -47,6 +54,8 @@ export function CustomerInvoices({ customerId, customerName, onViewInvoice }) {
     {
       id: "INV-20201",
       customerId: "CL002",
+      projectId: "P2001",
+      jobId: "J2001",
       period: "Jan 2026",
       amount: 54000,
       status: "Sent",
@@ -54,27 +63,37 @@ export function CustomerInvoices({ customerId, customerName, onViewInvoice }) {
     {
       id: "INV-30110",
       customerId: "CL003",
+      projectId: "P3001",
+      jobId: "J3001",
       period: "Jan 2026",
       amount: 22000,
       status: "Draft",
     },
   ];
 
+  /* ================= FILTER BY CUSTOMER ================= */
+
   const scopedInvoices = useMemo(() => {
     return invoices.filter((inv) => inv.customerId === customerId);
   }, [customerId]);
 
+  /* ================= TOTALS ================= */
+
   const totals = useMemo(() => {
     const total = scopedInvoices.reduce((s, i) => s + i.amount, 0);
+
     const sent = scopedInvoices
       .filter((i) => i.status === "Sent")
       .reduce((s, i) => s + i.amount, 0);
+
     const draft = scopedInvoices
       .filter((i) => i.status === "Draft")
       .reduce((s, i) => s + i.amount, 0);
 
     return { total, sent, draft };
   }, [scopedInvoices]);
+
+  /* ================= HELPERS ================= */
 
   const statusBadge = (s) => {
     const map = {
@@ -89,9 +108,7 @@ export function CustomerInvoices({ customerId, customerName, onViewInvoice }) {
       maximumFractionDigits: 0,
     })}`;
 
-  const onCreateInvoice = () => {
-    alert(`Create invoice for ${customerName || customerId}`);
-  };
+  /* ================= UI ================= */
 
   return (
     <div className="space-y-4">
@@ -105,8 +122,6 @@ export function CustomerInvoices({ customerId, customerName, onViewInvoice }) {
         </div>
 
         <div className="flex items-center gap-2">
-         
-
           <Button variant="outline" onClick={() => alert("Export invoices")}>
             <Download className="w-4 h-4 mr-2" />
             Export
@@ -114,7 +129,7 @@ export function CustomerInvoices({ customerId, customerName, onViewInvoice }) {
         </div>
       </div>
 
-      {/* Mini KPI row */}
+      {/* KPI Row */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <Card className="p-4">
           <p className="text-sm text-muted-foreground">Draft Invoices</p>
@@ -132,7 +147,7 @@ export function CustomerInvoices({ customerId, customerName, onViewInvoice }) {
         </Card>
       </div>
 
-      {/* Table */}
+      {/* Invoice Table */}
       <Card className="p-0 overflow-hidden">
         <div className="p-4 border-b flex items-center gap-2">
           <FileText className="w-4 h-4 text-muted-foreground" />
@@ -147,6 +162,8 @@ export function CustomerInvoices({ customerId, customerName, onViewInvoice }) {
             <TableHeader>
               <TableRow>
                 <TableHead>Invoice</TableHead>
+                <TableHead>Project</TableHead>
+                <TableHead>Job</TableHead>
                 <TableHead>Billing Period</TableHead>
                 <TableHead className="text-right">Amount</TableHead>
                 <TableHead>Status</TableHead>
@@ -157,7 +174,7 @@ export function CustomerInvoices({ customerId, customerName, onViewInvoice }) {
             <TableBody>
               {scopedInvoices.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5}>
+                  <TableCell colSpan={7}>
                     <div className="py-10 text-center text-muted-foreground">
                       No invoices for this customer yet.
                     </div>
@@ -167,7 +184,13 @@ export function CustomerInvoices({ customerId, customerName, onViewInvoice }) {
                 scopedInvoices.map((inv) => (
                   <TableRow key={inv.id}>
                     <TableCell className="font-medium">{inv.id}</TableCell>
+
+                    <TableCell>{inv.projectId}</TableCell>
+
+                    <TableCell>{inv.jobId}</TableCell>
+
                     <TableCell>{inv.period}</TableCell>
+
                     <TableCell className="text-right">
                       {money(inv.amount)}
                     </TableCell>

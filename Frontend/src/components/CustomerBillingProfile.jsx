@@ -99,7 +99,7 @@ const emptyRule = (customerId) => ({
   lastResult: "Not Run",
 });
 
-export function CustomerBillingRules({ customer }) {
+export function CustomerBillingProfile({ customer }) {
   const [profiles, setProfiles] = useState(initialProfiles);
   const [rules, setRules] = useState(initialRules);
   const [selectedRuleId, setSelectedRuleId] = useState(null);

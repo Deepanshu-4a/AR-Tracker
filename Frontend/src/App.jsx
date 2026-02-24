@@ -104,7 +104,7 @@ function App() {
         {/* Page Container */}
         <div className="flex-1 overflow-hidden">
           <div className="h-full overflow-y-auto">
-            <div className="mx-auto max-w-[1600px] px-8 py-8">
+            <div className="mx-auto max-w-400 px-8 py-8">
               {renderContent()}
             </div>
           </div>

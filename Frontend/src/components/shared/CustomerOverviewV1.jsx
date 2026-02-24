@@ -4,9 +4,9 @@ import { cn } from "../ui/utils";
 export function CustomerOverviewV1({ customer }) {
   if (!customer) return null;
 
-  // 🔒 Normalize numeric values safely
-  const arBalance = Number(customer?.arBalance ?? 0);
-  const avgDaysToPay = Number(customer?.avgDaysToPay ?? 0);
+  // 🔥 Financial mock defaults (used if missing)
+  const arBalance = Number(customer?.arBalance ?? 182500);
+  const avgDaysToPay = Number(customer?.avgDaysToPay ?? 48);
 
   const creditLimit = 500000;
   const openInvoices = 14;
@@ -24,23 +24,21 @@ export function CustomerOverviewV1({ customer }) {
   const riskScore = Math.min(
     100,
     Math.round(
-      (arBalance ? overdue / arBalance : 0) * 40 +
-        (avgDaysToPay / 90) * 40 +
-        utilization * 20,
+      (overdue / arBalance) * 40 + (avgDaysToPay / 90) * 40 + utilization * 20,
     ),
   );
 
   const risk =
     riskScore >= 75
-      ? { label: "High Risk", tone: "bg-red-50 text-red-700 border-red-200" }
+      ? { label: "High Risk", tone: "bg-red-100 text-red-700 border-red-300" }
       : riskScore >= 50
         ? {
             label: "Moderate Risk",
-            tone: "bg-amber-50 text-amber-700 border-amber-200",
+            tone: "bg-amber-100 text-amber-700 border-amber-300",
           }
         : {
             label: "Low Risk",
-            tone: "bg-emerald-50 text-emerald-700 border-emerald-200",
+            tone: "bg-emerald-100 text-emerald-700 border-emerald-300",
           };
 
   const aging = {
@@ -50,7 +48,7 @@ export function CustomerOverviewV1({ customer }) {
     d90: Math.floor(overdue * 0.2),
   };
 
-  const overduePct = arBalance ? Math.round((overdue / arBalance) * 100) : 0;
+  const overduePct = Math.round((overdue / arBalance) * 100);
 
   return (
     <div className="space-y-5">
@@ -89,7 +87,6 @@ export function CustomerOverviewV1({ customer }) {
 
       {/* ================= MID GRID ================= */}
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
-        {/* RECEIVABLES */}
         <section className="rounded-xl border border-border bg-card p-5">
           <SectionTitle title="Receivables" />
 
@@ -107,7 +104,7 @@ export function CustomerOverviewV1({ customer }) {
             <DataTile label="Disputes" value={`${disputes}`} />
           </div>
 
-          {/* RISK BAR */}
+          {/* Risk Bar */}
           <div className="mt-4 rounded-lg border border-border/70 bg-muted/30 p-3">
             <div className="flex items-center justify-between text-xs">
               <span className="uppercase tracking-wide text-muted-foreground">
@@ -138,7 +135,7 @@ export function CustomerOverviewV1({ customer }) {
           </div>
         </section>
 
-        {/* PAYMENT SIGNALS */}
+        {/* Payment Signals */}
         <section className="rounded-xl border border-border bg-card p-5">
           <SectionTitle title="Payment Signals" />
 
@@ -184,7 +181,7 @@ export function CustomerOverviewV1({ customer }) {
   );
 }
 
-/* ================= SUB COMPONENTS ================= */
+/* ================= Helper Components ================= */
 
 function SectionTitle({ title }) {
   return (

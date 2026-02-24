@@ -511,7 +511,7 @@ export function CustomerRegistry({
         {/* ✅ REGISTRY TABLE (your existing registry, unchanged) */}
         <div
           style={{
-            width: "86%",
+            width: "97%",
             marginLeft: 0,
             marginRight: "auto",
             boxSizing: "border-box",

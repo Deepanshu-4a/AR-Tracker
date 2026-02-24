@@ -21,7 +21,7 @@ const mockCustomers = [
     status: "Active",
     category: "Retail",
     addInfo: "—",
-    primaryBU: "Cyber Infotech, LLC",
+    primaryBU: "4A Consulting",
     appBU: "—",
     placements: 3,
     currency: "USD",
@@ -36,7 +36,7 @@ const mockCustomers = [
     status: "Active",
     category: "Technology",
     addInfo: "—",
-    primaryBU: "Cyber Infotech, LLC",
+    primaryBU: "4A Consulting",
     appBU: "—",
     placements: 1,
     currency: "USD",
@@ -51,7 +51,7 @@ const mockCustomers = [
     status: "Active",
     category: "Manufacturing",
     addInfo: "—",
-    primaryBU: "Cyber Infotech, LLC",
+    primaryBU: "4A Consulting",
     appBU: "—",
     placements: 2,
     currency: "USD",
@@ -66,7 +66,7 @@ const mockCustomers = [
     status: "Active",
     category: "Retail",
     addInfo: "—",
-    primaryBU: "Cyber Infotech, LLC",
+    primaryBU: "4A Consulting",
     appBU: "—",
     placements: 3,
     currency: "USD",
@@ -81,7 +81,7 @@ const mockCustomers = [
     status: "Active",
     category: "Retail",
     addInfo: "—",
-    primaryBU: "Cyber Infotech, LLC",
+    primaryBU: "4A Consulting",
     appBU: "—",
     placements: 3,
     currency: "USD",
@@ -96,7 +96,7 @@ const mockCustomers = [
     status: "Active",
     category: "Retail",
     addInfo: "—",
-    primaryBU: "Cyber Infotech, LLC",
+    primaryBU: "4A Consulting",
     appBU: "—",
     placements: 3,
     currency: "USD",
@@ -111,7 +111,7 @@ const mockCustomers = [
     status: "Active",
     category: "Retail",
     addInfo: "—",
-    primaryBU: "Cyber Infotech, LLC",
+    primaryBU: "4A Consulting",
     appBU: "—",
     placements: 3,
     currency: "USD",
@@ -126,7 +126,7 @@ const mockCustomers = [
     status: "Active",
     category: "Retail",
     addInfo: "—",
-    primaryBU: "Cyber Infotech, LLC",
+    primaryBU: "4A Consulting",
     appBU: "—",
     placements: 3,
     currency: "USD",
@@ -141,7 +141,7 @@ const mockCustomers = [
     status: "Active",
     category: "Retail",
     addInfo: "—",
-    primaryBU: "Cyber Infotech, LLC",
+    primaryBU: "4A Consulting",
     appBU: "—",
     placements: 3,
     currency: "USD",
@@ -156,7 +156,7 @@ const mockCustomers = [
     status: "Active",
     category: "Retail",
     addInfo: "—",
-    primaryBU: "Cyber Infotech, LLC",
+    primaryBU: "4A Consulting",
     appBU: "—",
     placements: 3,
     currency: "USD",
@@ -172,7 +172,6 @@ const SCROLL_COLS = [
   { key: "addInfo", label: "Additional Info", w: 140 },
   { key: "primaryBU", label: "Primary Business Unit", w: 190 },
   { key: "appBU", label: "Applicable Business Units", w: 200 },
-  { key: "placements", label: "Active Placements", w: 160 },
   { key: "currency", label: "Currency", w: 110 },
 ];
 
@@ -193,66 +192,7 @@ const FilterIcon = () => (
   </svg>
 );
 
-const PlacementIcon = ({ count }) => (
-  <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-    <div
-      style={{
-        width: 26,
-        height: 20,
-        borderRadius: 3,
-        background: count > 0 ? "#3b82f6" : "#93c5fd",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
-        <rect
-          x="1"
-          y="2"
-          width="12"
-          height="10"
-          rx="1.5"
-          stroke="white"
-          strokeWidth="1.3"
-        />
-        <path d="M1 5h12" stroke="white" strokeWidth="1.3" />
-        <path
-          d="M4.5 2V1M9.5 2V1"
-          stroke="white"
-          strokeWidth="1.3"
-          strokeLinecap="round"
-        />
-        {count > 0 && (
-          <text x="4" y="10" fill="white" fontSize="5" fontWeight="bold">
-            {count}
-          </text>
-        )}
-      </svg>
-    </div>
-    <div
-      style={{
-        width: 20,
-        height: 20,
-        borderRadius: 3,
-        background: "#3b82f6",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
-        <circle cx="6" cy="4" r="2.2" stroke="white" strokeWidth="1.2" />
-        <path
-          d="M1.5 10c0-2.485 2.015-4.5 4.5-4.5s4.5 2.015 4.5 4.5"
-          stroke="white"
-          strokeWidth="1.2"
-          strokeLinecap="round"
-        />
-      </svg>
-    </div>
-  </div>
-);
+
 
 /* frozen widths */
 const FROZEN_W = { name: 200, id: 110, menu: 40, email: 260 };

@@ -1,6 +1,5 @@
-// ==============================
-// CustomerCenter.jsx (UPDATED)
-// ==============================
+
+
 import { useMemo, useState } from "react";
 import { Card } from "./ui/card";
 import { Input } from "./ui/input";
@@ -9,14 +8,90 @@ import { Badge } from "./ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "./ui/tabs";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import { Search01Icon as Search } from "hugeicons-react";
+import { InvoiceManagement } from "./InvoiceManagement";
+import { PaymentsReceivables } from "./PaymentsReceivables";
+import { CustomerBillingProfile } from "./CustomerBillingProfile";
+
+const CUSTOMERS = [
+  { id: "CL001", name: "MegaMart" },
+  { id: "CL002", name: "TechStart Inc" },
+  { id: "CL003", name: "Acme Corp" },
+];
+
+const REVENUE_TABS = [
+  { id: "invoices", label: "Invoice Center", Component: InvoiceManagement },
+  { id: "payments", label: "Payments & Receivables", Component: PaymentsReceivables },
+  { id: "billing", label: "Billing Profile", Component: CustomerBillingProfile },
+];
+
+export function RevenueWorkspace() {
+  const [activeTab, setActiveTab] = useState("invoices");
+
+  // ✅ add selected customer in Revenue
+  const [selectedCustomerId, setSelectedCustomerId] = useState("CL001");
+  const selectedCustomer = CUSTOMERS.find((c) => c.id === selectedCustomerId);
+
+  const ActiveComponent =
+    REVENUE_TABS.find((t) => t.id === activeTab)?.Component ?? InvoiceManagement;
+
+  return (
+    <div className="p-6 space-y-6">
+      <div>
+        <h1 className="text-2xl font-semibold">Revenue</h1>
+        <p className="text-sm text-muted-foreground">Billing and accounts receivable</p>
+      </div>
+
+      <div className="border-b border-border">
+        <div className="flex gap-6">
+          {REVENUE_TABS.map((tab) => (
+            <RevenueTab
+              key={tab.id}
+              id={tab.id}
+              label={tab.label}
+              isActive={activeTab === tab.id}
+              onSelect={setActiveTab}
+            />
+          ))}
+        </div>
+      </div>
+
+      <div>
+        {/* ✅ ONLY Billing Profile needs customer */}
+        {activeTab === "billing" ? (
+          <CustomerBillingProfile customer={selectedCustomer} />
+        ) : (
+          <ActiveComponent />
+        )}
+      </div>
+    </div>
+  );
+}
+
+function RevenueTab({ id, label, isActive, onSelect }) {
+  return (
+    <button
+      onClick={() => onSelect(id)}
+      className={`pb-3 text-sm font-medium transition-colors ${
+        isActive
+          ? "text-orange-600 border-b-2 border-orange-500"
+          : "text-muted-foreground hover:text-foreground"
+      }`}
+    >
+      {label}
+    </button>
+  );
+}
 import { Users, Plus, Download, FileText } from "lucide-react";
+
 import { CreateEstimateModal } from "./CreateEstimateModal";
 import { CustomerOverview } from "./CustomerOverview";
 import { RightSidePanel } from "./shared/RightSidePanel";
-import { CustomerPayments } from "./CustomerPayments"; // <-- new import
+import { CustomerPayments } from "./CustomerPayments";
 import { CreateCustomerModal } from "./customers/CreateCustomerModal";
-import { CustomerInvoices } from "./CustomerInvoices"; // <-- adjust path if needed
-import { CustomerBillingRules } from "./CustomerBillingRules";
+import { CustomerInvoices } from "./CustomerInvoices";
+
+
+import { CustomerRegistry } from "./CustomerRegistry";
 
 export function CustomerCenter({ onViewInvoice }) {
   const [searchTerm, setSearchTerm] = useState("");
@@ -25,7 +100,6 @@ export function CustomerCenter({ onViewInvoice }) {
   const [isEstimateOpen, setIsEstimateOpen] = useState(false);
 
   /* ================= MOCK DATA ================= */
-
   const customers = [
     {
       id: "CL001",
@@ -35,6 +109,11 @@ export function CustomerCenter({ onViewInvoice }) {
       risk: "High",
       email: "finance@megamart.com",
       phone: "+1 555-111-2222",
+      status: "Active",
+      netTerms: "30 days",
+      category: "Retail",
+      primaryBusinessUnit: "Cyber Infotech, LLC",
+      createdAt: "2026-02-10",
     },
     {
       id: "CL002",
@@ -44,6 +123,11 @@ export function CustomerCenter({ onViewInvoice }) {
       risk: "Medium",
       email: "accounts@techstart.com",
       phone: "+1 555-333-4444",
+      status: "Active",
+      netTerms: "45 days",
+      category: "Technology",
+      primaryBusinessUnit: "Cyber Infotech, LLC",
+      createdAt: "2026-01-22",
     },
     {
       id: "CL003",
@@ -53,6 +137,11 @@ export function CustomerCenter({ onViewInvoice }) {
       risk: "Low",
       email: "billing@acme.com",
       phone: "+1 555-555-6666",
+      status: "Active",
+      netTerms: "15 days",
+      category: "Manufacturing",
+      primaryBusinessUnit: "Cyber Infotech, LLC",
+      createdAt: "2025-12-18",
     },
   ];
 
@@ -76,7 +165,6 @@ export function CustomerCenter({ onViewInvoice }) {
       .toUpperCase();
 
   /* ================= UI ================= */
-
   return (
     <div className="space-y-6">
       {/* TOOLBAR */}
@@ -93,7 +181,6 @@ export function CustomerCenter({ onViewInvoice }) {
           </div>
 
           <div className="flex items-center gap-2">
-            {/* ✅ NEW CREATE ESTIMATE BUTTON */}
             <Button
               variant="outline"
               disabled={!selectedCustomer}
@@ -121,7 +208,7 @@ export function CustomerCenter({ onViewInvoice }) {
 
       {/* MAIN LAYOUT */}
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_2fr_1fr] gap-6">
-        {/* ================= CUSTOMER LIST ================= */}
+        {/* LEFT: CUSTOMER LIST */}
         <Card className="p-4">
           <h2 className="mb-4 font-semibold">
             Customers ({filteredCustomers.length})
@@ -159,7 +246,7 @@ export function CustomerCenter({ onViewInvoice }) {
           </div>
         </Card>
 
-        {/* ================= CUSTOMER PROFILE ================= */}
+        {/* MIDDLE: PROFILE + NEW TAB */}
         <Card className="p-6">
           {selectedCustomer ? (
             <Tabs defaultValue="overview">
@@ -168,13 +255,15 @@ export function CustomerCenter({ onViewInvoice }) {
                 <TabsTrigger value="invoices">Invoices</TabsTrigger>
                 <TabsTrigger value="payments">Payment History</TabsTrigger>
                 <TabsTrigger value="billing">Billing Profile</TabsTrigger>
+
+                {/* ✅ NEW TAB */}
+                <TabsTrigger value="registry">Customer Registry</TabsTrigger>
               </TabsList>
 
               <TabsContent value="overview">
                 <CustomerOverview customer={selectedCustomer} />
               </TabsContent>
 
-              {/*  UPDATED: invoices tab now routes to InvoiceDetail via onViewInvoice */}
               <TabsContent value="invoices">
                 <CustomerInvoices
                   customerId={selectedCustomer.id}
@@ -183,14 +272,20 @@ export function CustomerCenter({ onViewInvoice }) {
                 />
               </TabsContent>
 
-             <TabsContent value="payments">
-  <CustomerPayments
-    customerId={selectedCustomer.id}
-    customerName={selectedCustomer.name}
-  />
-</TabsContent>
+              <TabsContent value="payments">
+                <CustomerPayments
+                  customerId={selectedCustomer.id}
+                  customerName={selectedCustomer.name}
+                />
+              </TabsContent>
+
               <TabsContent value="billing">
-                <CustomerBillingRules customer={selectedCustomer} />
+                <CustomerBillingProfile customer={selectedCustomer} />
+              </TabsContent>
+
+              {/* ✅ NEW CONTENT */}
+              <TabsContent value="registry">
+                <CustomerRegistry customers={customers} />
               </TabsContent>
             </Tabs>
           ) : (
@@ -201,14 +296,12 @@ export function CustomerCenter({ onViewInvoice }) {
           )}
         </Card>
 
-        {/* ================= RIGHT SIDE PANEL ================= */}
+        {/* RIGHT PANEL */}
         <RightSidePanel customer={selectedCustomer} />
       </div>
 
-      {/* CREATE CUSTOMER MODAL */}
+      {/* MODALS */}
       <CreateCustomerModal open={isCreateOpen} onOpenChange={setIsCreateOpen} />
-
-     
       <CreateEstimateModal
         open={isEstimateOpen}
         onOpenChange={setIsEstimateOpen}

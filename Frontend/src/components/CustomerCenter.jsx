@@ -139,7 +139,7 @@ export function CustomerCenter({ onViewInvoice }) {
             Customers ({filteredCustomers.length})
           </h2>
 
-          <div className="space-y-2 max-h-[600px] overflow-y-auto">
+          <div className="space-y-2 max-h-150 overflow-y-auto">
             {filteredCustomers.map((customer) => (
               <div
                 key={customer.id}
@@ -209,7 +209,7 @@ export function CustomerCenter({ onViewInvoice }) {
               </TabsContent>
             </Tabs>
           ) : (
-            <div className="flex flex-col items-center justify-center h-[500px] text-muted-foreground">
+            <div className="flex flex-col items-center justify-center h-125 text-muted-foreground">
               <Users className="w-8 h-8 mb-2" />
               Select a customer to view details
             </div>

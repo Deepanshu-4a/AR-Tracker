@@ -164,38 +164,91 @@ const mockCustomers = [
 ];
 
 const SCROLL_COLS = [
-  { key:"phone",      label:"Contact Number",            w:150 },
-  { key:"netTerms",   label:"Net Terms",                 w:120 },
-  { key:"termNotice", label:"Termination Notice",        w:160 },
-  { key:"status",     label:"Status",                    w:110 },
-  { key:"category",   label:"Category",                  w:130 },
-  { key:"addInfo",    label:"Additional Info",           w:140 },
-  { key:"primaryBU",  label:"Primary Business Unit",     w:190 },
-  { key:"appBU",      label:"Applicable Business Units", w:200 },
-  { key:"placements", label:"Active Placements",         w:160 },
-  { key:"currency",   label:"Currency",                  w:110 },
+  { key: "phone", label: "Contact Number", w: 150 },
+  { key: "netTerms", label: "Net Terms", w: 120 },
+  { key: "termNotice", label: "Termination Notice", w: 160 },
+  { key: "status", label: "Status", w: 110 },
+  { key: "category", label: "Category", w: 130 },
+  { key: "addInfo", label: "Additional Info", w: 140 },
+  { key: "primaryBU", label: "Primary Business Unit", w: 190 },
+  { key: "appBU", label: "Applicable Business Units", w: 200 },
+  { key: "placements", label: "Active Placements", w: 160 },
+  { key: "currency", label: "Currency", w: 110 },
 ];
 
 const FilterIcon = () => (
-  <svg width="11" height="11" viewBox="0 0 12 12" fill="none" style={{ marginLeft:3, display:"inline", verticalAlign:"middle" }}>
-    <path d="M1 2h10M3 6h6M5 10h2" stroke="#94a3b8" strokeWidth="1.4" strokeLinecap="round"/>
+  <svg
+    width="11"
+    height="11"
+    viewBox="0 0 12 12"
+    fill="none"
+    style={{ marginLeft: 3, display: "inline", verticalAlign: "middle" }}
+  >
+    <path
+      d="M1 2h10M3 6h6M5 10h2"
+      stroke="#94a3b8"
+      strokeWidth="1.4"
+      strokeLinecap="round"
+    />
   </svg>
 );
 
 const PlacementIcon = ({ count }) => (
-  <div style={{ display:"flex", alignItems:"center", gap:4 }}>
-    <div style={{ width:26, height:20, borderRadius:3, background: count>0 ? "#3b82f6" : "#93c5fd", display:"flex", alignItems:"center", justifyContent:"center" }}>
+  <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+    <div
+      style={{
+        width: 26,
+        height: 20,
+        borderRadius: 3,
+        background: count > 0 ? "#3b82f6" : "#93c5fd",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
       <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
-        <rect x="1" y="2" width="12" height="10" rx="1.5" stroke="white" strokeWidth="1.3"/>
-        <path d="M1 5h12" stroke="white" strokeWidth="1.3"/>
-        <path d="M4.5 2V1M9.5 2V1" stroke="white" strokeWidth="1.3" strokeLinecap="round"/>
-        {count > 0 && <text x="4" y="10" fill="white" fontSize="5" fontWeight="bold">{count}</text>}
+        <rect
+          x="1"
+          y="2"
+          width="12"
+          height="10"
+          rx="1.5"
+          stroke="white"
+          strokeWidth="1.3"
+        />
+        <path d="M1 5h12" stroke="white" strokeWidth="1.3" />
+        <path
+          d="M4.5 2V1M9.5 2V1"
+          stroke="white"
+          strokeWidth="1.3"
+          strokeLinecap="round"
+        />
+        {count > 0 && (
+          <text x="4" y="10" fill="white" fontSize="5" fontWeight="bold">
+            {count}
+          </text>
+        )}
       </svg>
     </div>
-    <div style={{ width:20, height:20, borderRadius:3, background:"#3b82f6", display:"flex", alignItems:"center", justifyContent:"center" }}>
+    <div
+      style={{
+        width: 20,
+        height: 20,
+        borderRadius: 3,
+        background: "#3b82f6",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
       <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
-        <circle cx="6" cy="4" r="2.2" stroke="white" strokeWidth="1.2"/>
-        <path d="M1.5 10c0-2.485 2.015-4.5 4.5-4.5s4.5 2.015 4.5 4.5" stroke="white" strokeWidth="1.2" strokeLinecap="round"/>
+        <circle cx="6" cy="4" r="2.2" stroke="white" strokeWidth="1.2" />
+        <path
+          d="M1.5 10c0-2.485 2.015-4.5 4.5-4.5s4.5 2.015 4.5 4.5"
+          stroke="white"
+          strokeWidth="1.2"
+          strokeLinecap="round"
+        />
       </svg>
     </div>
   </div>

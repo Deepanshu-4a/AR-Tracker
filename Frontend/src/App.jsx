@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Sidebar } from "./components/ui/Sidebar";
-import { CustomerWorkspace } from "./components/CustomerWorkspace";
+import { CustomerWorkspace } from "./components/customers/CustomerWorkspace";
 import { Dashboard } from "./components/dashboard/Dashboard";
 import { RevenueWorkspace } from "./components/RevenueWorkspace";
 import CashInPage from "./components/dashboard/CashInPage";

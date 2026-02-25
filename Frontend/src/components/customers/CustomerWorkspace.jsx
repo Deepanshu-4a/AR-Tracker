@@ -17,20 +17,20 @@ export function CustomerWorkspace() {
   // -----------------------------
   // CUSTOMER DETAIL VIEW
   // -----------------------------
-  if (activeTab === "customer-detail" && activeCustomer) {
-    return (
-      <div className="px-10 py-8">
-        <CustomerDetail
-          customer={activeCustomer}
-          onBack={() => setActiveTab("registry")}
-          onViewInvoice={(invoiceId) => {
-            setActiveInvoiceId(invoiceId);
-            setActiveTab("invoice-detail");
-          }}
-        />
-      </div>
-    );
-  }
+ if (activeTab === "customer-detail" && activeCustomer) {
+   return (
+     <div className="py-8">
+       <CustomerDetail
+         customer={activeCustomer}
+         onBack={() => setActiveTab("registry")}
+         onViewInvoice={(invoiceId) => {
+           setActiveInvoiceId(invoiceId);
+           setActiveTab("invoice-detail");
+         }}
+       />
+     </div>
+   );
+ }
 
   // -----------------------------
   // INVOICE DETAIL VIEW

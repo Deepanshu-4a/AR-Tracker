@@ -101,12 +101,11 @@ function App() {
           </button>
         </div>
 
+ 
         {/* Page Container */}
         <div className="flex-1 overflow-hidden">
           <div className="h-full overflow-y-auto">
-            <div className="mx-auto max-w-400 px-8 py-8">
-              {renderContent()}
-            </div>
+            <div className="w-full px-1 py-8">{renderContent()}</div>
           </div>
         </div>
       </div>

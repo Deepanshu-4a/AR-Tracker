@@ -11,7 +11,6 @@ import { Search01Icon as Search } from "hugeicons-react";
 import { Users, Plus, Download, FileText } from "lucide-react";
 
 import { CreateEstimateModal } from "../CreateEstimateModal";
-import { CustomerOverview } from "./CustomerOverview";
 import { RightSidePanel } from "../shared/RightSidePanel";
 import { CustomerPayments } from "./CustomerPayments";
 import { CreateCustomerModal } from "./CreateCustomerModal";
@@ -184,10 +183,6 @@ export function CustomerCenter({ onViewInvoice }) {
                 {/* ✅ NEW TAB */}
                 <TabsTrigger value="registry">Customer Registry</TabsTrigger>
               </TabsList>
-
-              <TabsContent value="overview">
-                <CustomerOverview customer={selectedCustomer} />
-              </TabsContent>
 
               <TabsContent value="invoices">
                 <CustomerInvoices

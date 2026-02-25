@@ -5,12 +5,12 @@ import { CustomerRegistry } from "./CustomerRegistry";
 import { CustomerDetail } from "./CustomerDetail";
 
 const CUSTOMER_TABS = [
-  { id: "center", label: "Customer Center" },
-  { id: "registry", label: "Customer Registry" },
+ 
+  { id: "registry", label: "Customer Center" },
 ];
 
 export function CustomerWorkspace() {
-  const [activeTab, setActiveTab] = useState("center");
+  const [activeTab, setActiveTab] = useState("registry");
   const [activeInvoiceId, setActiveInvoiceId] = useState(null);
   const [activeCustomer, setActiveCustomer] = useState(null);
 
@@ -74,15 +74,7 @@ export function CustomerWorkspace() {
         </div>
       </div>
 
-      {/* Content */}
-      {activeTab === "center" && (
-        <CustomerCenter
-          onViewCustomer={(customer) => {
-            setActiveCustomer(customer);
-            setActiveTab("customer-detail");
-          }}
-        />
-      )}
+    
 
       {activeTab === "registry" && (
         <CustomerRegistry

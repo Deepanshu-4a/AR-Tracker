@@ -4,13 +4,18 @@ import { cn } from "../ui/utils";
 import { CustomerProfileSidebar } from "./CustomerProfileSidebar";
 import { CustomerOverviewV1 } from "../shared/CustomerOverviewV1";
 import { CustomerProjects } from "./CustomerProjects";
-import { CustomerEstimates } from "./CustomerEstimates"; 
+import { CustomerEstimates } from "./CustomerEstimates";
 import { RightSidePanel } from "../shared/RightSidePanel";
-
+import { CustomerTransactions } from "./CustomerTransactions";
+import { CustomerContacts } from "./CustomerContacts";
+import { CustomerToDos } from "./CustomerToDos";
 const DETAIL_TABS = [
   { id: "overview", label: "Overview" },
   { id: "projects", label: "Projects" },
   { id: "estimates", label: "Estimates" },
+  { id: "transactions", label: "Transactions" },
+  { id: "contacts", label: "Contacts" },
+  { id: "todos", label: "ToDo's" },
 ];
 
 export function CustomerDetail({ customer, onBack }) {
@@ -31,6 +36,15 @@ export function CustomerDetail({ customer, onBack }) {
 
       case "estimates":
         return <CustomerEstimates customerId={customer.id} />;
+
+      case "transactions":
+        return <CustomerTransactions customerId={customer.id} />;
+
+      case "contacts":
+        return <CustomerContacts customerId={customer.id} />;
+
+      case "todos":
+        return <CustomerToDos customerId={customer.id} />;
 
       default:
         return null;

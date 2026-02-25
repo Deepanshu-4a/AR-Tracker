@@ -24,7 +24,7 @@ export function CustomerProfileSidebar({ customer, onBack }) {
           className="px-0 text-muted-foreground hover:text-foreground mb-6"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Registry
+          Back to Customer Center
         </Button>
 
         {/* Profile Header */}

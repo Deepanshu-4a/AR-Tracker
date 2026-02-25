@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { InvoiceManagement } from "./InvoiceManagement";
 import { PaymentsReceivables } from "./PaymentsReceivables";
-import { CustomerBillingProfile } from "./CustomerBillingProfile";
+import { CustomerBillingProfile } from "./customers/CustomerBillingProfile";
 
 const CUSTOMERS = [
   { id: "CL001", name: "MegaMart" },

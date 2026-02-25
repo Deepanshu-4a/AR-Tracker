@@ -9,9 +9,10 @@ import { CustomerTransactions } from "./CustomerTransactions";
 import { CustomerContacts } from "./CustomerContacts";
 import { CustomerToDos } from "./CustomerToDos";
 const DETAIL_TABS = [
+  { id: "transactions", label: "Transactions" },
   { id: "projects", label: "Projects" },
   { id: "estimates", label: "Estimates" },
-  { id: "transactions", label: "Transactions" },
+  
   { id: "contacts", label: "Contacts" },
   { id: "todos", label: "ToDo's" },
 ];

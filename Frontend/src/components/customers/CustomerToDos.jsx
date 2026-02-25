@@ -1,29 +1,42 @@
 // ==============================
-// CustomerToDos.jsx
-// Same styling as CustomerContacts table (no slider, no pagination, no horizontal scrollbar)
-// Includes a FILTER BAR (as requested)
-// Columns (typical To-Do grid):
-// TODO | OWNER | DUE DATE | PRIORITY | STATUS
+// CustomerToDos.jsx (UPDATED)
+// ✅ Uses SAME table styling as CustomerTransactions (Tailwind classes + Th/Td helpers)
+// ✅ Keeps filter bar (as you already had)
+// ✅ No slider, no pagination, no horizontal scrollbar
 // ==============================
 import { useMemo, useState } from "react";
-import { Card } from "../ui/card";
-import { CR_STYLES, FilterIcon } from "../customers/CustomerRegistryUtils.jsx";
+import { cn } from "../ui/utils";
 
 /* ─── MOCK DATA ─────────────────────────────────────── */
 const mockToDos = [
-  { todo: "Send invoice follow-up email", owner: "Ava Thompson", dueDate: "2026-02-28", priority: "High", status: "Open" },
-  { todo: "Confirm PO number", owner: "Noah Patel", dueDate: "2026-02-26", priority: "Medium", status: "In Progress" },
-  { todo: "Update billing address", owner: "Mia Chen", dueDate: "2026-03-03", priority: "Low", status: "Open" },
-  { todo: "Resolve payment failure", owner: "Ethan Brooks", dueDate: "2026-02-25", priority: "High", status: "Done" },
-];
-
-/* ✅ Columns (match the style you asked for) */
-const TODO_COLS = [
-  { key: "todo", label: "TO DO", width: "44%" },
-  { key: "owner", label: "OWNER", width: "18%" },
-  { key: "dueDate", label: "DUE DATE", width: "14%" },
-  { key: "priority", label: "PRIORITY", width: "12%" },
-  { key: "status", label: "STATUS", width: "12%" },
+  {
+    todo: "Send invoice follow-up email",
+    owner: "Ava Thompson",
+    dueDate: "2026-02-28",
+    priority: "High",
+    status: "Open",
+  },
+  {
+    todo: "Confirm PO number",
+    owner: "Noah Patel",
+    dueDate: "2026-02-26",
+    priority: "Medium",
+    status: "In Progress",
+  },
+  {
+    todo: "Update billing address",
+    owner: "Mia Chen",
+    dueDate: "2026-03-03",
+    priority: "Low",
+    status: "Open",
+  },
+  {
+    todo: "Resolve payment failure",
+    owner: "Ethan Brooks",
+    dueDate: "2026-02-25",
+    priority: "High",
+    status: "Done",
+  },
 ];
 
 export function CustomerToDos({ todos: propToDos }) {
@@ -33,7 +46,7 @@ export function CustomerToDos({ todos: propToDos }) {
   }, [propToDos]);
 
   // -----------------------------
-  // Filters (shown in UI)
+  // Filters
   // -----------------------------
   const [statusFilter, setStatusFilter] = useState("all"); // all | open | in progress | done
   const [priorityFilter, setPriorityFilter] = useState("all"); // all | high | medium | low
@@ -41,7 +54,11 @@ export function CustomerToDos({ todos: propToDos }) {
 
   const filtered = useMemo(() => {
     const today = new Date();
-    const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const startOfDay = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate(),
+    );
     const next7 = new Date(startOfDay);
     next7.setDate(next7.getDate() + 7);
 
@@ -49,13 +66,8 @@ export function CustomerToDos({ todos: propToDos }) {
       const st = String(r.status ?? "").toLowerCase();
       const pr = String(r.priority ?? "").toLowerCase();
 
-      const statusOk =
-        statusFilter === "all" ||
-        st === statusFilter;
-
-      const priorityOk =
-        priorityFilter === "all" ||
-        pr === priorityFilter;
+      const statusOk = statusFilter === "all" || st === statusFilter;
+      const priorityOk = priorityFilter === "all" || pr === priorityFilter;
 
       let dueOk = true;
       if (dueFilter !== "all") {
@@ -64,7 +76,8 @@ export function CustomerToDos({ todos: propToDos }) {
         else {
           const d0 = new Date(d.getFullYear(), d.getMonth(), d.getDate());
           if (dueFilter === "overdue") dueOk = d0 < startOfDay;
-          if (dueFilter === "today") dueOk = d0.getTime() === startOfDay.getTime();
+          if (dueFilter === "today")
+            dueOk = d0.getTime() === startOfDay.getTime();
           if (dueFilter === "next7") dueOk = d0 >= startOfDay && d0 <= next7;
         }
       }
@@ -73,232 +86,172 @@ export function CustomerToDos({ todos: propToDos }) {
     });
   }, [rows, statusFilter, priorityFilter, dueFilter]);
 
-  // -----------------------------
-  // Table styling (same as contacts)
-  // -----------------------------
-  const th = (w) => ({
-    background: "#f4f7fb",
-    width: w,
-    padding: "11px 12px",
-    fontSize: 12,
-    fontWeight: 600,
-    color: "#64748b",
-    textAlign: "left",
-    whiteSpace: "nowrap",
-    borderBottom: "2px solid #e2e8f0",
-    borderRight: "1px solid #e2e8f0",
-    boxSizing: "border-box",
-  });
-
-  const td = (w, rowBg, extra = {}) => ({
-    width: w,
-    padding: "10px 12px",
-    borderBottom: "1px solid #eef2f7",
-    borderRight: "1px solid #eef2f7",
-    whiteSpace: "nowrap",
-    overflow: "hidden",
-    textOverflow: "ellipsis",
-    boxSizing: "border-box",
-    background: rowBg,
-    ...extra,
-  });
-
-  const Pill = ({ label, kind }) => {
-    const k = String(kind || "").toLowerCase();
-
-    // Status colors (same vibe as your other pills)
-    const statusMap = {
-      open: { bg: "#e0f2fe", fg: "#0284c7" },
-      "in progress": { bg: "#ffedd5", fg: "#c2410c" },
-      done: { bg: "#dcfce7", fg: "#16a34a" },
-    };
-
-    // Priority colors
-    const prMap = {
-      high: { bg: "#fee2e2", fg: "#dc2626" },
-      medium: { bg: "#ffedd5", fg: "#c2410c" },
-      low: { bg: "#e5e7eb", fg: "#374151" },
-    };
-
-    const c = (kind === "status" ? statusMap[k] : prMap[k]) || { bg: "#e5e7eb", fg: "#374151" };
-
-    return (
-      <span
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          padding: "2px 9px",
-          borderRadius: 20,
-          fontSize: 11,
-          fontWeight: 600,
-          background: c.bg,
-          color: c.fg,
-        }}
-      >
-        {label || "—"}
-      </span>
-    );
-  };
-
   return (
-    <>
-      <style>{CR_STYLES}</style>
+    <div className="flex flex-col h-full min-w-0 space-y-4">
+      {/* ================= FILTER BAR (same vibe as Transactions) ================= */}
+      <div className="flex flex-wrap items-center gap-6 border-b border-border pb-4 text-sm">
+        <Filter label="Status">
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="border border-border rounded-md px-2 py-1 bg-background text-sm"
+          >
+            <option value="all">All</option>
+            <option value="open">Open</option>
+            <option value="in progress">In Progress</option>
+            <option value="done">Done</option>
+          </select>
+        </Filter>
 
-      <div className="space-y-3">
-        {/* FILTER BAR (as requested) */}
-        <div style={{ width: "97%" }}>
-          <Card className="p-4">
-            <div className="flex flex-col gap-3">
-              <div className="flex items-center gap-2" style={{ fontSize: 12, fontWeight: 600, color: "#64748b" }}>
-                Filters <FilterIcon />
-              </div>
+        <Filter label="Priority">
+          <select
+            value={priorityFilter}
+            onChange={(e) => setPriorityFilter(e.target.value)}
+            className="border border-border rounded-md px-2 py-1 bg-background text-sm"
+          >
+            <option value="all">All</option>
+            <option value="high">High</option>
+            <option value="medium">Medium</option>
+            <option value="low">Low</option>
+          </select>
+        </Filter>
 
-              <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:flex-wrap">
-                <div className="flex items-center gap-2">
-                  <span style={{ fontSize: 12, color: "#64748b" }}>Status</span>
-                  <select
-                    value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value)}
-                    className="h-10 px-3 rounded-md border border-slate-200 bg-white text-sm"
-                  >
-                    <option value="all">All</option>
-                    <option value="open">Open</option>
-                    <option value="in progress">In Progress</option>
-                    <option value="done">Done</option>
-                  </select>
-                </div>
+        <Filter label="Due">
+          <select
+            value={dueFilter}
+            onChange={(e) => setDueFilter(e.target.value)}
+            className="border border-border rounded-md px-2 py-1 bg-background text-sm"
+          >
+            <option value="all">All</option>
+            <option value="overdue">Overdue</option>
+            <option value="today">Today</option>
+            <option value="next7">Next 7 days</option>
+          </select>
+        </Filter>
 
-                <div className="flex items-center gap-2">
-                  <span style={{ fontSize: 12, color: "#64748b" }}>Priority</span>
-                  <select
-                    value={priorityFilter}
-                    onChange={(e) => setPriorityFilter(e.target.value)}
-                    className="h-10 px-3 rounded-md border border-slate-200 bg-white text-sm"
-                  >
-                    <option value="all">All</option>
-                    <option value="high">High</option>
-                    <option value="medium">Medium</option>
-                    <option value="low">Low</option>
-                  </select>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <span style={{ fontSize: 12, color: "#64748b" }}>Due</span>
-                  <select
-                    value={dueFilter}
-                    onChange={(e) => setDueFilter(e.target.value)}
-                    className="h-10 px-3 rounded-md border border-slate-200 bg-white text-sm"
-                  >
-                    <option value="all">All</option>
-                    <option value="overdue">Overdue</option>
-                    <option value="today">Today</option>
-                    <option value="next7">Next 7 days</option>
-                  </select>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <button
-                    className="h-10 px-3 rounded-md border border-slate-200 bg-white text-sm"
-                    onClick={() => {
-                      setStatusFilter("all");
-                      setPriorityFilter("all");
-                      setDueFilter("all");
-                    }}
-                  >
-                    Clear
-                  </button>
-                </div>
-              </div>
-            </div>
-          </Card>
-        </div>
-
-        {/* TABLE (no horizontal scrollbar) */}
-        <div
-          style={{
-            width: "97%",
-            marginLeft: 0,
-            marginRight: "auto",
-            boxSizing: "border-box",
-            border: "1px solid #e2e8f0",
-            borderRadius: 8,
-            background: "#fff",
-            overflow: "hidden", // 🚫 prevents horizontal scroll
-            fontFamily: "'DM Sans','Segoe UI',sans-serif",
+        <button
+          className="border border-border rounded-md px-3 py-1 bg-background text-sm"
+          onClick={() => {
+            setStatusFilter("all");
+            setPriorityFilter("all");
+            setDueFilter("all");
           }}
         >
-          <div
-            style={{
-              width: "100%",
-              overflowX: "hidden", // 🚫 no horizontal scrollbar
-              overflowY: "auto",
-              maxHeight: 520,
-            }}
-          >
-            <table
-              style={{
-                borderCollapse: "collapse",
-                tableLayout: "fixed",
-                width: "100%",
-              }}
-            >
-              <thead>
-                <tr>
-                  {TODO_COLS.map((c) => (
-                    <th key={c.key} style={th(c.width)}>
-                      {c.label}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-
-              <tbody>
-                {filtered.map((r, i) => {
-                  const rowBg = i % 2 === 0 ? "#fff" : "#eaf3ff"; // stripe like your other tables
-
-                  return (
-                    <tr key={`${r.todo}-${i}`} className="cr-row">
-                      <td
-                        style={td(TODO_COLS[0].width, rowBg, {
-                          fontSize: 13,
-                          fontWeight: 600,
-                          color: "#475569",
-                        })}
-                      >
-                        {r.todo ?? "—"}
-                      </td>
-
-                      <td style={td(TODO_COLS[1].width, rowBg, { fontSize: 13, color: "#374151" })}>
-                        {r.owner ?? "—"}
-                      </td>
-
-                      <td style={td(TODO_COLS[2].width, rowBg, { fontSize: 13, color: "#374151" })}>
-                        {r.dueDate ?? "—"}
-                      </td>
-
-                      <td style={td(TODO_COLS[3].width, rowBg, { fontSize: 13 })}>
-                        <Pill label={r.priority} kind="priority" />
-                      </td>
-
-                      <td style={td(TODO_COLS[4].width, rowBg, { fontSize: 13 })}>
-                        <Pill label={r.status} kind="status" />
-                      </td>
-                    </tr>
-                  );
-                })}
-
-                {filtered.length === 0 && (
-                  <tr>
-                    <td colSpan={TODO_COLS.length} style={{ padding: 20, textAlign: "center", color: "#94a3b8", fontSize: 13 }}>
-                      No To-Dos found
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
+          Clear
+        </button>
       </div>
-    </>
+
+      {/* ================= TABLE (same as Transactions) ================= */}
+      <div className="border border-border rounded-xl overflow-hidden">
+        <table className="w-full text-sm table-fixed">
+          <thead className="bg-muted/40 text-muted-foreground text-xs uppercase tracking-wide">
+            <tr>
+              <Th className="w-[44%]">To Do</Th>
+              <Th className="w-[18%]">Owner</Th>
+              <Th className="w-[14%]">Due Date</Th>
+              <Th className="w-[12%]">Priority</Th>
+              <Th className="w-[12%]">Status</Th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {filtered.map((t, i) => (
+              <tr
+                key={`${t.todo}-${i}`}
+                className={cn(
+                  "border-t hover:bg-muted/30 transition-colors",
+                  i % 2 === 0 ? "bg-white" : "bg-muted/10",
+                )}
+              >
+                <Td className="font-medium text-slate-700 truncate">
+                  {t.todo ?? "—"}
+                </Td>
+
+                <Td className="text-slate-700 truncate">{t.owner ?? "—"}</Td>
+
+                <Td className="text-slate-700 whitespace-nowrap">
+                  {t.dueDate ?? "—"}
+                </Td>
+
+                <Td>
+                  <span
+                    className={cn(
+                      "px-2 py-0.5 rounded-full text-xs font-medium",
+                      String(t.priority).toLowerCase() === "high" &&
+                        "bg-red-100 text-red-700",
+                      String(t.priority).toLowerCase() === "medium" &&
+                        "bg-yellow-100 text-yellow-700",
+                      String(t.priority).toLowerCase() === "low" &&
+                        "bg-slate-100 text-slate-700",
+                    )}
+                  >
+                    {t.priority ?? "—"}
+                  </span>
+                </Td>
+
+                <Td>
+                  <span
+                    className={cn(
+                      "px-2 py-0.5 rounded-full text-xs font-medium",
+                      String(t.status).toLowerCase() === "open" &&
+                        "bg-blue-100 text-blue-700",
+                      String(t.status).toLowerCase() === "in progress" &&
+                        "bg-orange-100 text-orange-700",
+                      String(t.status).toLowerCase() === "done" &&
+                        "bg-emerald-100 text-emerald-700",
+                    )}
+                  >
+                    {t.status ?? "—"}
+                  </span>
+                </Td>
+              </tr>
+            ))}
+
+            {filtered.length === 0 && (
+              <tr className="border-t">
+                <td
+                  colSpan={5}
+                  className="px-3 py-8 text-center text-sm text-muted-foreground"
+                >
+                  No To-Dos found
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+/* ================= SMALL COMPONENTS (same as Transactions) ================= */
+
+function Filter({ label, children }) {
+  return (
+    <div className="flex items-center gap-2">
+      <span className="text-muted-foreground text-xs uppercase">{label}</span>
+      {children}
+    </div>
+  );
+}
+
+function Th({ children, className }) {
+  return (
+    <th
+      className={cn(
+        "px-3 py-2 text-left font-medium whitespace-nowrap",
+        className,
+      )}
+    >
+      {children}
+    </th>
+  );
+}
+
+function Td({ children, className }) {
+  return (
+    <td className={cn("px-3 py-2 whitespace-nowrap", className)}>
+      {children}
+    </td>
   );
 }

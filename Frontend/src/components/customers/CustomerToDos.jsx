@@ -1,9 +1,4 @@
-// ==============================
-// CustomerToDos.jsx (UPDATED)
-// ✅ Uses SAME table styling as CustomerTransactions (Tailwind classes + Th/Td helpers)
-// ✅ Keeps filter bar (as you already had)
-// ✅ No slider, no pagination, no horizontal scrollbar
-// ==============================
+
 import { useMemo, useState } from "react";
 import { cn } from "../ui/utils";
 

@@ -3,10 +3,11 @@ import { CustomerCenter } from "./CustomerCenter";
 import { InvoiceDetail } from "../InvoiceDetail";
 import { CustomerRegistry } from "./CustomerRegistry";
 import { CustomerDetail } from "./CustomerDetail";
+import { CustomerOperations } from "./CustomerOperations";
 
 const CUSTOMER_TABS = [
- 
   { id: "registry", label: "Customer Center" },
+  { id: "operations", label: "Customer Operations" },
 ];
 
 export function CustomerWorkspace() {
@@ -74,8 +75,6 @@ export function CustomerWorkspace() {
         </div>
       </div>
 
-    
-
       {activeTab === "registry" && (
         <CustomerRegistry
           onSelectCustomer={(customer) => {
@@ -84,6 +83,8 @@ export function CustomerWorkspace() {
           }}
         />
       )}
+
+      {activeTab === "operations" && <CustomerOperations />}
     </div>
   );
 }

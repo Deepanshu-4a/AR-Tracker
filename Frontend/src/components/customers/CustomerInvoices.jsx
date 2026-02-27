@@ -24,52 +24,12 @@ export function CustomerInvoices({ customerId, customerName, onViewInvoice }) {
 
   // Invoices are relational (tagged with project + job)
   const invoices = [
-    {
-      id: "INV-10234",
-      customerId: "CL001",
-      projectId: "P1001",
-      jobId: "J1001",
-      period: "Jan 2026",
-      amount: 125000,
-      status: "Sent",
-    },
-    {
-      id: "INV-10212",
-      customerId: "CL001",
-      projectId: "P1001",
-      jobId: "J1002",
-      period: "Dec 2025",
-      amount: 98000,
-      status: "Sent",
-    },
-    {
-      id: "INV-10188",
-      customerId: "CL001",
-      projectId: "P1002",
-      jobId: "J1003",
-      period: "Nov 2025",
-      amount: 67000,
-      status: "Draft",
-    },
-    {
-      id: "INV-20201",
-      customerId: "CL002",
-      projectId: "P2001",
-      jobId: "J2001",
-      period: "Jan 2026",
-      amount: 54000,
-      status: "Sent",
-    },
-    {
-      id: "INV-30110",
-      customerId: "CL003",
-      projectId: "P3001",
-      jobId: "J3001",
-      period: "Jan 2026",
-      amount: 22000,
-      status: "Draft",
-    },
-  ];
+  { id:"INV-10234", customerId:"CLN-001", projectId:"P1001", jobId:"J1001", period:"Jan 2026", amount:125000, status:"Sent" },
+  { id:"INV-10212", customerId:"CLN-001", projectId:"P1001", jobId:"J1002", period:"Dec 2025", amount:98000,  status:"Sent" },
+  { id:"INV-10188", customerId:"CLN-001", projectId:"P1002", jobId:"J1003", period:"Nov 2025", amount:67000,  status:"Draft" },
+  { id:"INV-20201", customerId:"CLN-002", projectId:"P2001", jobId:"J2001", period:"Jan 2026", amount:54000,  status:"Sent" },
+  { id:"INV-30110", customerId:"CLN-003", projectId:"P3001", jobId:"J3001", period:"Jan 2026", amount:22000,  status:"Draft" },
+];
 
   /* ================= FILTER BY CUSTOMER ================= */
 

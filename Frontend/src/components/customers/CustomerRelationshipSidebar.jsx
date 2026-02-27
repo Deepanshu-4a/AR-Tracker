@@ -51,15 +51,11 @@ const SAMPLE_RELATIONSHIPS = [
   },
 ];
 
-/* ================= MOCK TRANSACTIONS (from screenshot vibe) ================= */
+/* ================= TRANSACTIONS LIST ================= */
 const SAMPLE_TRANSACTIONS = [
-  "Invoices",
-  "Payments",
-  "Credit Charges",
-  "Credit Payments",
-  "Misc Receipts",
-  "Misc Payments",
-  "Adjustments",
+  "Statement Charges",
+  "Sales reciepts",
+  "Credit Memos",
   "Refunds",
 ];
 
@@ -127,7 +123,7 @@ function flattenTree(customers, expanded) {
 /* ================= component ================= */
 
 export function CustomerRelationshipSidebar({ items, selectedId, onSelect }) {
-  const [activeTab, setActiveTab] = useState("customers"); // ✅ NEW: customers | transactions
+  const [activeTab, setActiveTab] = useState("customers");
 
   const base = items?.length ? items : SAMPLE_RELATIONSHIPS;
 
@@ -148,7 +144,7 @@ export function CustomerRelationshipSidebar({ items, selectedId, onSelect }) {
   return (
     <div className="w-[320px] shrink-0">
       <div className="rounded-2xl border border-border/60 bg-card shadow-lg overflow-hidden">
-        {/* ✅ NEW: Tabs like screenshot */}
+       
         <div className="border-b border-border/60 bg-muted/20">
           <div className="flex">
             <button
@@ -179,11 +175,11 @@ export function CustomerRelationshipSidebar({ items, selectedId, onSelect }) {
           </div>
         </div>
 
-        {/* ✅ BODY */}
+       
         {activeTab === "customers" ? (
           <div className="h-[560px] overflow-y-auto overflow-x-hidden">
-            <table className="w-full text-xs table-fixed">
-              <thead className="sticky top-0 z-10 bg-muted/40 text-muted-foreground text-[11px] uppercase tracking-wide">
+            <table className="w-full text-sm table-fixed">
+              <thead className="sticky top-0 z-10 bg-muted/40 text-muted-foreground text-xs uppercase tracking-wide">
                 <tr>
                   <Th className="w-[58%] px-2 py-1.5">Name</Th>
                   <Th className="w-[28%] text-right px-2 py-1.5">Balan.</Th>
@@ -194,7 +190,7 @@ export function CustomerRelationshipSidebar({ items, selectedId, onSelect }) {
               <tbody>
                 {rows.map((r, i) => {
                   const isActive = r.id === selectedId;
-                  const pad = 6 + r.depth * 12;
+                  const pad = r.depth === 0 ? 0 : r.depth * 4;
 
                   return (
                     <tr
@@ -247,7 +243,7 @@ export function CustomerRelationshipSidebar({ items, selectedId, onSelect }) {
                           <span
                             className={cn(
                               "truncate leading-tight",
-                              r.depth === 0 ? "font-semibold" : "font-medium"
+                              r.depth === 0 ? "font-medium" : "font-medium"
                             )}
                           >
                             {r.name ?? "—"}
@@ -280,7 +276,7 @@ export function CustomerRelationshipSidebar({ items, selectedId, onSelect }) {
                   <tr className="border-t">
                     <td
                       colSpan={3}
-                      className="px-2 py-4 text-center text-xs text-muted-foreground"
+                      className="px-2 py-4 text-center text-sm text-muted-foreground"
                     >
                       No results
                     </td>
@@ -290,14 +286,14 @@ export function CustomerRelationshipSidebar({ items, selectedId, onSelect }) {
             </table>
           </div>
         ) : (
-          // ✅ Transactions Tab (list like screenshot)
+          
           <div className="h-[560px] overflow-y-auto overflow-x-hidden bg-white">
             <div className="py-2">
               {SAMPLE_TRANSACTIONS.map((label) => (
                 <button
                   key={label}
                   type="button"
-                  className="w-full text-left px-3 py-1.5 text-xs text-slate-700 hover:bg-muted/20"
+                  className="w-full text-left px-3 py-1.5 text-sm text-slate-700 hover:bg-muted/20"
                 >
                   {label}
                 </button>

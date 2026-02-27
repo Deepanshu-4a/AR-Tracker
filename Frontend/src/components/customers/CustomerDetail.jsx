@@ -8,10 +8,14 @@ import { RightSidePanel } from "../shared/RightSidePanel";
 import { CustomerTransactions } from "./CustomerTransactions";
 import { CustomerContacts } from "./CustomerContacts";
 import { CustomerToDos } from "./CustomerToDos";
+import { CustomerPayments } from "./CustomerPayments";
+import { CustomerInvoices } from "./CustomerInvoices";
 
 const DETAIL_TABS = [
   { id: "transactions", label: "Transactions" },
   { id: "projects", label: "Projects" },
+  { id: "payment history", label: "Payment History" },
+  {id:"invoice history",label:"Invoice History"},
   { id: "estimates", label: "Estimates" },
   { id: "contacts", label: "Contacts" },
   { id: "todos", label: "ToDo's" },
@@ -30,6 +34,12 @@ export function CustomerDetail({ customer, onBack }) {
 
       case "estimates":
         return <CustomerEstimates customerId={customer.id} />;
+
+      case "payment history":
+        return <CustomerPayments customerId={customer.id}/>;
+
+      case "invoice history":
+        return <CustomerInvoices customerId={customer.id}/>;
 
       case "transactions":
         return <CustomerTransactions customerId={customer.id} />;

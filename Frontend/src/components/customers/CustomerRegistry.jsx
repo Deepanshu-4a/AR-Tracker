@@ -31,7 +31,7 @@ export function CustomerRegistry({
   customers: propCustomers,
   onSelectCustomer,
 }) {
-  // ✅ bring CustomerCenter toolbar features in here (search + create)
+  
   const [searchTerm, setSearchTerm] = useState("");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
 
@@ -49,10 +49,10 @@ export function CustomerRegistry({
     });
   }, [propCustomers]);
 
-  // ✅ Filter state (kept as-is)
+  
   const [activeFilter, setActiveFilter] = useState("all");
 
-  // ✅ Apply filters (kept as-is)
+  
   const filteredRows = useMemo(() => {
     if (activeFilter === "with")
       return baseRows.filter((r) => (r.placements ?? 0) > 0);
@@ -61,7 +61,7 @@ export function CustomerRegistry({
     return baseRows;
   }, [baseRows, activeFilter]);
 
-  // ✅ Search is applied on top of existing filters (doesn't remove anything)
+  
   const searchedRows = useMemo(() => {
     const q = searchTerm.trim().toLowerCase();
     if (!q) return filteredRows;

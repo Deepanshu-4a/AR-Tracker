@@ -1,17 +1,6 @@
-// ==============================
-// CustomerRelationshipSidebar.jsx
-// ✅ Same UI vibe as Transactions (Tailwind)
-// ✅ TRUE 3-LEVEL TREE: Customer -> Projects -> Jobs (as in screenshot)
-// ✅ Indentation + expand/collapse per level
-// ✅ Green selected row across full width
-// ✅ Header + rows like a grid (NAME | BALAN. | ATT.)
-// ==============================
+
 import { useMemo, useState } from "react";
 import { cn } from "../ui/utils";
-
-/* ================= MOCK TREE DATA =================
-   Customer -> Projects -> Jobs
-*/
 const SAMPLE_RELATIONSHIPS = [
   {
     id: "C-INNOSOFT",
@@ -254,10 +243,7 @@ export function CustomerRelationshipSidebar({ items, selectedId, onSelect }) {
     return init;
   });
 
-  const rows = useMemo(
-    () => flattenTree(base, expanded, q),
-    [base, expanded, q],
-  );
+  const rows = useMemo(() => flattenTree(base, expanded, q), [base, expanded, q]);
 
   const toggle = (expandKey) =>
     setExpanded((prev) => ({ ...prev, [expandKey]: !prev[expandKey] }));
@@ -291,25 +277,16 @@ export function CustomerRelationshipSidebar({ items, selectedId, onSelect }) {
               title="Search"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                <circle
-                  cx="11"
-                  cy="11"
-                  r="7"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                />
-                <path
-                  d="M20 20l-3.5-3.5"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                />
+                <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" />
+                <path d="M20 20l-3.5-3.5" stroke="currentColor" strokeWidth="2" />
               </svg>
             </button>
           </div>
         </div>
 
         {/* Scrollable grid like your other tables */}
-        <div className="h-[560px] overflow-y-auto">
+        {/* ✅ CHANGE: prevent horizontal scrollbar without changing UI */}
+        <div className="h-[560px] overflow-y-auto overflow-x-hidden">
           <table className="w-full text-sm table-fixed">
             <thead className="sticky top-0 z-10 bg-muted/40 text-muted-foreground text-xs uppercase tracking-wide">
               <tr>
@@ -334,23 +311,15 @@ export function CustomerRelationshipSidebar({ items, selectedId, onSelect }) {
                       isActive
                         ? "bg-orange-500 text-white"
                         : i % 2 === 0
-                          ? "bg-white"
-                          : "bg-muted/10",
-                      !isActive && "hover:bg-muted/30",
+                        ? "bg-white"
+                        : "bg-muted/10",
+                      !isActive && "hover:bg-muted/30"
                     )}
                     onClick={() => onSelect?.(r)}
                     style={{ cursor: "pointer" }}
                   >
-                    <Td
-                      className={cn(
-                        "truncate",
-                        isActive ? "" : "text-slate-700",
-                      )}
-                    >
-                      <div
-                        className="flex items-center gap-2"
-                        style={{ paddingLeft: pad }}
-                      >
+                    <Td className={cn("truncate", isActive ? "" : "text-slate-700")}>
+                      <div className="flex items-center gap-2" style={{ paddingLeft: pad }}>
                         {/* caret for expandable nodes */}
                         {r.hasChildren ? (
                           <button
@@ -363,11 +332,9 @@ export function CustomerRelationshipSidebar({ items, selectedId, onSelect }) {
                               "w-6 h-6 grid place-items-center rounded-md border",
                               isActive
                                 ? "border-white/25 hover:bg-white/10"
-                                : "border-border hover:bg-muted/40",
+                                : "border-border hover:bg-muted/40"
                             )}
-                            aria-label={
-                              expanded[r.expandKey] ? "Collapse" : "Expand"
-                            }
+                            aria-label={expanded[r.expandKey] ? "Collapse" : "Expand"}
                           >
                             <span className="text-xs leading-none">
                               {expanded[r.expandKey] ? "▾" : "▸"}
@@ -380,7 +347,7 @@ export function CustomerRelationshipSidebar({ items, selectedId, onSelect }) {
                         <span
                           className={cn(
                             "truncate",
-                            r.depth === 0 ? "font-semibold" : "font-medium",
+                            r.depth === 0 ? "font-semibold" : "font-medium"
                           )}
                         >
                           {r.name ?? "—"}
@@ -391,18 +358,13 @@ export function CustomerRelationshipSidebar({ items, selectedId, onSelect }) {
                     <Td
                       className={cn(
                         "text-right tabular-nums font-medium",
-                        isActive ? "" : "text-slate-700",
+                        isActive ? "" : "text-slate-700"
                       )}
                     >
                       {fmtBal(r.balance)}
                     </Td>
 
-                    <Td
-                      className={cn(
-                        "text-center",
-                        isActive ? "" : "text-slate-700",
-                      )}
-                    >
+                    <Td className={cn("text-center", isActive ? "" : "text-slate-700")}>
                       {r.att ?? ""}
                     </Td>
                   </tr>
@@ -431,19 +393,12 @@ export function CustomerRelationshipSidebar({ items, selectedId, onSelect }) {
 
 function Th({ children, className }) {
   return (
-    <th
-      className={cn(
-        "px-3 py-2 text-left font-medium whitespace-nowrap",
-        className,
-      )}
-    >
+    <th className={cn("px-3 py-2 text-left font-medium whitespace-nowrap", className)}>
       {children}
     </th>
   );
 }
 
 function Td({ children, className }) {
-  return (
-    <td className={cn("px-3 py-2 whitespace-nowrap", className)}>{children}</td>
-  );
+  return <td className={cn("px-3 py-2 whitespace-nowrap", className)}>{children}</td>;
 }

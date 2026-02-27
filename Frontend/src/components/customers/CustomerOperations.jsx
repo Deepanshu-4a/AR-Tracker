@@ -1,7 +1,4 @@
-// ==============================
-// CustomerOperations.jsx
-// ONLY Customer & Jobs tab
-// ==============================
+
 import { useState } from "react";
 import { cn } from "../ui/utils";
 

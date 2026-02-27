@@ -1,13 +1,7 @@
-// ==============================
-// CustomerContacts.jsx (UPDATED)
-// ✅ Uses SAME table styling as CustomerTransactions (Tailwind classes + Th/Td helpers)
-// ✅ Keeps: NO slider, NO pagination, NO horizontal scrollbar
-// ✅ Removes inline th/td styles and matches fonts/spacing/colors from transactions table
-// ==============================
+
 import { useMemo } from "react";
 import { cn } from "../ui/utils";
 
-/* ─── MOCK DATA (NO PHONES) ─────────────────────────── */
 const mockContacts = [
   { name: "Ava Thompson", info: "ava.thompson@cyberinfotek.com" },
   { name: "Noah Patel", info: "noah.patel@nlbservices.com" },
@@ -23,7 +17,7 @@ export function CustomerContacts({ contacts: propContacts }) {
 
   return (
     <div className="flex flex-col h-full min-w-0">
-      {/* ================= TABLE (same as Transactions) ================= */}
+     
       <div className="border border-border rounded-xl overflow-hidden">
         <table className="w-full text-sm table-fixed">
           <thead className="bg-muted/40 text-muted-foreground text-xs uppercase tracking-wide">
@@ -66,7 +60,7 @@ export function CustomerContacts({ contacts: propContacts }) {
   );
 }
 
-/* ================= SMALL COMPONENTS (same as Transactions) ================= */
+
 
 function Th({ children, className }) {
   return (

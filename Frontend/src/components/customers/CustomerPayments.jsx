@@ -1,7 +1,4 @@
-// ==============================
-// CustomerPayments.jsx (UPDATED)
-// - Status column removed
-// ==============================
+
 import { useMemo } from "react";
 
 import { Card } from "../ui/card";

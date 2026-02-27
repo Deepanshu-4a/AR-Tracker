@@ -8,7 +8,7 @@ import { CreateProjectModal } from "../CreateProjectModal";
 
 const uid = () => crypto.randomUUID();
 
-/* ================= MOCK DATA ================= */
+
 
 const mockProjects = [
   {

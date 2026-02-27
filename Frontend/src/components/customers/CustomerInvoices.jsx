@@ -20,9 +20,7 @@ import {
 import { FileText, MoreVertical, Send, Eye, Download } from "lucide-react";
 
 export function CustomerInvoices({ customerId, customerName, onViewInvoice }) {
-  /* ================= MOCK DATA ================= */
 
-  // Invoices are relational (tagged with project + job)
   const invoices = [
   { id:"INV-10234", customerId:"CLN-001", projectId:"P1001", jobId:"J1001", period:"Jan 2026", amount:125000, status:"Sent" },
   { id:"INV-10212", customerId:"CLN-001", projectId:"P1001", jobId:"J1002", period:"Dec 2025", amount:98000,  status:"Sent" },

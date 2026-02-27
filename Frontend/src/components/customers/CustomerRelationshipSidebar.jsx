@@ -1,303 +1,449 @@
+// ==============================
 // CustomerRelationshipSidebar.jsx
-// Matches the screenshot: tree hierarchy, indented children, classic Windows grid UI
+// ✅ Same UI vibe as Transactions (Tailwind)
+// ✅ TRUE 3-LEVEL TREE: Customer -> Projects -> Jobs (as in screenshot)
+// ✅ Indentation + expand/collapse per level
+// ✅ Green selected row across full width
+// ✅ Header + rows like a grid (NAME | BALAN. | ATT.)
+// ==============================
 import { useMemo, useState } from "react";
+import { cn } from "../ui/utils";
 
+/* ================= MOCK TREE DATA =================
+   Customer -> Projects -> Jobs
+*/
 const SAMPLE_RELATIONSHIPS = [
   {
-    id: "ESG", name: "ESG", balance: 54050, att: "A",
-    children: [
-      { id: "DOJ", name: "DOJ", balance: 54050, att: "" },
-      { id: "EOIR", name: "EOIR", balance: 54050, att: "" },
-      { id: "BY", name: "BY", balance: 54050, att: "" },
-    ],
-  },
-  { id: "EXELON", name: "Exelon Business Service Co.", balance: 0, att: "" },
-  { id: "GCS", name: "GLOBAL CERTIFICATION SERVICES", balance: 0, att: "" },
-  { id: "GSA", name: "GSA MAS IFF", balance: 0, att: "" },
-  { id: "INFIC", name: "InfiCare Technologies", balance: 0, att: "" },
-  { id: "INNOSOFT", name: "Innosoft Corporation.", balance: 0, att: "" },
-  {
-    id: "IRIS", name: "RS", balance: 291.66, att: "",
-    children: [
-      { id: "TEGE", name: "TEGE", balance: 291.66, att: "" },
-    ],
+    id: "C-INNOSOFT",
+    type: "customer",
+    name: "Innosoft Corporation.",
+    balance: 0,
+    att: "",
+    projects: [],
   },
   {
-    id: "PH_GROUP", name: "Phase1", balance: 0, att: "",
-    children: [
-      { id: "PH2", name: "Phase2", balance: 0, att: "" },
-      { id: "PH3", name: "Phase3", balance: 291.66, att: "" },
-    ],
-  },
-  {
-    id: "KFORCE", name: "KFORCE", balance: 0, att: "",
-    children: [
-      { id: "PLUTO", name: "Pluto", balance: 0, att: "" },
+    id: "C-IRS",
+    type: "customer",
+    name: "IRS",
+    balance: 0,
+    att: "",
+    projects: [
+      {
+        id: "P-TEGE",
+        type: "project",
+        name: "TEGE",
+        balance: 0,
+        att: "",
+        jobs: [
+          { id: "J-PH1", type: "job", name: "Phase1", balance: 0, att: "" },
+          { id: "J-PH2", type: "job", name: "Phase2", balance: 0, att: "" },
+          { id: "J-PH3", type: "job", name: "Phase3", balance: 0, att: "" },
+        ],
+      },
     ],
   },
   {
-    id: "MD", name: "MD", balance: 1465.9, att: "",
-    children: [
-      { id: "ATR", name: "ATR", balance: 890.15, att: "" },
-      { id: "TO16", name: "TO#16", balance: 53305, att: "" },
+    id: "C-KFORCE",
+    type: "customer",
+    name: "KFORCE",
+    balance: 0,
+    att: "",
+    projects: [
+      {
+        id: "P-PLUTO",
+        type: "project",
+        name: "Pluto",
+        balance: 0,
+        att: "",
+        jobs: [],
+      },
+    ],
+  },
+  {
+    id: "C-MD",
+    type: "customer",
+    name: "MD",
+    balance: 1392.0,
+    att: "",
+    projects: [
+      {
+        id: "P-ATR",
+        type: "project",
+        name: "ATR",
+        balance: 816.24,
+        att: "",
+        jobs: [
+          {
+            id: "J-TO16",
+            type: "job",
+            name: "TO#16",
+            balance: 53305,
+            att: "",
+            jobs: [
+              // allow deeper nesting if your real data has it
+              {
+                id: "J-MDHBASE",
+                type: "job",
+                name: "MDH-Base",
+                balance: 53305,
+                att: "",
+              },
+            ],
+          },
+          {
+            id: "J-TO21",
+            type: "job",
+            name: "TO#21",
+            balance: 12769,
+            att: "",
+            jobs: [
+              {
+                id: "J-DHSBASE",
+                type: "job",
+                name: "DHS-Base",
+                balance: 12769,
+                att: "",
+              },
+            ],
+          },
+          {
+            id: "J-TO44",
+            type: "job",
+            name: "TO#44",
+            balance: 16935,
+            att: "",
+            jobs: [
+              {
+                id: "J-MDSRABASE",
+                type: "job",
+                name: "MDSRA-Base",
+                balance: 85736,
+                att: "",
+              },
+            ],
+          },
+          {
+            id: "J-MDSRAOY1",
+            type: "job",
+            name: "MDSRA-OY1",
+            balance: 83615,
+            att: "",
+          },
+          { id: "J-TO46", type: "job", name: "TO#46", balance: 65685, att: "" },
+          {
+            id: "J-WDCSBASE",
+            type: "job",
+            name: "WDCS-Base",
+            balance: 65685,
+            att: "",
+          },
+        ],
+      },
     ],
   },
 ];
 
+/* ================= helpers ================= */
+
 function fmtBal(n) {
   const num = Number(n);
-  if (Number.isNaN(num) || num === 0) return "0.00";
+  if (Number.isNaN(num)) return "—";
   return new Intl.NumberFormat("en-US", {
-    minimumFractionDigits: 2,
+    minimumFractionDigits: 0,
     maximumFractionDigits: 2,
   }).format(num);
 }
 
-function flattenRows(items, expanded) {
-  const result = [];
-  for (const item of items) {
-    const hasChildren = item.children?.length > 0;
-    const isExpanded = expanded[item.id];
-    result.push({ ...item, depth: 0, hasChildren, isParent: hasChildren });
-    if (hasChildren && isExpanded) {
-      for (const child of item.children) {
-        result.push({ ...child, depth: 1, hasChildren: false, isParent: false });
+/**
+ * Build a stable "expand key" so customer/project/job can expand independently.
+ */
+function keyOf(node) {
+  return `${node.type}:${node.id}`;
+}
+
+/**
+ * Flatten 3-level tree into rows:
+ * - Customer
+ *   - Project
+ *     - Job
+ * (Jobs may optionally contain nested jobs; handled recursively)
+ */
+function flattenTree(customers, expanded, query) {
+  const q = query.trim().toLowerCase();
+  const out = [];
+
+  const pushRow = (node, depth, hasChildren) => {
+    out.push({
+      ...node,
+      depth,
+      hasChildren,
+      expandKey: keyOf(node),
+    });
+  };
+
+  const match = (node) =>
+    String(node.name ?? "")
+      .toLowerCase()
+      .includes(q);
+
+  const walkJobs = (jobs, depth) => {
+    for (const j of jobs || []) {
+      const childJobs = j.jobs || [];
+      const hasChildren = childJobs.length > 0;
+      const k = keyOf(j);
+
+      if (q) {
+        // when searching, just show matches (and their parent path is not required here)
+        if (match(j)) pushRow(j, depth, hasChildren);
+        walkJobs(childJobs, depth + 1);
+      } else {
+        pushRow(j, depth, hasChildren);
+        if (hasChildren && expanded[k]) walkJobs(childJobs, depth + 1);
+      }
+    }
+  };
+
+  for (const c of customers) {
+    const hasProjects = (c.projects || []).length > 0;
+    const ck = keyOf(c);
+
+    if (q) {
+      if (match(c)) pushRow(c, 0, hasProjects);
+      for (const p of c.projects || []) {
+        const hasJobs = (p.jobs || []).length > 0;
+        if (match(p)) pushRow(p, 1, hasJobs);
+        walkJobs(p.jobs || [], 2);
+      }
+      continue;
+    }
+
+    pushRow(c, 0, hasProjects);
+
+    if (hasProjects && expanded[ck]) {
+      for (const p of c.projects || []) {
+        const hasJobs = (p.jobs || []).length > 0;
+        const pk = keyOf(p);
+
+        pushRow(p, 1, hasJobs);
+
+        if (hasJobs && expanded[pk]) {
+          walkJobs(p.jobs || [], 2);
+        }
       }
     }
   }
-  return result;
+
+  return out;
 }
 
-export function CustomerRelationshipSidebar({
-  items,
-  selectedId,
-  onSelect,
-  height = 580,
-}) {
+/* ================= component ================= */
+
+export function CustomerRelationshipSidebar({ items, selectedId, onSelect }) {
   const [group, setGroup] = useState("Active Customers");
   const [q, setQ] = useState("");
-  const [expanded, setExpanded] = useState(() => {
-    // Start with all parents expanded to match screenshot
-    const init = {};
-    SAMPLE_RELATIONSHIPS.forEach((r) => { if (r.children?.length) init[r.id] = true; });
-    return init;
-  });
 
   const base = items?.length ? items : SAMPLE_RELATIONSHIPS;
 
-  const rows = useMemo(() => {
-    const query = q.trim().toLowerCase();
-    if (query) {
-      // Flat search
-      const flat = [];
-      for (const r of base) {
-        if (String(r.name).toLowerCase().includes(query))
-          flat.push({ ...r, depth: 0, hasChildren: false, isParent: false });
-        if (r.children) {
-          for (const c of r.children) {
-            if (String(c.name).toLowerCase().includes(query))
-              flat.push({ ...c, depth: 1, hasChildren: false, isParent: false });
-          }
-        }
-      }
-      return flat;
+  // expand default: customers + projects expanded (like screenshot)
+  const [expanded, setExpanded] = useState(() => {
+    const init = {};
+    for (const c of base) {
+      init[keyOf(c)] = true;
+      for (const p of c.projects || []) init[keyOf(p)] = true;
     }
-    return flattenRows(base, expanded);
-  }, [base, q, expanded]);
+    return init;
+  });
 
-  const toggleExpand = (id) => {
-    setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
-  };
+  const rows = useMemo(
+    () => flattenTree(base, expanded, q),
+    [base, expanded, q],
+  );
 
-  const border = "#b0b0b0";
-  const grid = "#d0d0d0";
-  const headerBg = "#e8e8e8";
-  const selectGreen = "#3a7a10";
+  const toggle = (expandKey) =>
+    setExpanded((prev) => ({ ...prev, [expandKey]: !prev[expandKey] }));
 
   return (
-    <div
-      style={{
-        width: 300,
-        border: `1px solid ${border}`,
-        background: "#f0f0f0",
-        boxSizing: "border-box",
-        fontFamily: "Tahoma, Arial, sans-serif",
-        fontSize: 11,
-        display: "flex",
-        flexDirection: "column",
-        flexShrink: 0,
-      }}
-    >
-      {/* Controls */}
-      <div style={{ padding: "5px 5px 4px" }}>
-        <select
-          value={group}
-          onChange={(e) => setGroup(e.target.value)}
-          style={{
-            width: "100%",
-            height: 22,
-            border: `1px solid ${border}`,
-            background: "#fff",
-            outline: "none",
-            padding: "0 4px",
-            fontSize: 11,
-            fontFamily: "Tahoma, Arial, sans-serif",
-          }}
-        >
-          <option>Active Customers</option>
-          <option>All Customers</option>
-          <option>Inactive Customers</option>
-        </select>
-
-        <div style={{ display: "flex", gap: 4, marginTop: 4 }}>
-          <input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder=""
-            style={{
-              flex: 1,
-              height: 21,
-              border: `1px solid ${border}`,
-              background: "#fff",
-              outline: "none",
-              padding: "0 4px",
-              fontSize: 11,
-              fontFamily: "Tahoma, Arial, sans-serif",
-            }}
-          />
-          <button
-            type="button"
-            style={{
-              width: 24,
-              height: 21,
-              border: `1px solid ${border}`,
-              background: "#e8e8e8",
-              cursor: "pointer",
-              display: "grid",
-              placeItems: "center",
-              padding: 0,
-            }}
+    <div className="w-[320px] shrink-0">
+      <div className="rounded-2xl border border-border/60 bg-card shadow-lg overflow-hidden">
+        {/* Controls (same vibe as app) */}
+        <div className="px-4 py-4 border-b border-border/60 bg-muted/30 space-y-3">
+          <select
+            value={group}
+            onChange={(e) => setGroup(e.target.value)}
+            className="w-full h-10 border border-border rounded-md px-2 bg-background text-sm"
           >
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
-              <circle cx="10" cy="10" r="6.5" stroke="#444" strokeWidth="2.2" />
-              <path d="M18 18l-3-3" stroke="#444" strokeWidth="2.2" strokeLinecap="round" />
-            </svg>
-          </button>
-        </div>
-      </div>
+            <option>Active Customers</option>
+            <option>All Customers</option>
+            <option>Inactive Customers</option>
+          </select>
 
-      {/* Column Headers */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 78px 32px",
-          background: headerBg,
-          borderTop: `1px solid ${border}`,
-          borderBottom: `1px solid ${border}`,
-          fontWeight: 700,
-          color: "#222",
-          fontSize: 11,
-          userSelect: "none",
-        }}
-      >
-        <div style={{ padding: "3px 6px", borderRight: `1px solid ${grid}` }}>NAME</div>
-        <div style={{ padding: "3px 6px", textAlign: "right", borderRight: `1px solid ${grid}` }}>BALAN.</div>
-        <div style={{ padding: "3px 4px", textAlign: "center" }}>ATT.</div>
-      </div>
+          <div className="flex gap-2">
+            <input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Search..."
+              className="h-10 flex-1 border border-border rounded-md px-3 bg-background text-sm outline-none"
+            />
 
-      {/* Body */}
-      <div
-        style={{
-          height,
-          overflowY: "auto",
-          overflowX: "hidden",
-          background: "#fff",
-        }}
-      >
-        {rows.map((r) => {
-          const isActive = r.id === selectedId;
-          const indent = r.depth === 1 ? 16 : 0;
-          const bullet = r.isParent ? "»" : r.depth === 1 ? "»" : "»";
-          // parent rows get » prefix, children also get » (matching screenshot)
-          const prefix = r.depth === 0 && !r.isParent ? "»" : r.depth === 1 ? "»" : "»";
-
-          return (
-            <div
-              key={r.id}
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 78px 32px",
-                alignItems: "center",
-                minHeight: 18,
-                borderBottom: `1px solid ${grid}`,
-                background: isActive ? selectGreen : "#fff",
-                color: isActive ? "#fff" : "#111",
-                cursor: "pointer",
-                fontSize: 11,
-              }}
-              onClick={() => {
-                if (r.isParent) toggleExpand(r.id);
-                onSelect?.(r);
-              }}
+            <button
+              type="button"
+              className="h-10 w-10 border border-border rounded-md bg-background hover:bg-muted/40 transition grid place-items-center"
+              title="Search"
             >
-              {/* Name cell */}
-              <div
-                style={{
-                  padding: "2px 4px 2px",
-                  paddingLeft: 4 + indent,
-                  borderRight: `1px solid ${isActive ? "rgba(255,255,255,0.3)" : grid}`,
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 2,
-                }}
-              >
-                <span style={{ color: isActive ? "#cfe8b0" : "#555", fontWeight: 700, fontSize: 10 }}>
-                  {prefix}
-                </span>
-                <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{r.name}</span>
-              </div>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <circle
+                  cx="11"
+                  cy="11"
+                  r="7"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                />
+                <path
+                  d="M20 20l-3.5-3.5"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
 
-              {/* Balance cell */}
-              <div
-                style={{
-                  padding: "2px 5px",
-                  textAlign: "right",
-                  borderRight: `1px solid ${isActive ? "rgba(255,255,255,0.3)" : grid}`,
-                  fontVariantNumeric: "tabular-nums",
-                  letterSpacing: "0.02em",
-                }}
-              >
-                {fmtBal(r.balance)}
-              </div>
+        {/* Scrollable grid like your other tables */}
+        <div className="h-[560px] overflow-y-auto">
+          <table className="w-full text-sm table-fixed">
+            <thead className="sticky top-0 z-10 bg-muted/40 text-muted-foreground text-xs uppercase tracking-wide">
+              <tr>
+                <Th className="w-[60%]">Name</Th>
+                <Th className="w-[30%] text-right">Balan.</Th>
+                <Th className="w-[10%] text-center">Att.</Th>
+              </tr>
+            </thead>
 
-              {/* ATT cell */}
-              <div style={{ padding: "2px 4px", textAlign: "center" }}>
-                {r.att ?? ""}
-              </div>
-            </div>
-          );
-        })}
+            <tbody>
+              {rows.map((r, i) => {
+                const isActive = r.id === selectedId;
 
-        {rows.length === 0 && (
-          <div style={{ padding: 8, color: "#666", fontSize: 11 }}>No results</div>
-        )}
+                // indent per depth (customer=0, project=1, job=2, ...)
+                const pad = 10 + r.depth * 16;
+
+                return (
+                  <tr
+                    key={`${r.expandKey}-${i}`}
+                    className={cn(
+                      "border-t transition-colors",
+                      isActive
+                        ? "bg-orange-500 text-white"
+                        : i % 2 === 0
+                          ? "bg-white"
+                          : "bg-muted/10",
+                      !isActive && "hover:bg-muted/30",
+                    )}
+                    onClick={() => onSelect?.(r)}
+                    style={{ cursor: "pointer" }}
+                  >
+                    <Td
+                      className={cn(
+                        "truncate",
+                        isActive ? "" : "text-slate-700",
+                      )}
+                    >
+                      <div
+                        className="flex items-center gap-2"
+                        style={{ paddingLeft: pad }}
+                      >
+                        {/* caret for expandable nodes */}
+                        {r.hasChildren ? (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggle(r.expandKey);
+                            }}
+                            className={cn(
+                              "w-6 h-6 grid place-items-center rounded-md border",
+                              isActive
+                                ? "border-white/25 hover:bg-white/10"
+                                : "border-border hover:bg-muted/40",
+                            )}
+                            aria-label={
+                              expanded[r.expandKey] ? "Collapse" : "Expand"
+                            }
+                          >
+                            <span className="text-xs leading-none">
+                              {expanded[r.expandKey] ? "▾" : "▸"}
+                            </span>
+                          </button>
+                        ) : (
+                          <span className="inline-block w-6" />
+                        )}
+
+                        <span
+                          className={cn(
+                            "truncate",
+                            r.depth === 0 ? "font-semibold" : "font-medium",
+                          )}
+                        >
+                          {r.name ?? "—"}
+                        </span>
+                      </div>
+                    </Td>
+
+                    <Td
+                      className={cn(
+                        "text-right tabular-nums font-medium",
+                        isActive ? "" : "text-slate-700",
+                      )}
+                    >
+                      {fmtBal(r.balance)}
+                    </Td>
+
+                    <Td
+                      className={cn(
+                        "text-center",
+                        isActive ? "" : "text-slate-700",
+                      )}
+                    >
+                      {r.att ?? ""}
+                    </Td>
+                  </tr>
+                );
+              })}
+
+              {rows.length === 0 && (
+                <tr className="border-t">
+                  <td
+                    colSpan={3}
+                    className="px-3 py-8 text-center text-sm text-muted-foreground"
+                  >
+                    No results
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
 }
 
-// ─── Demo wrapper so you can see it standalone ───────────────────────────────
-export default function App() {
-  const [selected, setSelected] = useState("ESG");
+/* ===== helpers (same style as Transactions/Contacts) ===== */
+
+function Th({ children, className }) {
   return (
-    <div style={{ display: "flex", height: "100vh", alignItems: "flex-start", padding: 16, background: "#d4d0c8" }}>
-      <CustomerRelationshipSidebar
-        selectedId={selected}
-        onSelect={(r) => setSelected(r.id)}
-      />
-    </div>
+    <th
+      className={cn(
+        "px-3 py-2 text-left font-medium whitespace-nowrap",
+        className,
+      )}
+    >
+      {children}
+    </th>
+  );
+}
+
+function Td({ children, className }) {
+  return (
+    <td className={cn("px-3 py-2 whitespace-nowrap", className)}>{children}</td>
   );
 }

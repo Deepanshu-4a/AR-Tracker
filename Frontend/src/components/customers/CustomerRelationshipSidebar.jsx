@@ -51,7 +51,7 @@ const SAMPLE_RELATIONSHIPS = [
   },
 ];
 
-/* ================= TRANSACTIONS LIST (updated) ================= */
+/* ================= TRANSACTIONS LIST ================= */
 const SAMPLE_TRANSACTIONS = [
   "Statement Charges",
   "Sales reciepts",
@@ -144,7 +144,7 @@ export function CustomerRelationshipSidebar({ items, selectedId, onSelect }) {
   return (
     <div className="w-[320px] shrink-0">
       <div className="rounded-2xl border border-border/60 bg-card shadow-lg overflow-hidden">
-        {/* Tabs (unchanged styling) */}
+       
         <div className="border-b border-border/60 bg-muted/20">
           <div className="flex">
             <button
@@ -175,7 +175,7 @@ export function CustomerRelationshipSidebar({ items, selectedId, onSelect }) {
           </div>
         </div>
 
-        {/* ✅ FONT: match RightSidePanel (text-sm) */}
+       
         {activeTab === "customers" ? (
           <div className="h-[560px] overflow-y-auto overflow-x-hidden">
             <table className="w-full text-sm table-fixed">
@@ -190,7 +190,7 @@ export function CustomerRelationshipSidebar({ items, selectedId, onSelect }) {
               <tbody>
                 {rows.map((r, i) => {
                   const isActive = r.id === selectedId;
-                  const pad = 6 + r.depth * 12;
+                  const pad = r.depth === 0 ? 0 : r.depth * 4;
 
                   return (
                     <tr
@@ -286,7 +286,7 @@ export function CustomerRelationshipSidebar({ items, selectedId, onSelect }) {
             </table>
           </div>
         ) : (
-          // ✅ FONT: match RightSidePanel (text-sm)
+          
           <div className="h-[560px] overflow-y-auto overflow-x-hidden bg-white">
             <div className="py-2">
               {SAMPLE_TRANSACTIONS.map((label) => (

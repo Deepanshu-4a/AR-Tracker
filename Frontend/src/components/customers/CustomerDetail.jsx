@@ -2,7 +2,6 @@ import { useState } from "react";
 import { cn } from "../ui/utils";
 
 import { CustomerProfileSidebar } from "./CustomerProfileSidebar";
-import { CustomerProjects } from "./CustomerProjects";
 import { CustomerEstimates } from "./CustomerEstimates";
 import { RightSidePanel } from "../shared/RightSidePanel";
 import { CustomerTransactions } from "./CustomerTransactions";
@@ -13,7 +12,6 @@ import { CustomerInvoices } from "./CustomerInvoices";
 
 const DETAIL_TABS = [
   { id: "transactions", label: "Transactions" },
-  { id: "projects", label: "Projects" },
   { id: "payment history", label: "Payment History" },
   {id:"invoice history",label:"Invoice History"},
   { id: "estimates", label: "Estimates" },
@@ -29,8 +27,6 @@ export function CustomerDetail({ customer, onBack }) {
 
   const renderActiveTab = () => {
     switch (activeTab) {
-      case "projects":
-        return <CustomerProjects customerId={customer.id} />;
 
       case "estimates":
         return <CustomerEstimates customerId={customer.id} />;

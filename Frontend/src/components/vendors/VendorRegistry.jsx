@@ -69,7 +69,7 @@ const VENDOR_COLS = [
   { key: "activeConsultants", label: "Active Consultants", w: 170 },
 ];
 
-// Frozen widths (same idea as customer registry, but only 2 frozen cols)
+// Frozen widths
 const FROZEN_W = { name: 220, id: 140 };
 const FROZEN_LEFT = { name: 0, id: FROZEN_W.name };
 

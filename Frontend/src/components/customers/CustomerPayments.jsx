@@ -1,11 +1,8 @@
-// ==============================
-// CustomerPayments.jsx (UPDATED)
-// - Status column removed
-// ==============================
+
 import { useMemo } from "react";
 
-import { Card } from "../components/ui/card";
-import { Button } from "../components/ui/button";
+import { Card } from "../ui/card";
+import { Button } from "../ui/button";
 import {
   Table,
   TableHeader,
@@ -13,51 +10,51 @@ import {
   TableHead,
   TableBody,
   TableCell,
-} from "../components/ui/table";
+} from "../ui/table";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "../components/ui/dropdown-menu";
+} from "../ui/dropdown-menu";
 import { CreditCard, MoreVertical, Eye, Download, Plus } from "lucide-react";
 
 export function CustomerPayments({ customerId, customerName }) {
   // Mock payments (scoped by customerId)
-  const payments = [
-    {
-      id: "PMT-9001",
-      customerId: "CL001",
-      date: "2026-01-18",
-      amount: 42000,
-      method: "ACH",
-      appliedTo: ["INV-10212"],
-    },
-    {
-      id: "PMT-9002",
-      customerId: "CL001",
-      date: "2025-12-28",
-      amount: 67000,
-      method: "Wire",
-      appliedTo: ["INV-10188"],
-    },
-    {
-      id: "PMT-9101",
-      customerId: "CL002",
-      date: "2026-02-02",
-      amount: 15000,
-      method: "Card",
-      appliedTo: [],
-    },
-    {
-      id: "PMT-9203",
-      customerId: "CL003",
-      date: "2026-01-10",
-      amount: 5000,
-      method: "Check",
-      appliedTo: ["INV-30110"],
-    },
-  ];
+ const payments = [
+  {
+    id: "PMT-9001",
+    customerId: "CLN-001",
+    date: "2026-01-18",
+    amount: 42000,
+    method: "ACH",
+    appliedTo: ["INV-10212"],
+  },
+  {
+    id: "PMT-9002",
+    customerId: "CLN-001",
+    date: "2025-12-28",
+    amount: 67000,
+    method: "Wire",
+    appliedTo: ["INV-10188"],
+  },
+  {
+    id: "PMT-9101",
+    customerId: "CLN-002",
+    date: "2026-02-02",
+    amount: 15000,
+    method: "Card",
+    appliedTo: [],
+  },
+  {
+    id: "PMT-9203",
+    customerId: "CLN-003",
+    date: "2026-01-10",
+    amount: 5000,
+    method: "Check",
+    appliedTo: ["INV-30110"],
+  },
+];
 
   const scopedPayments = useMemo(() => {
     return payments.filter((p) => p.customerId === customerId);

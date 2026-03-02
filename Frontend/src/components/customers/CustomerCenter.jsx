@@ -1,20 +1,19 @@
 
 
 import { useMemo, useState } from "react";
-import { Card } from "./ui/card";
-import { Input } from "./ui/input";
-import { Button } from "./ui/button";
-import { Badge } from "./ui/badge";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "./ui/tabs";
-import { Avatar, AvatarFallback } from "./ui/avatar";
+import { Card } from "../ui/card";
+import { Input } from "../ui/input";
+import { Button } from "../ui/button";
+import { Badge } from "../ui/badge";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "../ui/tabs";
+import { Avatar, AvatarFallback } from "../ui/avatar";
 import { Search01Icon as Search } from "hugeicons-react";
 import { Users, Plus, Download, FileText } from "lucide-react";
 
-import { CreateEstimateModal } from "./CreateEstimateModal";
-import { CustomerOverview } from "./CustomerOverview";
-import { RightSidePanel } from "./shared/RightSidePanel";
+import { CreateEstimateModal } from "../CreateEstimateModal";
+import { RightSidePanel } from "../shared/RightSidePanel";
 import { CustomerPayments } from "./CustomerPayments";
-import { CreateCustomerModal } from "./customers/CreateCustomerModal";
+import { CreateCustomerModal } from "./CreateCustomerModal";
 import { CustomerInvoices } from "./CustomerInvoices"; // <-- adjust path if needed
 import { CustomerBillingRules } from "./CustomerBillingRules";
 
@@ -184,10 +183,6 @@ export function CustomerCenter({ onViewInvoice }) {
                 {/* ✅ NEW TAB */}
                 <TabsTrigger value="registry">Customer Registry</TabsTrigger>
               </TabsList>
-
-              <TabsContent value="overview">
-                <CustomerOverview customer={selectedCustomer} />
-              </TabsContent>
 
               <TabsContent value="invoices">
                 <CustomerInvoices

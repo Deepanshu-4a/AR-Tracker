@@ -1,17 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
-import { Card } from "./ui/card";
-import { Button } from "./ui/button";
-import { Badge } from "./ui/badge";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
-import { Switch } from "./ui/switch";
+import { Card } from "../ui/card";
+import { Button } from "../ui/button";
+import { Badge } from "../ui/badge";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import { Switch } from "../ui/switch";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "./ui/select";
+} from "../ui/select";
 
 const initialProfiles = {
   CL001: {

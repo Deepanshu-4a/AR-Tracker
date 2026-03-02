@@ -1,36 +1,37 @@
 import { useState } from "react";
 import { CustomerCenter } from "./CustomerCenter";
-import { InvoiceDetail } from "./InvoiceDetail";
+import { InvoiceDetail } from "../InvoiceDetail";
 import { CustomerRegistry } from "./CustomerRegistry";
 import { CustomerDetail } from "./CustomerDetail";
+import { CustomerOperations } from "./CustomerOperations";
 
 const CUSTOMER_TABS = [
-  { id: "center", label: "Customer Center" },
-  { id: "registry", label: "Customer Registry" },
+  { id: "registry", label: "Customer Center" },
+  { id: "operations", label: "Customer Operations" },
 ];
 
 export function CustomerWorkspace() {
-  const [activeTab, setActiveTab] = useState("center");
+  const [activeTab, setActiveTab] = useState("registry");
   const [activeInvoiceId, setActiveInvoiceId] = useState(null);
   const [activeCustomer, setActiveCustomer] = useState(null);
 
   // -----------------------------
   // CUSTOMER DETAIL VIEW
   // -----------------------------
-  if (activeTab === "customer-detail" && activeCustomer) {
-    return (
-      <div className="px-10 py-8">
-        <CustomerDetail
-          customer={activeCustomer}
-          onBack={() => setActiveTab("registry")}
-          onViewInvoice={(invoiceId) => {
-            setActiveInvoiceId(invoiceId);
-            setActiveTab("invoice-detail");
-          }}
-        />
-      </div>
-    );
-  }
+ if (activeTab === "customer-detail" && activeCustomer) {
+   return (
+     <div className="py-8">
+       <CustomerDetail
+         customer={activeCustomer}
+         onBack={() => setActiveTab("registry")}
+         onViewInvoice={(invoiceId) => {
+           setActiveInvoiceId(invoiceId);
+           setActiveTab("invoice-detail");
+         }}
+       />
+     </div>
+   );
+ }
 
   // -----------------------------
   // INVOICE DETAIL VIEW
@@ -74,16 +75,6 @@ export function CustomerWorkspace() {
         </div>
       </div>
 
-      {/* Content */}
-      {activeTab === "center" && (
-        <CustomerCenter
-          onViewCustomer={(customer) => {
-            setActiveCustomer(customer);
-            setActiveTab("customer-detail");
-          }}
-        />
-      )}
-
       {activeTab === "registry" && (
         <CustomerRegistry
           onSelectCustomer={(customer) => {
@@ -92,6 +83,8 @@ export function CustomerWorkspace() {
           }}
         />
       )}
+
+      {activeTab === "operations" && <CustomerOperations />}
     </div>
   );
 }

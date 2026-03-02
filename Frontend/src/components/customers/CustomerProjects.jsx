@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { Card } from "./ui/card";
-import { Button } from "./ui/button";
-import { Badge } from "./ui/badge";
-import { Input } from "./ui/input";
+import { Card } from ".././ui/card";
+import { Button } from ".././ui/button";
+import { Badge } from ".././ui/badge";
+import { Input } from ".././ui/input";
 import { ChevronDown, ChevronRight, Plus, Trash2 } from "lucide-react";
-import { CreateProjectModal } from "./CreateProjectModal";
+import { CreateProjectModal } from "../CreateProjectModal";
 
 const uid = () => crypto.randomUUID();
 

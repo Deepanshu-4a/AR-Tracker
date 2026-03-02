@@ -211,7 +211,7 @@ export function CustomerRegistry({
           </Card>
         </div>
 
-        {/* ✅ REGISTRY TABLE (your existing registry, unchanged) */}
+       
         <div
           style={{
             width: "97%",
@@ -490,7 +490,7 @@ export function CustomerRegistry({
         </div>
       </div>
 
-      {/* ✅ MODAL (Create Customer) */}
+     
       <CreateCustomerModal open={isCreateOpen} onOpenChange={setIsCreateOpen} />
     </>
   );

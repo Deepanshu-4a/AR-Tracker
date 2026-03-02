@@ -382,7 +382,7 @@ export function CustomerToDos({ todos: propToDos }) {
   );
 }
 
-/* ================= SMALL COMPONENTS (same as Transactions) ================= */
+/* ================= SMALL COMPONENTS  ================= */
 
 function Filter({ label, children }) {
   return (

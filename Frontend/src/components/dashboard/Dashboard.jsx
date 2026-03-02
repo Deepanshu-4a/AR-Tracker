@@ -79,7 +79,7 @@ const actionTone = (cta) => {
   return "bg-slate-100 text-slate-700";
 };
 
-/** ✅ NEW: Profit + Profit Lost model (overdue invoice) */
+
 const NET_MARGIN_ASSUMPTION = 0.224; // 22.4% from your Net Margin KPI
 const DAILY_PROFIT_LEAK_RATE = 0.01; // 1% per day on PROFIT
 
@@ -92,7 +92,7 @@ const calcInvoiceProfitImpact = (
   const expectedProfit = amount * margin;
 
   const rawProfitLeak = expectedProfit * dailyProfitLeakRate * daysOverdue;
-  const profitLeakToDate = Math.min(rawProfitLeak, expectedProfit); // ✅ cap
+  const profitLeakToDate = Math.min(rawProfitLeak, expectedProfit); 
 
   const remainingProfitIfPaidToday = Math.max(
     expectedProfit - profitLeakToDate,

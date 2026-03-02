@@ -31,7 +31,7 @@ const TAX_ITEMS = [
   { value: "gst", label: "GST" },
 ];
 
-// ✅ Outside the component — stable identity, no remount on render
+
 function Row({ label, children }) {
   return (
     <div className="grid grid-cols-[110px_minmax(0,1fr)] items-center gap-4 min-w-0">

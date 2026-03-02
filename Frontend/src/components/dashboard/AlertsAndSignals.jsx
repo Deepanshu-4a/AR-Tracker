@@ -1,4 +1,4 @@
-// ✅ components/AlertsAndSignals.jsx
+
 import React, { useMemo } from "react";
 import { AlertTriangle } from "lucide-react";
 

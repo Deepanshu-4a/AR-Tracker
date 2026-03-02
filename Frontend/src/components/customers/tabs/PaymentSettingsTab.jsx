@@ -70,7 +70,7 @@ const DELIVERY_METHODS = [
   { value: "portal", label: "Customer Portal" },
 ];
 
-// ✅ Defined OUTSIDE the component — never recreated on render, no focus loss
+
 function Row({ label, children }) {
   return (
     <div className="grid grid-cols-[150px_minmax(0,1fr)] items-center gap-2 min-w-0">

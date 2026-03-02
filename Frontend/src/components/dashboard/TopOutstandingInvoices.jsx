@@ -1,4 +1,4 @@
-// ✅ components/TopOutstandingInvoices.jsx
+
 import React, { useMemo } from "react";
 
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
@@ -44,7 +44,7 @@ const getStatusBadge = (status) => {
 };
 
 export function TopOutstandingInvoices({ setActiveTab, onOpenInvoice }) {
-  // ✅ move static data here
+ 
   const topOutstandingInvoices = useMemo(
     () => [
       {

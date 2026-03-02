@@ -1,6 +1,3 @@
-// ==============================
-// CustomerRegistry.jsx
-// ==============================
 import { useMemo, useRef, useCallback, useEffect, useState } from "react";
 import { Card } from "../ui/card";
 import { Input } from "../ui/input";
@@ -31,7 +28,6 @@ export function CustomerRegistry({
   customers: propCustomers,
   onSelectCustomer,
 }) {
-  
   const [searchTerm, setSearchTerm] = useState("");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
 
@@ -49,10 +45,8 @@ export function CustomerRegistry({
     });
   }, [propCustomers]);
 
-  
   const [activeFilter, setActiveFilter] = useState("all");
 
-  
   const filteredRows = useMemo(() => {
     if (activeFilter === "with")
       return baseRows.filter((r) => (r.placements ?? 0) > 0);
@@ -61,7 +55,6 @@ export function CustomerRegistry({
     return baseRows;
   }, [baseRows, activeFilter]);
 
-  
   const searchedRows = useMemo(() => {
     const q = searchTerm.trim().toLowerCase();
     if (!q) return filteredRows;
@@ -211,7 +204,6 @@ export function CustomerRegistry({
           </Card>
         </div>
 
-       
         <div
           style={{
             width: "97%",
@@ -282,31 +274,29 @@ export function CustomerRegistry({
                       style={{ background: rowBg }}
                       onClick={() => onSelectCustomer?.(r)}
                     >
-                     <td
-  style={td(
-    true,
-    FROZEN_W.name,
-    FROZEN_LEFT.name,
-    rowBg,
-    {
-      fontSize: 13,
-      fontWeight: 600,
-      color: "#475569",
-      letterSpacing: "-0.01em",
-    },
-  )}
->
-  <TooltipProvider>
-    <Tooltip>
-      <TooltipTrigger asChild>
-  <div style={{ width: "100%" }}>
-    {r.name}
-  </div>
-</TooltipTrigger>
-      <TooltipContent>View details</TooltipContent>
-    </Tooltip>
-  </TooltipProvider>
-</td>
+                      <td
+                        style={td(
+                          true,
+                          FROZEN_W.name,
+                          FROZEN_LEFT.name,
+                          rowBg,
+                          {
+                            fontSize: 13,
+                            fontWeight: 600,
+                            color: "#475569",
+                            letterSpacing: "-0.01em",
+                          },
+                        )}
+                      >
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div style={{ width: "100%" }}>{r.name}</div>
+                            </TooltipTrigger>
+                            <TooltipContent>View details</TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </td>
 
                       <td
                         style={td(true, FROZEN_W.id, FROZEN_LEFT.id, rowBg, {
@@ -323,7 +313,7 @@ export function CustomerRegistry({
                           FROZEN_W.menu,
                           FROZEN_LEFT.menu,
                           rowBg,
-                          { padding: "0 4px" }
+                          { padding: "0 4px" },
                         )}
                       >
                         <button
@@ -348,9 +338,8 @@ export function CustomerRegistry({
                           FROZEN_LEFT.email,
                           rowBg,
                           { fontSize: 13, color: "#374151" },
-                          true
+                          true,
                         )}
-                        
                       >
                         {r.email}
                       </td>
@@ -490,7 +479,6 @@ export function CustomerRegistry({
         </div>
       </div>
 
-     
       <CreateCustomerModal open={isCreateOpen} onOpenChange={setIsCreateOpen} />
     </>
   );

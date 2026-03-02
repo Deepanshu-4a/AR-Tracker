@@ -14,7 +14,7 @@ import { CreateEstimateModal } from "../CreateEstimateModal";
 import { RightSidePanel } from "../shared/RightSidePanel";
 import { CustomerPayments } from "./CustomerPayments";
 import { CreateCustomerModal } from "./CreateCustomerModal";
-import { CustomerInvoices } from "./CustomerInvoices"; // <-- adjust path if needed
+import { CustomerInvoices } from "./CustomerInvoices"; 
 import { CustomerBillingRules } from "./CustomerBillingRules";
 
 export function CustomerCenter({ onViewInvoice }) {
@@ -180,7 +180,7 @@ export function CustomerCenter({ onViewInvoice }) {
                 <TabsTrigger value="payments">Payment History</TabsTrigger>
                 <TabsTrigger value="billing">Billing Profile</TabsTrigger>
 
-                {/* ✅ NEW TAB */}
+           
                 <TabsTrigger value="registry">Customer Registry</TabsTrigger>
               </TabsList>
 

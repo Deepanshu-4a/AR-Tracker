@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-/* 🔒 Move Row outside for stability */
+
 function Row({ label, children }) {
   return (
     <div className="grid grid-cols-[160px_minmax(0,1fr)] items-center gap-3">

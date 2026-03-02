@@ -163,7 +163,7 @@ export function CreateCustomerModal({ open, onOpenChange }) {
             ))}
           </div>
 
-          {/* Content (ALL TABS STAY MOUNTED) */}
+          {/* Content*/}
           <div className="flex-1 p-6 bg-card overflow-hidden">
             <div
               className={activeTab === "address" ? "block h-full" : "hidden"}

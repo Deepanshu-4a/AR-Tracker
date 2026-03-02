@@ -1,4 +1,4 @@
-// ✅ components/InvoiceAging.jsx
+
 import React, { useMemo, useState } from "react";
 
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
@@ -64,7 +64,7 @@ const sumEconomics = (rows, delayKey) => {
 };
 
 export function InvoiceAging() {
-  // ✅ move static data here
+ 
   const BILLED_AGING = useMemo(
     () => [
       { name: "0–30 Days", value: 13.9, percentage: 75, count: 45, avgDaysLate: 5 },
@@ -87,7 +87,7 @@ export function InvoiceAging() {
   const [agingMode, setAgingMode] = useState("billed");
   const [activeIndex, setActiveIndex] = useState(null);
 
-  // ✅ IMPORTANT: avoid green twice in receivables mode
+  
   const COLORS_BILLED = ["#10b981", "#f59e0b", "#ef4444"]; // green, amber, red
   const COLORS_CASH = ["#3b82f6", "#f59e0b", "#a855f7", "#ef4444"]; // blue, amber, purple, red
 

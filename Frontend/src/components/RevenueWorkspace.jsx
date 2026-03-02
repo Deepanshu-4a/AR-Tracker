@@ -18,7 +18,6 @@ const REVENUE_TABS = [
 export function RevenueWorkspace() {
   const [activeTab, setActiveTab] = useState("invoices");
 
-  // ✅ add selected customer in Revenue
   const [selectedCustomerId, setSelectedCustomerId] = useState("CL001");
   const selectedCustomer = CUSTOMERS.find((c) => c.id === selectedCustomerId);
 
@@ -47,7 +46,7 @@ export function RevenueWorkspace() {
       </div>
 
       <div>
-        {/* ✅ ONLY Billing Profile needs customer */}
+       
         {activeTab === "billing" ? (
           <CustomerBillingProfile customer={selectedCustomer} />
         ) : (

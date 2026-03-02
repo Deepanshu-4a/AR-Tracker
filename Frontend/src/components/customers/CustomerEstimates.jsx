@@ -72,7 +72,7 @@ export function CustomerEstimates({ estimates: propEstimates }) {
   const [activeId, setActiveId] = useState(null);
 
   // -----------------------------
-  // Find filters (like screenshot)
+  // Find filters 
   // -----------------------------
   const [customerJobFilter, setCustomerJobFilter] = useState("");
   const [dateFrom, setDateFrom] = useState("");
@@ -278,7 +278,7 @@ function FindEstimatesPanel({ estimates, filters, onReset, onOpen }) {
 
   return (
     <div className="border border-border rounded-xl overflow-hidden">
-      {/* filters header (like Find Estimates) */}
+      {/* filters header ) */}
       <div className="p-3 border-b border-border bg-muted/10">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-3 text-sm">
           <div className="md:col-span-5">
@@ -448,7 +448,7 @@ function EstimateForm({
       </div>
 
       <div className="p-3 space-y-4">
-        {/* top fields like screenshot */}
+        
         <div className="grid grid-cols-1 md:grid-cols-12 gap-3 text-sm">
           <div className="md:col-span-6">
             <label className="block text-xs uppercase text-muted-foreground mb-1">
@@ -536,7 +536,7 @@ function EstimateForm({
           </div>
         </div>
 
-        {/* line items table like screenshot */}
+       
         <div className="border border-border rounded-xl overflow-hidden">
           <table className="w-full text-sm table-fixed">
             <thead className="bg-muted/40 text-muted-foreground text-xs uppercase tracking-wide">
@@ -670,12 +670,12 @@ function EstimateForm({
               + Add Line
             </button>
             <div className="text-xs text-muted-foreground">
-              Temporary: stored only in component state.
+             
             </div>
           </div>
         </div>
 
-        {/* bottom area like screenshot */}
+        {/* bottom area  */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-3 text-sm">
           <div className="md:col-span-6">
             <label className="block text-xs uppercase text-muted-foreground mb-1">

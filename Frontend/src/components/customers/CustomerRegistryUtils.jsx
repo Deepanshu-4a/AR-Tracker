@@ -156,7 +156,7 @@ export const CR_STYLES = `
   .cr-scroll::-webkit-scrollbar { display: none; }
   .cr-scroll { scrollbar-width: none; -ms-overflow-style: none; }
 
-  /* ✅ hover works on frozen cols too */
+ 
   .cr-row:hover { background: #eff6ff !important; }
   .cr-row:hover td { background: #eff6ff !important; }
 
@@ -177,7 +177,7 @@ export const CR_STYLES = `
   .cr-range:hover::-webkit-slider-thumb { background: #475569; }
   .cr-range:hover::-moz-range-thumb     { background: #475569; }
 
-  /* ✅ filter tabs (kept; you haven't rendered them yet) */
+  
   .cr-tabs{
     display:flex;
     gap:28px;

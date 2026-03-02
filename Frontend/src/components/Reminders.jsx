@@ -153,7 +153,7 @@ export function Reminders() {
     return reminders.filter(
       (reminder) =>
         reminder.invoiceNumber.toLowerCase().includes(query) ||
-        reminder.clientName.toLowerCase().includes(query)
+        reminder.clientName.toLowerCase().includes(query),
     );
   };
 
@@ -190,9 +190,7 @@ export function Reminders() {
 
     const csvContent = [
       headers.join(","),
-      ...rows.map((row) =>
-        row.map((cell) => `"${cell}"`).join(",")
-      ),
+      ...rows.map((row) => row.map((cell) => `"${cell}"`).join(",")),
     ].join("\n");
 
     const blob = new Blob([csvContent], { type: "text/csv" });
@@ -232,20 +230,20 @@ export function Reminders() {
 
   const getRemindersForDate = (date) => {
     const dateStr = date.toISOString().split("T")[0];
-    return upcomingReminders.filter((reminder) => 
-      reminder.scheduledDate === dateStr
+    return upcomingReminders.filter(
+      (reminder) => reminder.scheduledDate === dateStr,
     );
   };
 
   const previousMonth = () => {
     setCalendarDate(
-      new Date(calendarDate.getFullYear(), calendarDate.getMonth() - 1)
+      new Date(calendarDate.getFullYear(), calendarDate.getMonth() - 1),
     );
   };
 
   const nextMonth = () => {
     setCalendarDate(
-      new Date(calendarDate.getFullYear(), calendarDate.getMonth() + 1)
+      new Date(calendarDate.getFullYear(), calendarDate.getMonth() + 1),
     );
   };
 
@@ -323,7 +321,7 @@ export function Reminders() {
             const dateOfDay = new Date(
               calendarDate.getFullYear(),
               calendarDate.getMonth(),
-              day
+              day,
             );
             const remindersOnDay = getRemindersForDate(dateOfDay);
             const isToday =
@@ -412,7 +410,10 @@ export function Reminders() {
               </Button>
             )}
             {reminder.status === "sent" && reminder.responseReceived && (
-              <Badge variant="outline" className="text-green-600 border-green-200 bg-green-50 rounded-full">
+              <Badge
+                variant="outline"
+                className="text-green-600 border-green-200 bg-green-50 rounded-full"
+              >
                 <CheckCircle className="h-3 w-3 mr-1" />
                 Response
               </Badge>
@@ -435,7 +436,6 @@ export function Reminders() {
 
   return (
     <div className="p-6 space-y-6">
-      {/* Modern background + spacing */}
       <div className="space-y-6 p-4 md:p-6 lg:p-8 bg-gradient-to-b from-muted/30 via-background to-background">
         {/* Header */}
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
@@ -444,7 +444,6 @@ export function Reminders() {
               <h1 className="text-2xl md:text-3xl font-semibold tracking-tight">
                 Reminders
               </h1>
-             
             </div>
             <p className="text-sm text-muted-foreground mt-1">
               Manage and track payment reminders across all channels
@@ -687,12 +686,9 @@ export function Reminders() {
             </span>
           </div>
           <Button variant="outline" onClick={() => setRulesOpen(true)}>
-  Configure Rules
-</Button>
-<ConfigureRulesSheet
-  open={rulesOpen}
-  onOpenChange={setRulesOpen}
-/>
+            Configure Rules
+          </Button>
+          <ConfigureRulesSheet open={rulesOpen} onOpenChange={setRulesOpen} />
         </CardContent>
       </Card>
     </div>

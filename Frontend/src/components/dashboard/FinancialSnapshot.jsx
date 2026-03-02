@@ -1,4 +1,4 @@
-// ✅ components/FinancialSnapshot.jsx
+
 import React, { useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowUp, ArrowDown, DollarSign, TrendingUp, TrendingDown, FileText, Clock } from "lucide-react";

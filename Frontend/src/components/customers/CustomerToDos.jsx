@@ -1,4 +1,3 @@
-
 import { useMemo, useState } from "react";
 import { cn } from "../ui/utils";
 
@@ -35,10 +34,28 @@ const mockToDos = [
 ];
 
 export function CustomerToDos({ todos: propToDos }) {
-  const rows = useMemo(() => {
+  const baseRows = useMemo(() => {
     if (propToDos?.length) return propToDos;
     return mockToDos;
   }, [propToDos]);
+
+  // -----------------------------
+  // Temporary (local) "add todo" state
+  // -----------------------------
+  const [localToDos, setLocalToDos] = useState([]);
+  const rows = useMemo(
+    () => [...localToDos, ...baseRows],
+    [localToDos, baseRows],
+  );
+
+  const [showAdd, setShowAdd] = useState(false);
+  const [newTodo, setNewTodo] = useState({
+    todo: "",
+    owner: "",
+    dueDate: "",
+    priority: "Medium",
+    status: "Open",
+  });
 
   // -----------------------------
   // Filters
@@ -81,9 +98,34 @@ export function CustomerToDos({ todos: propToDos }) {
     });
   }, [rows, statusFilter, priorityFilter, dueFilter]);
 
+  function handleAddTodo() {
+    const todoText = String(newTodo.todo || "").trim();
+    if (!todoText) return;
+
+    const row = {
+      todo: todoText,
+      owner: String(newTodo.owner || "").trim() || "—",
+      dueDate: String(newTodo.dueDate || "").trim() || "—",
+      priority: newTodo.priority || "Medium",
+      status: newTodo.status || "Open",
+    };
+
+    setLocalToDos((prev) => [row, ...prev]);
+
+    // reset + close
+    setNewTodo({
+      todo: "",
+      owner: "",
+      dueDate: "",
+      priority: "Medium",
+      status: "Open",
+    });
+    setShowAdd(false);
+  }
+
   return (
     <div className="flex flex-col h-full min-w-0 space-y-4">
-      {/* ================= FILTER BAR (same vibe as Transactions) ================= */}
+      {/* ================= FILTER BAR ================= */}
       <div className="flex flex-wrap items-center gap-6 border-b border-border pb-4 text-sm">
         <Filter label="Status">
           <select
@@ -134,9 +176,130 @@ export function CustomerToDos({ todos: propToDos }) {
         >
           Clear
         </button>
+
+        {/* ---- ADD TODO BUTTON ---- */}
+        <button
+          className="ml-auto border border-border rounded-md px-3 py-1 bg-background text-sm"
+          onClick={() => setShowAdd((v) => !v)}
+        >
+          + Add To-Do
+        </button>
       </div>
 
-      {/* ================= TABLE (same as Transactions) ================= */}
+      {/* ================= ADD TODO  ================= */}
+    
+      {showAdd && (
+        <div className="border border-border rounded-xl p-3 bg-background">
+          {/* Row 1 */}
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-3 text-sm">
+            <div className="md:col-span-5">
+              <label className="block text-xs uppercase text-muted-foreground mb-1">
+                To Do
+              </label>
+              <input
+                value={newTodo.todo}
+                onChange={(e) =>
+                  setNewTodo((p) => ({ ...p, todo: e.target.value }))
+                }
+                className="w-full border border-border rounded-md px-2 py-1 bg-background"
+                placeholder="e.g., Call customer about invoice"
+              />
+            </div>
+
+            <div className="md:col-span-4">
+              <label className="block text-xs uppercase text-muted-foreground mb-1">
+                Owner
+              </label>
+              <input
+                value={newTodo.owner}
+                onChange={(e) =>
+                  setNewTodo((p) => ({ ...p, owner: e.target.value }))
+                }
+                className="w-full border border-border rounded-md px-2 py-1 bg-background"
+                placeholder="e.g., Ava Thompson"
+              />
+            </div>
+
+            <div className="md:col-span-3">
+              <label className="block text-xs uppercase text-muted-foreground mb-1">
+                Due Date
+              </label>
+              <input
+                type="date"
+                value={newTodo.dueDate}
+                onChange={(e) =>
+                  setNewTodo((p) => ({ ...p, dueDate: e.target.value }))
+                }
+                className="w-full border border-border rounded-md px-2 py-1 bg-background"
+              />
+            </div>
+          </div>
+
+          {/* Row 2 */}
+          <div className="mt-3 grid grid-cols-1 md:grid-cols-12 gap-3 text-sm">
+            <div className="md:col-span-3">
+              <label className="block text-xs uppercase text-muted-foreground mb-1">
+                Priority
+              </label>
+              <select
+                value={newTodo.priority}
+                onChange={(e) =>
+                  setNewTodo((p) => ({ ...p, priority: e.target.value }))
+                }
+                className="w-full border border-border rounded-md px-2 py-1 bg-background text-sm"
+              >
+                <option>High</option>
+                <option>Medium</option>
+                <option>Low</option>
+              </select>
+            </div>
+
+            <div className="md:col-span-3">
+              <label className="block text-xs uppercase text-muted-foreground mb-1">
+                Status
+              </label>
+              <select
+                value={newTodo.status}
+                onChange={(e) =>
+                  setNewTodo((p) => ({ ...p, status: e.target.value }))
+                }
+                className="w-full border border-border rounded-md px-2 py-1 bg-background text-sm"
+              >
+                <option>Open</option>
+                <option>In Progress</option>
+                <option>Done</option>
+              </select>
+            </div>
+
+            <div className="md:col-span-6 flex items-end gap-2">
+              <button
+                className="border border-border rounded-md px-3 py-1 bg-background text-sm"
+                onClick={handleAddTodo}
+              >
+                Add
+              </button>
+              <button
+                className="border border-border rounded-md px-3 py-1 bg-background text-sm"
+                onClick={() => {
+                  setShowAdd(false);
+                  setNewTodo({
+                    todo: "",
+                    owner: "",
+                    dueDate: "",
+                    priority: "Medium",
+                    status: "Open",
+                  });
+                }}
+              >
+                Cancel
+              </button>
+              
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ================= TABLE  ================= */}
       <div className="border border-border rounded-xl overflow-hidden">
         <table className="w-full text-sm table-fixed">
           <thead className="bg-muted/40 text-muted-foreground text-xs uppercase tracking-wide">
@@ -245,8 +408,6 @@ function Th({ children, className }) {
 
 function Td({ children, className }) {
   return (
-    <td className={cn("px-3 py-2 whitespace-nowrap", className)}>
-      {children}
-    </td>
+    <td className={cn("px-3 py-2 whitespace-nowrap", className)}>{children}</td>
   );
 }

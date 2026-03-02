@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-/* 🔒 Row moved OUTSIDE to stabilize render tree */
+
 function Row({ label, children }) {
   return (
     <div className="grid grid-cols-[160px_1fr] items-center gap-4">
@@ -96,7 +96,7 @@ export function AddressInfoTab({ formData, setFormData }) {
           />
         </Row>
 
-        {/* 🔒 Explicit inputs (no map) */}
+       
         <div className="grid grid-cols-2 gap-x-10 gap-y-3 pt-2">
           <Row label="MAIN PHONE">
             <Input
@@ -164,7 +164,7 @@ export function AddressInfoTab({ formData, setFormData }) {
         </div>
       </div>
 
-      {/* ================= ADDRESS DETAILS (UNCHANGED) ================= */}
+      {/* ================= ADDRESS DETAILS ================= */}
       <div className="space-y-2">
         <div className="text-xs font-semibold tracking-wide text-muted-foreground">
           ADDRESS DETAILS

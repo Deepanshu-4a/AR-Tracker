@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Sidebar } from "./components/ui/Sidebar";
 import { CustomerWorkspace } from "./components/customers/CustomerWorkspace";
+import { VendorWorkspace } from "./components/vendors/VendorWorkspace";
 import { Dashboard } from "./components/dashboard/Dashboard";
 import { RevenueWorkspace } from "./components/RevenueWorkspace";
 import CashInPage from "./components/dashboard/CashInPage";
@@ -40,6 +41,9 @@ function App() {
 
       case "customers":
         return <CustomerWorkspace />;
+
+      case "vendors":
+        return <VendorWorkspace />;
 
       case "action-queue":
         return <ActionQueuePage setActiveTab={setActiveTab} />;

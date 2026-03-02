@@ -1,9 +1,5 @@
 // ==============================
-// CustomerEstimates.jsx
-// "Estimates" section inspired by the screenshots:
-// - Find Estimates (filters + results list)
-// - Estimate form (header fields + line items grid + totals + actions)
-// Temporary/local state only (no backend)
+
 // ==============================
 import { useMemo, useState } from "react";
 import { cn } from "../ui/utils";

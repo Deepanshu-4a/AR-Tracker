@@ -1,68 +1,126 @@
 import { useMemo, useState } from "react";
 import { cn } from "../ui/utils";
 
-/* ─── MOCK DATA ─────────────────────────────────────── */
+
 const mockToDos = [
   {
-    todo: "Send invoice follow-up email",
-    owner: "Ava Thompson",
-    dueDate: "2026-02-28",
+    done: false,
     priority: "High",
-    status: "Open",
+    date: "2026-02-28",
+    type: "Billing",
+    details:
+      "Send invoice follow-up email (include updated invoice PDF and request confirmation of payment date).",
   },
   {
-    todo: "Confirm PO number",
-    owner: "Noah Patel",
-    dueDate: "2026-02-26",
+    done: false,
     priority: "Medium",
-    status: "In Progress",
+    date: "2026-02-26",
+    type: "Procurement",
+    details:
+      "Confirm PO number and validate it against the latest contract before releasing shipment.",
   },
   {
-    todo: "Update billing address",
-    owner: "Mia Chen",
-    dueDate: "2026-03-03",
+    done: false,
     priority: "Low",
-    status: "Open",
+    date: "2026-03-03",
+    type: "Account",
+    details:
+      "Update billing address in the system and notify the AR team for future invoices.",
   },
   {
-    todo: "Resolve payment failure",
-    owner: "Ethan Brooks",
-    dueDate: "2026-02-25",
+    done: true,
     priority: "High",
-    status: "Done",
+    date: "2026-02-25",
+    type: "Billing",
+    details:
+      "Resolve payment failure by re-running the transaction and updating the payment status for the invoice.",
   },
 ];
 
+function makeId() {
+  return `td_${Date.now()}_${Math.random().toString(16).slice(2)}`;
+}
+
+function normalizeIncoming(rows) {
+  
+  return (rows || []).map((r) => {
+    const hasNewShape =
+      "details" in r || "date" in r || "done" in r || "type" in r;
+
+    if (hasNewShape) {
+      return {
+        id: r.id ?? makeId(),
+        done: Boolean(r.done),
+        priority: r.priority ?? "Medium",
+        date: r.date ?? "—",
+        type: r.type ?? "Task",
+        details: r.details ?? "—",
+      };
+    }
+
+    const st = String(r.status ?? "").toLowerCase();
+    return {
+      id: r.id ?? makeId(),
+      done: st === "done",
+      priority: r.priority ?? "Medium",
+      date: r.dueDate ?? "—",
+      type: r.type ?? "Task",
+      details: r.todo ?? "—",
+    };
+  });
+}
+
 export function CustomerToDos({ todos: propToDos }) {
   const baseRows = useMemo(() => {
-    if (propToDos?.length) return propToDos;
-    return mockToDos;
+    const src = propToDos?.length ? propToDos : mockToDos;
+    return normalizeIncoming(src);
   }, [propToDos]);
 
-  // -----------------------------
-  // Temporary (local) "add todo" state
-  // -----------------------------
-  const [localToDos, setLocalToDos] = useState([]);
-  const rows = useMemo(
-    () => [...localToDos, ...baseRows],
-    [localToDos, baseRows],
-  );
+  
+  const [rows, setRows] = useState(baseRows);
+
+  
+  useMemo(() => {
+    setRows(baseRows);
+  }, [baseRows]);
 
   const [showAdd, setShowAdd] = useState(false);
+
+
+  const [expandedIds, setExpandedIds] = useState(() => new Set());
+
+  function toggleExpanded(id) {
+    setExpandedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  
   const [newTodo, setNewTodo] = useState({
-    todo: "",
-    owner: "",
-    dueDate: "",
+    done: false,
     priority: "Medium",
-    status: "Open",
+    date: "",
+    type: "Task",
+    details: "",
   });
 
-  // -----------------------------
-  // Filters
-  // -----------------------------
-  const [statusFilter, setStatusFilter] = useState("all"); // all | open | in progress | done
-  const [priorityFilter, setPriorityFilter] = useState("all"); // all | high | medium | low
-  const [dueFilter, setDueFilter] = useState("all"); // all | overdue | today | next7
+  
+  const [typeFilter, setTypeFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all"); 
+  const [dateFilter, setDateFilter] = useState("all"); 
+
+  const typeOptions = useMemo(() => {
+    const set = new Set();
+    rows.forEach((r) => {
+      const t = String(r.type ?? "").trim();
+      if (t) set.add(t);
+    });
+    if (!set.size) set.add("Task");
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
+  }, [rows]);
 
   const filtered = useMemo(() => {
     const today = new Date();
@@ -75,58 +133,83 @@ export function CustomerToDos({ todos: propToDos }) {
     next7.setDate(next7.getDate() + 7);
 
     return rows.filter((r) => {
-      const st = String(r.status ?? "").toLowerCase();
-      const pr = String(r.priority ?? "").toLowerCase();
+      const tp = String(r.type ?? "Task").toLowerCase();
+      const isDone = Boolean(r.done);
 
-      const statusOk = statusFilter === "all" || st === statusFilter;
-      const priorityOk = priorityFilter === "all" || pr === priorityFilter;
+      const typeOk = typeFilter === "all" || tp === typeFilter;
 
-      let dueOk = true;
-      if (dueFilter !== "all") {
-        const d = r.dueDate ? new Date(r.dueDate) : null;
-        if (!d || Number.isNaN(d.getTime())) dueOk = false;
+      const statusOk =
+        statusFilter === "all" ||
+        (statusFilter === "done" && isDone) ||
+        (statusFilter === "open" && !isDone);
+
+      let dateOk = true;
+      if (dateFilter !== "all") {
+        const d = r.date && r.date !== "—" ? new Date(r.date) : null;
+        if (!d || Number.isNaN(d.getTime())) dateOk = false;
         else {
           const d0 = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-          if (dueFilter === "overdue") dueOk = d0 < startOfDay;
-          if (dueFilter === "today")
-            dueOk = d0.getTime() === startOfDay.getTime();
-          if (dueFilter === "next7") dueOk = d0 >= startOfDay && d0 <= next7;
+          if (dateFilter === "overdue") dateOk = d0 < startOfDay;
+          if (dateFilter === "today")
+            dateOk = d0.getTime() === startOfDay.getTime();
+          if (dateFilter === "next7") dateOk = d0 >= startOfDay && d0 <= next7;
         }
       }
 
-      return statusOk && priorityOk && dueOk;
+      return typeOk && statusOk && dateOk;
     });
-  }, [rows, statusFilter, priorityFilter, dueFilter]);
+  }, [rows, typeFilter, statusFilter, dateFilter]);
 
   function handleAddTodo() {
-    const todoText = String(newTodo.todo || "").trim();
-    if (!todoText) return;
+    const details = String(newTodo.details || "").trim();
+    if (!details) return;
 
     const row = {
-      todo: todoText,
-      owner: String(newTodo.owner || "").trim() || "—",
-      dueDate: String(newTodo.dueDate || "").trim() || "—",
+      id: makeId(),
+      done: Boolean(newTodo.done),
       priority: newTodo.priority || "Medium",
-      status: newTodo.status || "Open",
+      date: String(newTodo.date || "").trim() || "—",
+      type: String(newTodo.type || "Task").trim() || "Task",
+      details,
     };
 
-    setLocalToDos((prev) => [row, ...prev]);
+    setRows((prev) => [row, ...prev]);
 
-    // reset + close
     setNewTodo({
-      todo: "",
-      owner: "",
-      dueDate: "",
+      done: false,
       priority: "Medium",
-      status: "Open",
+      date: "",
+      type: "Task",
+      details: "",
     });
     setShowAdd(false);
+  }
+
+  function toggleDoneById(id) {
+    setRows((prev) =>
+      prev.map((r) => (r.id === id ? { ...r, done: !r.done } : r)),
+    );
   }
 
   return (
     <div className="flex flex-col h-full min-w-0 space-y-4">
       {/* ================= FILTER BAR ================= */}
       <div className="flex flex-wrap items-center gap-6 border-b border-border pb-4 text-sm">
+        <Filter label="Type">
+          <select
+            value={typeFilter}
+            onChange={(e) => setTypeFilter(e.target.value)}
+            className="border border-border rounded-md px-2 py-1 bg-background text-sm"
+          >
+            <option value="all">All</option>
+            {typeOptions.map((t) => (
+              <option key={t} value={t.toLowerCase()}>
+                {t}
+              </option>
+            ))}
+          </select>
+        </Filter>
+
         <Filter label="Status">
           <select
             value={statusFilter}
@@ -135,28 +218,14 @@ export function CustomerToDos({ todos: propToDos }) {
           >
             <option value="all">All</option>
             <option value="open">Open</option>
-            <option value="in progress">In Progress</option>
             <option value="done">Done</option>
           </select>
         </Filter>
 
-        <Filter label="Priority">
+        <Filter label="Date">
           <select
-            value={priorityFilter}
-            onChange={(e) => setPriorityFilter(e.target.value)}
-            className="border border-border rounded-md px-2 py-1 bg-background text-sm"
-          >
-            <option value="all">All</option>
-            <option value="high">High</option>
-            <option value="medium">Medium</option>
-            <option value="low">Low</option>
-          </select>
-        </Filter>
-
-        <Filter label="Due">
-          <select
-            value={dueFilter}
-            onChange={(e) => setDueFilter(e.target.value)}
+            value={dateFilter}
+            onChange={(e) => setDateFilter(e.target.value)}
             className="border border-border rounded-md px-2 py-1 bg-background text-sm"
           >
             <option value="all">All</option>
@@ -169,74 +238,44 @@ export function CustomerToDos({ todos: propToDos }) {
         <button
           className="border border-border rounded-md px-3 py-1 bg-background text-sm"
           onClick={() => {
+            setTypeFilter("all");
             setStatusFilter("all");
-            setPriorityFilter("all");
-            setDueFilter("all");
+            setDateFilter("all");
           }}
         >
           Clear
         </button>
 
-        {/* ---- ADD TODO BUTTON ---- */}
         <button
           className="ml-auto border border-border rounded-md px-3 py-1 bg-background text-sm"
           onClick={() => setShowAdd((v) => !v)}
         >
-          + Add To-Do
+          + Add
         </button>
       </div>
 
-      {/* ================= ADD TODO  ================= */}
-    
+      {/* ================= ADD FORM ================= */}
       {showAdd && (
-        <div className="border border-border rounded-xl p-3 bg-background">
-          {/* Row 1 */}
+        <div className="border border-border rounded-2xl p-4 bg-background">
+          {/* Row 1: DONE | PRIORITY | DATE | TYPE */}
           <div className="grid grid-cols-1 md:grid-cols-12 gap-3 text-sm">
-            <div className="md:col-span-5">
-              <label className="block text-xs uppercase text-muted-foreground mb-1">
-                To Do
-              </label>
-              <input
-                value={newTodo.todo}
-                onChange={(e) =>
-                  setNewTodo((p) => ({ ...p, todo: e.target.value }))
-                }
-                className="w-full border border-border rounded-md px-2 py-1 bg-background"
-                placeholder="e.g., Call customer about invoice"
-              />
-            </div>
-
-            <div className="md:col-span-4">
-              <label className="block text-xs uppercase text-muted-foreground mb-1">
-                Owner
-              </label>
-              <input
-                value={newTodo.owner}
-                onChange={(e) =>
-                  setNewTodo((p) => ({ ...p, owner: e.target.value }))
-                }
-                className="w-full border border-border rounded-md px-2 py-1 bg-background"
-                placeholder="e.g., Ava Thompson"
-              />
-            </div>
-
             <div className="md:col-span-3">
               <label className="block text-xs uppercase text-muted-foreground mb-1">
-                Due Date
+                Done
               </label>
-              <input
-                type="date"
-                value={newTodo.dueDate}
-                onChange={(e) =>
-                  setNewTodo((p) => ({ ...p, dueDate: e.target.value }))
-                }
-                className="w-full border border-border rounded-md px-2 py-1 bg-background"
-              />
+              <div className="h-10 flex items-center gap-2 border border-border rounded-xl px-3 bg-background">
+                <input
+                  type="checkbox"
+                  checked={newTodo.done}
+                  onChange={(e) =>
+                    setNewTodo((p) => ({ ...p, done: e.target.checked }))
+                  }
+                  className="h-4 w-4 accent-emerald-600"
+                />
+                <span className="text-sm text-muted-foreground">Mark done</span>
+              </div>
             </div>
-          </div>
 
-          {/* Row 2 */}
-          <div className="mt-3 grid grid-cols-1 md:grid-cols-12 gap-3 text-sm">
             <div className="md:col-span-3">
               <label className="block text-xs uppercase text-muted-foreground mb-1">
                 Priority
@@ -246,7 +285,7 @@ export function CustomerToDos({ todos: propToDos }) {
                 onChange={(e) =>
                   setNewTodo((p) => ({ ...p, priority: e.target.value }))
                 }
-                className="w-full border border-border rounded-md px-2 py-1 bg-background text-sm"
+                className="w-full h-10 border border-border rounded-xl px-3 bg-background text-sm"
               >
                 <option>High</option>
                 <option>Medium</option>
@@ -256,114 +295,162 @@ export function CustomerToDos({ todos: propToDos }) {
 
             <div className="md:col-span-3">
               <label className="block text-xs uppercase text-muted-foreground mb-1">
-                Status
+                Date
               </label>
-              <select
-                value={newTodo.status}
+              <input
+                type="date"
+                value={newTodo.date}
                 onChange={(e) =>
-                  setNewTodo((p) => ({ ...p, status: e.target.value }))
+                  setNewTodo((p) => ({ ...p, date: e.target.value }))
                 }
-                className="w-full border border-border rounded-md px-2 py-1 bg-background text-sm"
-              >
-                <option>Open</option>
-                <option>In Progress</option>
-                <option>Done</option>
-              </select>
+                className="w-full h-10 border border-border rounded-xl px-3 bg-background"
+              />
             </div>
 
-            <div className="md:col-span-6 flex items-end gap-2">
-              <button
-                className="border border-border rounded-md px-3 py-1 bg-background text-sm"
-                onClick={handleAddTodo}
-              >
-                Add
-              </button>
-              <button
-                className="border border-border rounded-md px-3 py-1 bg-background text-sm"
-                onClick={() => {
-                  setShowAdd(false);
-                  setNewTodo({
-                    todo: "",
-                    owner: "",
-                    dueDate: "",
-                    priority: "Medium",
-                    status: "Open",
-                  });
-                }}
-              >
-                Cancel
-              </button>
-              
+            <div className="md:col-span-3">
+              <label className="block text-xs uppercase text-muted-foreground mb-1">
+                Type
+              </label>
+              <input
+                value={newTodo.type}
+                onChange={(e) =>
+                  setNewTodo((p) => ({ ...p, type: e.target.value }))
+                }
+                className="w-full h-10 border border-border rounded-xl px-3 bg-background"
+                placeholder="Task"
+              />
             </div>
+          </div>
+
+          {/* Row 2: DETAILS (below) */}
+          <div className="mt-3">
+            <label className="block text-xs uppercase text-muted-foreground mb-1">
+              Details
+            </label>
+            <input
+              value={newTodo.details}
+              onChange={(e) =>
+                setNewTodo((p) => ({ ...p, details: e.target.value }))
+              }
+              className="w-full h-10 border border-border rounded-xl px-3 bg-background"
+              placeholder="e.g., Send invoice follow-up email"
+            />
+          </div>
+
+          {/* Actions */}
+          <div className="mt-4 flex items-center gap-2">
+            <button
+              className="border border-border rounded-xl px-4 py-2 bg-background text-sm"
+              onClick={handleAddTodo}
+            >
+              Add
+            </button>
+            <button
+              className="border border-border rounded-xl px-4 py-2 bg-background text-sm"
+              onClick={() => {
+                setShowAdd(false);
+                setNewTodo({
+                  done: false,
+                  priority: "Medium",
+                  date: "",
+                  type: "Task",
+                  details: "",
+                });
+              }}
+            >
+              Cancel
+            </button>
           </div>
         </div>
       )}
 
-      {/* ================= TABLE  ================= */}
+      {/* ================= TABLE ================= */}
       <div className="border border-border rounded-xl overflow-hidden">
         <table className="w-full text-sm table-fixed">
           <thead className="bg-muted/40 text-muted-foreground text-xs uppercase tracking-wide">
             <tr>
-              <Th className="w-[44%]">To Do</Th>
-              <Th className="w-[18%]">Owner</Th>
-              <Th className="w-[14%]">Due Date</Th>
-              <Th className="w-[12%]">Priority</Th>
-              <Th className="w-[12%]">Status</Th>
+              <Th className="w-[10%]">Done</Th>
+              <Th className="w-[16%]">Priority</Th>
+              <Th className="w-[16%]">Date</Th>
+              <Th className="w-[18%]">Type</Th>
+              <Th className="w-[40%]">Details</Th>
             </tr>
           </thead>
 
           <tbody>
-            {filtered.map((t, i) => (
-              <tr
-                key={`${t.todo}-${i}`}
-                className={cn(
-                  "border-t hover:bg-muted/30 transition-colors",
-                  i % 2 === 0 ? "bg-white" : "bg-muted/10",
-                )}
-              >
-                <Td className="font-medium text-slate-700 truncate">
-                  {t.todo ?? "—"}
-                </Td>
+            {filtered.map((t, i) => {
+              const isExpanded = expandedIds.has(t.id);
 
-                <Td className="text-slate-700 truncate">{t.owner ?? "—"}</Td>
+              return (
+                <tr
+                  key={t.id ?? `${t.details}-${t.date}-${i}`}
+                  className={cn(
+                    "border-t hover:bg-muted/30 transition-colors",
+                    i % 2 === 0 ? "bg-white" : "bg-muted/10",
+                  )}
+                >
+                 
+                  <Td>
+                    <input
+                      type="checkbox"
+                      checked={Boolean(t.done)}
+                      onChange={() => toggleDoneById(t.id)}
+                      className="h-4 w-4 accent-emerald-600"
+                      title={t.done ? "Mark as not done" : "Mark as done"}
+                    />
+                  </Td>
 
-                <Td className="text-slate-700 whitespace-nowrap">
-                  {t.dueDate ?? "—"}
-                </Td>
+                  {/* PRIORITY */}
+                  <Td>
+                    <span
+                      className={cn(
+                        "px-2 py-0.5 rounded-full text-xs font-medium",
+                        String(t.priority).toLowerCase() === "high" &&
+                          "bg-red-100 text-red-700",
+                        String(t.priority).toLowerCase() === "medium" &&
+                          "bg-yellow-100 text-yellow-700",
+                        String(t.priority).toLowerCase() === "low" &&
+                          "bg-slate-100 text-slate-700",
+                      )}
+                    >
+                      {t.priority ?? "—"}
+                    </span>
+                  </Td>
 
-                <Td>
-                  <span
-                    className={cn(
-                      "px-2 py-0.5 rounded-full text-xs font-medium",
-                      String(t.priority).toLowerCase() === "high" &&
-                        "bg-red-100 text-red-700",
-                      String(t.priority).toLowerCase() === "medium" &&
-                        "bg-yellow-100 text-yellow-700",
-                      String(t.priority).toLowerCase() === "low" &&
-                        "bg-slate-100 text-slate-700",
-                    )}
-                  >
-                    {t.priority ?? "—"}
-                  </span>
-                </Td>
+                  {/* DATE */}
+                  <Td className="text-slate-700 whitespace-nowrap">
+                    {t.date ?? "—"}
+                  </Td>
 
-                <Td>
-                  <span
-                    className={cn(
-                      "px-2 py-0.5 rounded-full text-xs font-medium",
-                      String(t.status).toLowerCase() === "open" &&
-                        "bg-blue-100 text-blue-700",
-                      String(t.status).toLowerCase() === "in progress" &&
-                        "bg-orange-100 text-orange-700",
-                      String(t.status).toLowerCase() === "done" &&
-                        "bg-emerald-100 text-emerald-700",
-                    )}
-                  >
-                    {t.status ?? "—"}
-                  </span>
-                </Td>
-              </tr>
-            ))}
+                  {/* TYPE */}
+                  <Td className="text-slate-700 truncate">{t.type ?? "Task"}</Td>
+
+                  {/* DETAILS  */}
+                  <td className="px-3 py-2 align-top">
+                    <div className="flex flex-col gap-1">
+                      <div
+                        className={cn(
+                          "text-slate-700 font-medium break-words whitespace-normal",
+                          !isExpanded && "line-clamp-2",
+                        )}
+                      >
+                        {t.details ?? "—"}
+                      </div>
+
+                      {String(t.details || "").length > 80 && (
+                        <button
+                          className="text-xs text-muted-foreground hover:text-foreground w-fit"
+                          onClick={() => toggleExpanded(t.id)}
+                          type="button"
+                        >
+                          {isExpanded ? "Show less" : "Show more"}
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
 
             {filtered.length === 0 && (
               <tr className="border-t">
@@ -382,7 +469,7 @@ export function CustomerToDos({ todos: propToDos }) {
   );
 }
 
-/* ================= SMALL COMPONENTS  ================= */
+
 
 function Filter({ label, children }) {
   return (
@@ -407,7 +494,5 @@ function Th({ children, className }) {
 }
 
 function Td({ children, className }) {
-  return (
-    <td className={cn("px-3 py-2 whitespace-nowrap", className)}>{children}</td>
-  );
+  return <td className={cn("px-3 py-2 whitespace-nowrap", className)}>{children}</td>;
 }

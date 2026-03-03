@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -17,17 +17,26 @@ import {
 /* =========================================================
    DIRECT DEPOSIT POPUP
 ========================================================= */
+
+const DD_INITIAL = {
+  bankName: "",
+  routingNo: "",
+  accountNo: "",
+  accountType: "",
+  sendConfirmation: false,
+  email: "",
+};
+
 function DirectDepositModal({ open, onClose }) {
   const [useDD, setUseDD] = useState(true);
+  const [ddData, setDdData] = useState(DD_INITIAL);
 
-  const [ddData, setDdData] = useState({
-    bankName: "",
-    routingNo: "",
-    accountNo: "",
-    accountType: "checking",
-    sendConfirmation: false,
-    email: "",
-  });
+  // reset fields every time modal opens
+  useEffect(() => {
+    if (!open) return;
+    setUseDD(true);
+    setDdData(DD_INITIAL);
+  }, [open]);
 
   if (!open) return null;
 
@@ -63,7 +72,6 @@ function DirectDepositModal({ open, onClose }) {
               BANK ACCOUNT INFO
             </p>
 
-            {/* BANK ROWS */}
             <div className="grid grid-cols-[140px_1fr_120px_1fr] gap-2 items-center">
               <Label className="text-[12px]">Bank Name</Label>
               <Input
@@ -92,7 +100,7 @@ function DirectDepositModal({ open, onClose }) {
                 onValueChange={(v) => update("accountType", v)}
               >
                 <SelectTrigger className="h-7 rounded-sm">
-                  <SelectValue />
+                  <SelectValue placeholder="—" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="checking">Checking</SelectItem>
@@ -148,8 +156,9 @@ function DirectDepositModal({ open, onClose }) {
 }
 
 /* =========================================================
-   ADDITIONAL INFO TAB (UPDATED)
+   ADDITIONAL INFO TAB
 ========================================================= */
+
 export function AdditionalInfoTab(props) {
   const data = props.data ?? props.formData?.additionalInfo ?? {};
   const onDataChange =
@@ -159,9 +168,10 @@ export function AdditionalInfoTab(props) {
 
   const [openDD, setOpenDD] = useState(false);
 
+
   const d = useMemo(
     () => ({
-      vendorType: "consultant",
+      vendorType: "",
       customFields: [],
       ...(data || {}),
     }),
@@ -201,7 +211,7 @@ export function AdditionalInfoTab(props) {
                 }}
               >
                 <SelectTrigger className="h-8 rounded-lg">
-                  <SelectValue />
+                  <SelectValue placeholder="—" />
                 </SelectTrigger>
                 <SelectContent>
                   {VENDOR_TYPES.map((opt) => (
@@ -244,7 +254,6 @@ export function AdditionalInfoTab(props) {
         </div>
       </div>
 
-     
       <DirectDepositModal open={openDD} onClose={() => setOpenDD(false)} />
     </>
   );

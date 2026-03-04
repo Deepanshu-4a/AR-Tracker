@@ -132,16 +132,7 @@ export function Sidebar({
 
         {/* Footer */}
         <div className="p-3 border-t">
-          <button
-            onClick={onLogout}
-            className={`w-full flex items-center
-              ${collapsed ? "justify-center px-0" : "gap-3 px-3"}
-              py-2 rounded-lg hover:bg-slate-100
-              text-slate-600 transition-colors`}
-          >
-            <LogOut className="w-5 h-5" />
-            {!collapsed && <span className="text-sm">Log out</span>}
-          </button>
+         
         </div>
       </aside>
     </>

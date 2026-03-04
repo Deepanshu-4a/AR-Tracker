@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -9,8 +9,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-
 
 const DEFAULTS = {
   prefillAccount1: "",
@@ -100,18 +98,7 @@ export function AccountSettingsTab(props) {
     }));
   };
 
-  const accountsFlat = useMemo(
-    () => flattenAccounts(MOCK_ACCOUNTS_TREE),
-    [],
-  );
-
- 
-  useEffect(() => {
-    if (d.prefillAccount1) return;
-    const preferred = accountsFlat.find((a) => a.id === "5020");
-    if (preferred) update("prefillAccount1", preferred.id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [accountsFlat.length]);
+  const accountsFlat = useMemo(() => flattenAccounts(MOCK_ACCOUNTS_TREE), []);
 
   const clearAll = () => {
     update("prefillAccount1", "");
@@ -125,22 +112,15 @@ export function AccountSettingsTab(props) {
         <SelectValue placeholder="—" />
       </SelectTrigger>
 
-      
       <SelectContent className="max-h-72 overflow-y-auto">
         {accountsFlat.map((a) => {
-          const indent = a.depth === 1 ? 14 : 0; // subfield indent
-          const isSelected = value === a.id;
+          const indent = a.depth === 1 ? 14 : 0;
 
           return (
             <SelectItem key={a.id} value={a.id}>
-              {/* Two-column row inside dropdown*/}
               <div className="w-full flex items-center justify-between gap-6">
                 <div className="min-w-0 flex items-center gap-2">
-                  <span
-                    className="inline-block"
-                    style={{ paddingLeft: indent }}
-                  />
-                 
+                  <span className="inline-block" style={{ paddingLeft: indent }} />
                   {a.depth === 1 && (
                     <span className="text-muted-foreground text-xs">↳</span>
                   )}

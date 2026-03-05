@@ -1,55 +1,56 @@
-import { useState } from "react";
-import { InvoiceDetail } from "../InvoiceDetail";
+import React, { useMemo } from "react";
+import { Routes, Route, Navigate, useLocation, useNavigate, useParams } from "react-router-dom";
 
 import { VendorRegistry } from "./VendorRegistry";
 import { VendorDetail } from "./VendorDetail";
 import { VendorOperations } from "./VendorOperations";
+import { InvoiceDetail } from "../InvoiceDetail";
 
-const VENDOR_TABS = [
-  { id: "registry", label: "Vendor Center" },
-  { id: "operations", label: "Vendor Operations" },
+
+const mockVendors = [
+  {
+    businessName: "Alpha Supplies",
+    vendorId: "VND-1001",
+    netTerms: "Net 30",
+    terminationNotice: "30 days",
+    status: "Active",
+    comments: "Preferred vendor",
+    primaryBusinessUnit: "4A Consulting",
+    applicableBusinessUnits: "4A Consulting, 4A Ops",
+    activeConsultants: 12,
+  },
+  {
+    businessName: "Bright Logistics",
+    vendorId: "VND-1002",
+    netTerms: "Net 15",
+    terminationNotice: "14 days",
+    status: "Inactive",
+    comments: "On hold",
+    primaryBusinessUnit: "4A Consulting",
+    applicableBusinessUnits: "Operations",
+    activeConsultants: 0,
+  },
+  {
+    businessName: "CloudParts Inc.",
+    vendorId: "VND-1003",
+    netTerms: "Net 45",
+    terminationNotice: "60 days",
+    status: "Active",
+    comments: "Bulk discounts",
+    primaryBusinessUnit: "4A Consulting",
+    applicableBusinessUnits: "Engineering, Operations",
+    activeConsultants: 4,
+  },
 ];
 
-export function VendorWorkspace() {
-  const [activeTab, setActiveTab] = useState("registry");
-  const [activeInvoiceId, setActiveInvoiceId] = useState(null);
-  const [activeVendor, setActiveVendor] = useState(null);
+function VendorLayout({ currentTab }) {
+  const navigate = useNavigate();
 
-  // -----------------------------
-  // VENDOR DETAIL VIEW
-  // -----------------------------
-  if (activeTab === "vendor-detail" && activeVendor) {
-    return (
-      <div className="py-8">
-        <VendorDetail
-          vendor={activeVendor}
-          onBack={() => setActiveTab("registry")}
-          onViewInvoice={(invoiceId) => {
-            setActiveInvoiceId(invoiceId);
-            setActiveTab("invoice-detail");
-          }}
-        />
-      </div>
-    );
-  }
+  const VENDOR_TABS = [
+    { id: "registry", label: "Vendor Center", to: "/vendors" },
+    { id: "operations", label: "Vendor Operations", to: "/vendors/operations" },
+  ];
 
-  // -----------------------------
-  // INVOICE DETAIL VIEW
-  // -----------------------------
-  if (activeTab === "invoice-detail" && activeInvoiceId) {
-    return (
-      <div className="p-6">
-        <InvoiceDetail
-          invoiceId={activeInvoiceId}
-          onBack={() => setActiveTab("vendor-detail")}
-        />
-      </div>
-    );
-  }
-
-  // -----------------------------
-  // NORMAL TAB VIEWS
-  // -----------------------------
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
@@ -64,42 +65,99 @@ export function VendorWorkspace() {
       <div className="border-b border-border">
         <div className="flex gap-6">
           {VENDOR_TABS.map((tab) => (
-            <VendorTab
+            <button
               key={tab.id}
-              id={tab.id}
-              label={tab.label}
-              isActive={activeTab === tab.id}
-              onSelect={setActiveTab}
-            />
+              onClick={() => navigate(tab.to)}
+              className={`pb-3 text-sm font-medium transition-colors ${
+                currentTab === tab.id
+                  ? "text-orange-600 border-b-2 border-orange-500"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {tab.label}
+            </button>
           ))}
         </div>
       </div>
 
-      {activeTab === "registry" && (
-        <VendorRegistry
-          onSelectVendor={(vendor) => {
-            setActiveVendor(vendor);
-            setActiveTab("vendor-detail");
-          }}
-        />
-      )}
-
-      {activeTab === "operations" && <VendorOperations />}
+      {/* children render below via routes */}
     </div>
   );
 }
 
-function VendorTab({ id, label, isActive, onSelect }) {
+function VendorCenterPage() {
+  const navigate = useNavigate();
+
   return (
-    <button
-      onClick={() => onSelect(id)}
-      className={`pb-3 text-sm font-medium transition-colors ${
-        isActive
-          ? "text-orange-600 border-b-2 border-orange-500"
-          : "text-muted-foreground hover:text-foreground"
-      }`}
-    >
-      {label}
-    </button>
+    <div className="p-6 space-y-6">
+      <VendorLayout currentTab="registry" />
+
+      <VendorRegistry
+        vendors={mockVendors}
+        onSelectVendor={(vendor) => {
+          // Route to vendor detail, include state so the detail page can render without refetch
+          navigate(`/vendors/${vendor.vendorId}/transactions`, { state: { vendor } });
+        }}
+      />
+    </div>
+  );
+}
+
+function VendorOperationsPage() {
+  return (
+    <div className="p-6 space-y-6">
+      <VendorLayout currentTab="operations" />
+      <VendorOperations />
+    </div>
+  );
+}
+
+function VendorDetailWrapper() {
+  const { vendorId } = useParams();
+  const location = useLocation();
+
+  // Prefer vendor passed from registry navigation; fallback to mock list on refresh
+  const vendorFromState = location.state?.vendor;
+  const vendor = vendorFromState || mockVendors.find((v) => v.vendorId === vendorId);
+
+  return (
+    <div className="py-8">
+      <VendorDetail vendor={vendor} />
+    </div>
+  );
+}
+
+function VendorInvoiceWrapper() {
+  const { vendorId, invoiceId } = useParams();
+  const navigate = useNavigate();
+
+  return (
+    <div className="p-6">
+      <InvoiceDetail
+        invoiceId={invoiceId}
+        onBack={() => navigate(`/vendors/${vendorId}/transactions`)}
+      />
+    </div>
+  );
+}
+
+export function VendorWorkspace() {
+  return (
+    <Routes>
+     
+      <Route path="/" element={<VendorCenterPage />} />
+
+     
+      <Route path="operations" element={<VendorOperationsPage />} />
+
+      
+      <Route path=":vendorId/*" element={<VendorDetailWrapper />} />
+
+     
+      <Route path=":vendorId/invoices/:invoiceId" element={<VendorInvoiceWrapper />} />
+
+     
+      <Route path="*" element={<Navigate to="/vendors" replace />} />
+    </Routes>
   );
 }

@@ -5,6 +5,7 @@ import { AlertTriangle } from "lucide-react";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useNavigate } from "react-router-dom";
 
 const badgeTone = (tone) => {
   if (tone === "danger") return "bg-red-100 text-red-700";
@@ -18,6 +19,7 @@ export function AlertsAndSignals({
   onOpenAutomations,
   onOpenAdminAudit,
 }) {
+  const navigate=useNavigate();
   const alertsAndSignals = useMemo(
     () => [
       {
@@ -77,7 +79,7 @@ export function AlertsAndSignals({
             variant="outline"
             size="sm"
             className="h-8 rounded-xl border-border/70"
-            onClick={() => setActiveTab?.("alerts-signals")}
+            onClick={() => navigate("/home/alerts-signals") }
           >
             View All
           </Button>

@@ -34,6 +34,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { useNavigate } from "react-router-dom";
 
 const toneBadge = (tone) => {
   if (tone === "danger") return "bg-red-100 text-red-700";
@@ -77,11 +78,11 @@ export function AlertsAndSignalsPage({
   const [category, setCategory] = useState("all"); 
   const [severity, setSeverity] = useState("all"); 
   const [type, setType] = useState("all");
-
+  const navigate=useNavigate();
   const [selected, setSelected] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  // Simple local state for ack/resolution (UI-only)
+ 
   const [ackIds, setAckIds] = useState(() => new Set());
   const [resolvedIds, setResolvedIds] = useState(() => new Set());
 
@@ -425,9 +426,9 @@ export function AlertsAndSignalsPage({
             <Button
               variant="outline"
               className="rounded-xl"
-              onClick={() => onBack?.()}
+              onClick={() => navigate("/home") }
             >
-              Back to Home
+              Back to Dashboard
             </Button>
           </div>
         </div>

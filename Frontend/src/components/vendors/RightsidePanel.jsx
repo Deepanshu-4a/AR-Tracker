@@ -232,7 +232,7 @@ export function RightSidePanel({ vendor }) {
 
   /* ================= EXPANDED ================= */
   return (
-    <div className="sticky top-8 h-[calc(100vh-96px)] w-[300px] shrink-0">
+    <div className="sticky top-8 h-[calc(100vh-96px)] w-[290px] shrink-0">
       <div className="h-full rounded-2xl border border-border/60 bg-card shadow-lg flex flex-col overflow-hidden">
         {/* HEADER */}
         <div className="flex justify-between items-center px-6 py-5 border-b border-border/60">
@@ -572,11 +572,15 @@ function Row({ label, value, highlight, link, blue }) {
   );
 
   return (
-  <div className="grid grid-cols-[48px_minmax(0,1fr)] items-center gap-3">
-    <span className="text-muted-foreground text-[12px]">{label}</span>
-    <div className="text-right min-w-0">{valueNode}</div>
-  </div>
-);
+    <div className="flex items-start justify-between gap-3">
+      <span className="text-muted-foreground text-[12px] shrink-0">{label}</span>
+
+      {/* take remaining space and allow wrapping */}
+      <span className="min-w-0 flex-1 text-right">
+        {valueNode}
+      </span>
+    </div>
+  );
 }
 
 function TxRow({ tx }) {

@@ -45,7 +45,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
+import { Outlet, useMatch,useNavigate } from "react-router-dom";
 import {
   Dialog,
   DialogContent,
@@ -124,7 +124,15 @@ export function Dashboard({
 
   const [actionDialogOpen, setActionDialogOpen] = useState(false);
   const [selectedAction, setSelectedAction] = useState(null);
-
+   const goToInvoice = (invoiceNo) => navigate("/home/ar-outstanding");
+  const goToCustomer = (customerId) => navigate("/customers");
+  const goToIntegrations = () => navigate("/integrations");
+  const goToAutomations = () => navigate("/automations");
+  const goToAdminUsers = () => navigate("/admin");
+  const goToAdminAudit = () => navigate("/admin");
+  const goToAlertsSignals = () => navigate("/home/alerts-signals");
+  const goToActionQueue = () => navigate("/home/action-queue");
+  const isHome = useMatch("/home"); 
   const openActionDialog = (item) => {
     setSelectedAction(item);
     setActionDialogOpen(true);
@@ -177,7 +185,9 @@ export function Dashboard({
   };
 
   return (
-    <div className="min-h-screen w-full bg-[radial-gradient(90%_120%_at_10%_0%,hsl(var(--muted))_0%,transparent_55%),radial-gradient(90%_120%_at_90%_0%,hsl(var(--muted))_0%,transparent_55%)]">
+    <>
+    {isHome?(
+        <div className="min-h-screen w-full bg-[radial-gradient(90%_120%_at_10%_0%,hsl(var(--muted))_0%,transparent_55%),radial-gradient(90%_120%_at_90%_0%,hsl(var(--muted))_0%,transparent_55%)]">
       {/* Dialog */}
       <Dialog open={actionDialogOpen} onOpenChange={setActionDialogOpen}>
         <DialogContent className="sm:max-w-[580px] rounded-2xl border-border/60 shadow-xl">
@@ -376,14 +386,14 @@ export function Dashboard({
         </div>
 
         {/* Financial Snapshot */}
-        <FinancialSnapshot setActiveTab={setActiveTab} />
+        <FinancialSnapshot  />
 
         {/* MIDDLE: Top Invoices + Aging Distribution */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Top Outstanding Invoices */}
           <TopOutstandingInvoices
             setActiveTab={setActiveTab}
-            onOpenInvoice={onOpenInvoice}
+            onOpenInvoice={onOpenInvoice?? goToInvoice}
           />
 
           <InvoiceAging />
@@ -393,24 +403,29 @@ export function Dashboard({
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
           {/* Action Queue */}
           <ActionQueue
-            setActiveTab={setActiveTab}
-            onOpenCustomer={onOpenCustomer}
-            onOpenInvoice={onOpenInvoice}
-            onOpenIntegrations={onOpenIntegrations}
-            onOpenAutomations={onOpenAutomations}
-            onOpenAdminUsers={onOpenAdminUsers}
-            onOpenAction={openActionDialog}
-          />
+              setActiveTab={setActiveTab}
+              onOpenCustomer={onOpenCustomer ?? goToCustomer} // ✅
+              onOpenInvoice={onOpenInvoice ?? goToInvoice} // ✅
+              onOpenIntegrations={onOpenIntegrations ?? goToIntegrations} // ✅
+              onOpenAutomations={onOpenAutomations ?? goToAutomations} // ✅
+              onOpenAdminUsers={onOpenAdminUsers ?? goToAdminUsers} // ✅
+              onOpenAction={openActionDialog}
+              onViewAll={goToActionQueue} // ✅ (add this prop + use it in ActionQueue)
+            />
 
-          {/* Alerts & Signals */}
-          <AlertsAndSignals
-            setActiveTab={setActiveTab}
-            onOpenAutomations={onOpenAutomations}
-            onOpenAdminAudit={onOpenAdminAudit}
-          />
+            <AlertsAndSignals
+              setActiveTab={setActiveTab}
+              onOpenAutomations={onOpenAutomations ?? goToAutomations} // ✅
+              onOpenAdminAudit={onOpenAdminAudit ?? goToAdminAudit} // ✅
+              onViewAll={goToAlertsSignals} // ✅ (add this prop + use it in AlertsAndSignals)
+            />
         </div>
       </div>
     </div>
+    ):
+    <Outlet />}
+    </>
+   
   );
 }
 

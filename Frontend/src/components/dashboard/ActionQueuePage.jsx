@@ -24,6 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { useNavigate } from "react-router-dom";
 
 const formatCurrency = (amount) => {
   if (!amount) return "$0";
@@ -62,7 +63,7 @@ export default function ActionQueuePage({
   onOpenAdminUsers,
   onOpenAdminAudit,
 }) {
- 
+  const navigate=useNavigate();
   const actions = useMemo(
     () => [
       {
@@ -219,7 +220,7 @@ export default function ActionQueuePage({
         <Button
           variant="outline"
           className="rounded-xl"
-          onClick={() => setActiveTab?.("dashboard")}
+          onClick={() => navigate("/home")}
         >
           Back to Dashboard
         </Button>
@@ -409,7 +410,7 @@ export default function ActionQueuePage({
                           className="h-8 rounded-xl"
                           onClick={(e) => {
                             e.stopPropagation();
-                            // ✅ static demo: mark as done could later call API
+                           
                             alert(`Marked as handled: ${a.id}`);
                           }}
                         >

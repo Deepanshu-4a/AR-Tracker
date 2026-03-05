@@ -21,14 +21,15 @@ import {
   Building2,
   CreditCard,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
-export default function CashOutPage({ onBack }) {
+export default function CashOutPage() {
   const [period, setPeriod] = useState("mtd");
   const [search, setSearch] = useState("");
   const [vendor, setVendor] = useState("all");
   const [method, setMethod] = useState("all");
   const [postedOnly, setPostedOnly] = useState(true);
-
+  const navigate=useNavigate();
   /* ------------------  DATA ------------------ */
   const rows = useMemo(
     () => [
@@ -136,7 +137,7 @@ export default function CashOutPage({ onBack }) {
       <div className="sticky top-0 border-b bg-background/80 backdrop-blur z-20">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" onClick={onBack}>
+            <Button variant="ghost" size="icon" onClick={()=>navigate("/home")}>
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div>

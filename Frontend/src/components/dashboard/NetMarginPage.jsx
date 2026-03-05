@@ -23,13 +23,14 @@ import {
   Tooltip,
   CartesianGrid,
 } from "recharts";
+import { useNavigate } from "react-router-dom";
 
-export default function NetMarginPage({ onBack }) {
+export default function NetMarginPage() {
   const [period, setPeriod] = useState("mtd"); // mtd | qtd
   const [search, setSearch] = useState("");
   const [segment, setSegment] = useState("all"); // all | enterprise | midmarket | smb
   const [includePending, setIncludePending] = useState(false);
-
+  const navigate=useNavigate(); 
   // Deterministic "today" for demo (replace with new Date())
   const now = new Date("2026-02-10");
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -174,7 +175,7 @@ export default function NetMarginPage({ onBack }) {
         <div className="mx-auto max-w-7xl px-4 py-4">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div className="flex items-center gap-3">
-              <Button variant="ghost" size="icon" onClick={onBack}>
+              <Button variant="ghost" size="icon" onClick={()=>navigate("/home")}>
                 <ArrowLeft className="h-5 w-5" />
               </Button>
 

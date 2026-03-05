@@ -4,6 +4,7 @@ import React, { useMemo } from "react";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useNavigate } from "react-router-dom";
 
 const formatCurrency = (amount) => {
   if (typeof amount === "string") return amount;
@@ -44,7 +45,7 @@ const getStatusBadge = (status) => {
 };
 
 export function TopOutstandingInvoices({ setActiveTab, onOpenInvoice }) {
- 
+   const navigate = useNavigate();
   const topOutstandingInvoices = useMemo(
     () => [
       {
@@ -93,7 +94,7 @@ export function TopOutstandingInvoices({ setActiveTab, onOpenInvoice }) {
             variant="outline"
             size="sm"
             className="h-8 rounded-xl border-border/70"
-            onClick={() => setActiveTab?.("revenue")}
+            onClick={() =>navigate("/revenue") }
           >
             View All
           </Button>

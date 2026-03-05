@@ -30,14 +30,15 @@ import {
   Cell,
   Tooltip,
 } from "recharts";
+import { useNavigate } from "react-router-dom";
 
-export default function AROutstandingPage({ onBack }) {
+export default function AROutstandingPage() {
   const [bucket, setBucket] = useState("all"); // all | 0-30 | 31-60 | 61-90 | 90+
   const [search, setSearch] = useState("");
   const [customer, setCustomer] = useState("all");
   const [status, setStatus] = useState("open"); 
   const [includeDisputed, setIncludeDisputed] = useState(true);
-
+  const navigate=useNavigate();
   const formatMoney = (n) =>
     n.toLocaleString("en-US", { style: "currency", currency: "USD" });
 
@@ -202,7 +203,7 @@ export default function AROutstandingPage({ onBack }) {
         <div className="mx-auto max-w-7xl px-4 py-4">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div className="flex items-center gap-3">
-              <Button variant="ghost" size="icon" onClick={onBack}>
+              <Button variant="ghost" size="icon" onClick={()=>navigate("/home")}>
                 <ArrowLeft className="h-5 w-5" />
               </Button>
               <div>

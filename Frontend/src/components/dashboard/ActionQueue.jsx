@@ -13,6 +13,7 @@ import {
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useNavigate } from "react-router-dom";
 
 const actionTone = (cta) => {
   if (cta === "Approve") return "bg-emerald-100 text-emerald-700";
@@ -37,7 +38,7 @@ export function ActionQueue({
   onOpenAction,
 }) {
   const [handledIds, setHandledIds] = useState(() => new Set());
-
+  const navigate=useNavigate();
   const actions = useMemo(
     () => [
       {
@@ -152,7 +153,7 @@ export function ActionQueue({
             variant="outline"
             size="sm"
             className="h-8 rounded-xl border-border/70"
-            onClick={() => setActiveTab?.("action-queue")}
+            onClick={() => navigate("/home/action-queue") }
           >
             View All
           </Button>

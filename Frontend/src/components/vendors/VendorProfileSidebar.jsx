@@ -2,6 +2,7 @@ import { ArrowLeft, Building2, Mail, Phone, ShieldCheck } from "lucide-react";
 import { Avatar, AvatarFallback } from "../ui/avatar";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
+import { useNavigate } from "react-router-dom";
 
 
 export function VendorProfileSidebar({ vendor, onBack }) {
@@ -10,7 +11,7 @@ export function VendorProfileSidebar({ vendor, onBack }) {
   
   const vendorName = vendor.businessName ?? vendor.name ?? "—";
   const vendorId = vendor.vendorId ?? vendor.id ?? "—";
-
+  const navigate=useNavigate();
   const initials = String(vendorName)
     .trim()
     .split(/\s+/)
@@ -37,7 +38,7 @@ export function VendorProfileSidebar({ vendor, onBack }) {
         {/* BACK BUTTON */}
         <Button
           variant="ghost"
-          onClick={onBack}
+          onClick={()=> navigate("/vendors")}
           className="px-0 text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />

@@ -2,8 +2,10 @@
 import React, { useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowUp, ArrowDown, DollarSign, TrendingUp, TrendingDown, FileText, Clock } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
-export function FinancialSnapshot({ setActiveTab }) {
+export function FinancialSnapshot() {
+  const navigate=useNavigate();
   const items = useMemo(
     () => [
       {
@@ -13,7 +15,7 @@ export function FinancialSnapshot({ setActiveTab }) {
         change: "+4.1%",
         trend: "up",
         icon: DollarSign,
-        onClick: () => setActiveTab?.("cash-in"),
+        onClick: () => navigate("/home/cash-in"),
       },
       {
         key: "cash_out_mtd",
@@ -22,7 +24,7 @@ export function FinancialSnapshot({ setActiveTab }) {
         change: "+1.9%",
         trend: "up",
         icon: TrendingDown,
-        onClick: () => setActiveTab?.("cash-out"),
+        onClick: () => navigate("/home/cash-out"),
       },
       {
         key: "net_margin",
@@ -31,7 +33,7 @@ export function FinancialSnapshot({ setActiveTab }) {
         change: "-0.8%",
         trend: "down",
         icon: TrendingUp,
-        onClick: () => setActiveTab?.("net-margin"),
+        onClick: () => navigate("/home/net-margin"),
       },
       {
         key: "ar_outstanding",
@@ -40,7 +42,7 @@ export function FinancialSnapshot({ setActiveTab }) {
         change: "+5.2%",
         trend: "up",
         icon: FileText,
-        onClick: () => setActiveTab?.("ar-outstanding"),
+        onClick: () => navigate("/home/ar-outstanding"),
       },
       {
         key: "ap_outstanding",
@@ -49,10 +51,10 @@ export function FinancialSnapshot({ setActiveTab }) {
         change: "+2.6%",
         trend: "up",
         icon: Clock,
-        onClick: () => setActiveTab?.("ap-outstanding"),
+        onClick: () => navigate("/home/ap-outstanding"),
       },
     ],
-    [setActiveTab],
+    [navigate],
   );
 
   return (

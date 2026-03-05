@@ -232,7 +232,7 @@ export function RightSidePanel({ vendor }) {
 
   /* ================= EXPANDED ================= */
   return (
-    <div className="sticky top-8 h-[calc(100vh-96px)] w-[280px] shrink-0">
+    <div className="sticky top-8 h-[calc(100vh-96px)] w-[300px] shrink-0">
       <div className="h-full rounded-2xl border border-border/60 bg-card shadow-lg flex flex-col overflow-hidden">
         {/* HEADER */}
         <div className="flex justify-between items-center px-6 py-5 border-b border-border/60">
@@ -551,7 +551,7 @@ function SectionCard({ title, rightIcon, children, compact }) {
 function Row({ label, value, highlight, link, blue }) {
   const valueNode = link ? (
     <a
-      className="font-medium text-blue-600 hover:underline break-all text-[12px]"
+      className="font-small text-blue-600 hover:underline  text-[12px] text-left"
       href={`mailto:${value}`}
       onClick={(e) => {
         if (!String(value || "").includes("@")) e.preventDefault();
@@ -562,7 +562,7 @@ function Row({ label, value, highlight, link, blue }) {
   ) : (
     <span
       className={cn(
-        "font-medium text-[12px]",
+        "font-small text-[10px]",
         highlight && "text-destructive",
         blue && "text-blue-600",
       )}
@@ -572,11 +572,11 @@ function Row({ label, value, highlight, link, blue }) {
   );
 
   return (
-    <div className="flex justify-between gap-3">
-      <span className="text-muted-foreground text-[12px]">{label}</span>
-      <span className="text-right min-w-0">{valueNode}</span>
-    </div>
-  );
+  <div className="grid grid-cols-[48px_minmax(0,1fr)] items-center gap-3">
+    <span className="text-muted-foreground text-[12px]">{label}</span>
+    <div className="text-right min-w-0">{valueNode}</div>
+  </div>
+);
 }
 
 function TxRow({ tx }) {

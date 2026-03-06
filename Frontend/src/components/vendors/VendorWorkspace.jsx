@@ -71,7 +71,7 @@ function VendorLayout({ currentTab }) {
               className={`pb-3 text-sm font-medium transition-colors ${
                 currentTab === tab.id
                   ? "text-orange-600 border-b-2 border-orange-500"
-                  : "text-muted-foreground hover:text-foreground"
+                  : "text-muted-foreground hover:text-foreground hover:cursor-pointer"
               }`}
             >
               {tab.label}

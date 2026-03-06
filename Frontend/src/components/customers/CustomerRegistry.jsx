@@ -193,7 +193,7 @@ export function CustomerRegistry({
 
               <div className="flex items-center gap-2 flex-wrap justify-end">
                 <Button
-                  className="bg-orange-500 hover:bg-orange-600"
+                  className="bg-orange-500 hover:bg-orange-600 cursor-pointer"
                   onClick={() => setIsCreateOpen(true)}
                 >
                   <Plus className="w-4 h-4 mr-2" />

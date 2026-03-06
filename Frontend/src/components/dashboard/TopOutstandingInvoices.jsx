@@ -93,7 +93,7 @@ export function TopOutstandingInvoices({ setActiveTab, onOpenInvoice }) {
           <Button
             variant="outline"
             size="sm"
-            className="h-8 rounded-xl border-border/70"
+            className="h-8 rounded-xl border-border/70 cursor-pointer"
             onClick={() =>navigate("/revenue") }
           >
             View All

@@ -42,7 +42,7 @@ export function VendorDetail({ vendor }) {
   const goTab = (tabId) => navigate(`/vendors/${vendorId}/${tabId}`);
 
   return (
-    <div className="h-full w-full max-w-none px-8">
+    <div className="h-full w-full max-w-none px-8 cursor-pointer">
       <div
         className={cn(
           "grid gap-8 transition-all duration-300",
@@ -115,7 +115,7 @@ function DetailTab({ id, label, onSelect }) {
       onClick={() => onSelect(id)}
       className={cn(
         "relative py-3 text-sm font-medium transition-colors",
-        isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground",
+        isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground cursor-pointer",
       )}
     >
       {label}

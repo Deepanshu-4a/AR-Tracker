@@ -325,7 +325,7 @@ export function Dashboard({
             <DropdownMenuTrigger asChild>
               <Button
                 variant="outline"
-                className="h-10 gap-2 rounded-2xl border-border/70 bg-background/70 shadow-sm hover:bg-accent/40"
+                className="h-10 gap-2 rounded-2xl border-border/70 bg-background/70 shadow-sm hover:bg-accent/40 cursor-pointer"
               >
                 <div className="h-7 w-7 rounded-full bg-orange-50 flex items-center justify-center">
                   <User className="h-4 w-4 text-orange-600" />

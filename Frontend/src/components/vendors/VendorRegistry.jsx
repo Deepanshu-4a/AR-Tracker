@@ -173,7 +173,7 @@ export function VendorRegistry({ vendors: propVendors, onSelectVendor }) {
               </div>
 
               <div className="flex items-center gap-2 flex-wrap justify-end">
-                <Button onClick={() => setIsCreateOpen(true)} className="bg-orange-500 hover:bg-orange-600">
+                <Button onClick={() => setIsCreateOpen(true)} className="bg-orange-500 hover:bg-orange-600 cursor-pointer">
                   <Plus className="w-4 h-4 mr-2" />
                   New Vendor
                 </Button>

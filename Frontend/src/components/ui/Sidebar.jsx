@@ -51,7 +51,7 @@ export function Sidebar({
           ${
             isActive
               ? "bg-orange-50 text-orange-600"
-              : "text-slate-600 hover:bg-slate-100"
+              : "text-slate-600 hover:bg-slate-100 cursor-pointer"
           }`}
       >
         <Icon className="w-5 h-5 shrink-0" />
@@ -111,7 +111,7 @@ export function Sidebar({
           {/* Collapse / Expand Button */}
           <button
             onClick={() => setCollapsed(!collapsed)}
-            className="hidden md:flex text-slate-500 hover:text-black transition-colors"
+            className="hidden md:flex text-slate-500 hover:text-black cursor-pointer transition-colors"
           >
             {collapsed ? (
               <Menu className="w-4 h-4" />

@@ -64,7 +64,7 @@ function RevenueTab({ id, label, isActive, onSelect }) {
       className={`pb-3 text-sm font-medium transition-colors ${
         isActive
           ? "text-orange-600 border-b-2 border-orange-500"
-          : "text-muted-foreground hover:text-foreground"
+          : "text-muted-foreground hover:text-foreground cursor-pointer"
       }`}
     >
       {label}

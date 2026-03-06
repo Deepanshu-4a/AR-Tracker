@@ -116,7 +116,7 @@ function DetailTab({ id, label, isActive, onSelect }) {
         "relative py-3 text-sm font-medium transition-colors",
         isActive
           ? "text-foreground"
-          : "text-muted-foreground hover:text-foreground",
+          : "text-muted-foreground hover:text-foreground cursor-pointer",
       )}
     >
       {label}

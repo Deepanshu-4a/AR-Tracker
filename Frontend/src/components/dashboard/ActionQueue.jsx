@@ -152,7 +152,7 @@ export function ActionQueue({
           <Button
             variant="outline"
             size="sm"
-            className="h-8 rounded-xl border-border/70"
+            className="h-8 rounded-xl border-border/70 cursor-pointer"
             onClick={() => navigate("/home/action-queue") }
           >
             View All

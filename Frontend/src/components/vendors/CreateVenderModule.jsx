@@ -69,20 +69,20 @@ export function CreateVendorModal({ open, onOpenChange }) {
           </h3>
 
           <div className="ml-auto flex items-center gap-2">
-            <button className="size-8 flex items-center justify-center rounded-md hover:bg-white/20 transition">
+            <button className="size-8 flex items-center justify-center rounded-md hover:bg-white/20 transition hover:cursor-pointer">
               <Minus size={14} />
             </button>
 
             <button
               onClick={() => setIsMaximized(!isMaximized)}
-              className="size-8 flex items-center justify-center rounded-md hover:bg-white/20 transition"
+              className="size-8 flex items-center justify-center rounded-md hover:bg-white/20 transition hover:cursor-pointer"
             >
               <Square size={13} />
             </button>
 
             <button
               onClick={() => onOpenChange(false)}
-              className="size-8 flex items-center justify-center rounded-md hover:bg-red-500/80 transition"
+              className="size-8 flex items-center justify-center rounded-md hover:bg-red-500/80 transition hover:cursor-pointer"
             >
               <X size={14} />
             </button>
@@ -152,7 +152,7 @@ export function CreateVendorModal({ open, onOpenChange }) {
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
-                className={`w-full text-left px-4 py-2 rounded-lg text-sm transition ${
+                className={`w-full text-left px-4 py-2 rounded-lg text-sm transition cursor-pointer ${
                   activeTab === tab.key
                     ? "bg-primary text-primary-foreground shadow-sm"
                     : "hover:bg-muted"
@@ -223,12 +223,12 @@ export function CreateVendorModal({ open, onOpenChange }) {
             <Button
               variant="outline"
               onClick={() => onOpenChange(false)}
-              className="h-9"
+              className="h-9 cursor-pointer"
             >
               Cancel
             </Button>
 
-            <Button onClick={handleSave} className="h-9">
+            <Button onClick={handleSave} className="h-9 cursor-pointer">
               Save Vendor
             </Button>
           </div>

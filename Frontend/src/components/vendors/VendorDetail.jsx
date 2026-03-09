@@ -1,12 +1,13 @@
 import React, { useMemo, useState } from "react";
 import { cn } from "../ui/utils";
-import { Outlet, useNavigate, useParams, useLocation, Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useNavigate, useParams, useLocation } from "react-router-dom";
 
 import { VendorProfileSidebar } from "./VendorProfileSidebar";
 import { RightSidePanel } from "./RightsidePanel";
 import { VendorTransactions } from "./VendorTransactions";
 import { VendorContacts } from "./VendorContacts";
 import { VendorToDos } from "./VendorToDos";
+import { VendorFormModal } from "./VendorFormModule";
 
 const DETAIL_TABS = [
   { id: "transactions", label: "Transactions" },
@@ -14,13 +15,13 @@ const DETAIL_TABS = [
   { id: "todos", label: "ToDo's" },
 ];
 
-export function VendorDetail({ vendor }) {
+export function VendorDetail({ vendor, onUpdateVendor }) {
   const { vendorId } = useParams();
   const navigate = useNavigate();
   const [contextCollapsed, setContextCollapsed] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
 
   if (!vendor) {
-
     return (
       <div className="px-8">
         <div className="rounded-2xl border border-border/60 bg-card p-8 shadow-sm">
@@ -42,62 +43,81 @@ export function VendorDetail({ vendor }) {
   const goTab = (tabId) => navigate(`/vendors/${vendorId}/${tabId}`);
 
   return (
-    <div className="h-full w-full max-w-none px-8 cursor-pointer">
-      <div
-        className={cn(
-          "grid gap-8 transition-all duration-300",
-          contextCollapsed
-            ? "grid-cols-[280px_minmax(0,1fr)]"
-            : "grid-cols-[280px_minmax(0,1fr)_260px]",
-        )}
-      >
-        {/* LEFT SIDEBAR */}
-        <VendorProfileSidebar vendor={vendor} />
+    <>
+      <div className="h-full w-full max-w-none px-8">
+        <div
+          className={cn(
+            "grid gap-8 transition-all duration-300",
+            contextCollapsed
+              ? "grid-cols-[280px_minmax(0,1fr)]"
+              : "grid-cols-[280px_minmax(0,1fr)_260px]",
+          )}
+        >
+          <VendorProfileSidebar vendor={vendor} onEdit={()=>setEditOpen(true)} />
 
-        {/* CENTER */}
-        <div className="min-w-0 flex flex-col">
-          {/* Tabs */}
-          <div className="border-b border-border">
-            <div className="flex gap-8">
-              {DETAIL_TABS.map((tab) => (
-                <DetailTab
-                  key={tab.id}
-                  id={tab.id}
-                  label={tab.label}
-                  onSelect={goTab}
+          <div className="min-w-0 flex flex-col">
+            <div className="flex items-center justify-between border-b border-border">
+              <div className="flex gap-8">
+                {DETAIL_TABS.map((tab) => (
+                  <DetailTab
+                    key={tab.id}
+                    id={tab.id}
+                    label={tab.label}
+                    onSelect={goTab}
+                  />
+                ))}
+              </div>
+
+             
+            </div>
+
+            <div className="flex-1 pt-8">
+              <Routes>
+                <Route
+                  index
+                  element={<Navigate to="transactions" replace />}
                 />
-              ))}
+                <Route
+                  path="transactions"
+                  element={<VendorTransactions vendorId={vendor.vendorId ?? vendor.id} />}
+                />
+                <Route
+                  path="contacts"
+                  element={<VendorContacts vendorId={vendor.vendorId ?? vendor.id} />}
+                />
+                <Route
+                  path="todos"
+                  element={<VendorToDos vendorId={vendor.vendorId ?? vendor.id} />}
+                />
+                <Route path="*" element={<Navigate to="transactions" replace />} />
+              </Routes>
             </div>
           </div>
 
-          {/* Nested Routes */}
-          <div className="flex-1 pt-8">
-            <Routes>
-              <Route index element={<Navigate to="transactions" replace />} />
-              <Route path="transactions" element={<VendorTransactions vendorId={vendor.vendorId ?? vendor.id} />} />
-              <Route path="contacts" element={<VendorContacts vendorId={vendor.vendorId ?? vendor.id} />} />
-              <Route path="todos" element={<VendorToDos vendorId={vendor.vendorId ?? vendor.id} />} />
-              <Route path="*" element={<Navigate to="transactions" replace />} />
-            </Routes>
-          </div>
+          {!contextCollapsed ? (
+            <RightSidePanel
+              customer={vendor}
+              collapsed={false}
+              onToggle={() => setContextCollapsed(true)}
+            />
+          ) : (
+            <RightSidePanel
+              customer={vendor}
+              collapsed={true}
+              onToggle={() => setContextCollapsed(false)}
+            />
+          )}
         </div>
-
-        {/* RIGHT CONTEXT */}
-        {!contextCollapsed ? (
-          <RightSidePanel
-            customer={vendor}
-            collapsed={false}
-            onToggle={() => setContextCollapsed(true)}
-          />
-        ) : (
-          <RightSidePanel
-            customer={vendor}
-            collapsed={true}
-            onToggle={() => setContextCollapsed(false)}
-          />
-        )}
       </div>
-    </div>
+
+      <VendorFormModal
+        open={editOpen}
+        onOpenChange={setEditOpen}
+        mode="edit"
+        initialData={vendor}
+        onSave={onUpdateVendor}
+      />
+    </>
   );
 }
 
@@ -115,7 +135,9 @@ function DetailTab({ id, label, onSelect }) {
       onClick={() => onSelect(id)}
       className={cn(
         "relative py-3 text-sm font-medium transition-colors",
-        isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground cursor-pointer",
+        isActive
+          ? "text-foreground"
+          : "text-muted-foreground hover:text-foreground cursor-pointer",
       )}
     >
       {label}

@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo,useState ,useEffect} from "react";
 import { Routes, Route, Navigate, useLocation, useNavigate, useParams } from "react-router-dom";
 
 import { VendorRegistry } from "./VendorRegistry";
@@ -116,13 +116,22 @@ function VendorDetailWrapper() {
   const { vendorId } = useParams();
   const location = useLocation();
 
-  // Prefer vendor passed from registry navigation; fallback to mock list on refresh
   const vendorFromState = location.state?.vendor;
-  const vendor = vendorFromState || mockVendors.find((v) => v.vendorId === vendorId);
+  const fallbackVendor = mockVendors.find((v) => v.vendorId === vendorId);
+
+  const [vendor, setVendor] = useState(vendorFromState || fallbackVendor);
+
+  useEffect(() => {
+    setVendor(vendorFromState || fallbackVendor);
+  }, [vendorFromState, fallbackVendor]);
+
+  function handleUpdateVendor(updatedVendor) {
+    setVendor(updatedVendor);
+  }
 
   return (
     <div className="py-8">
-      <VendorDetail vendor={vendor} />
+      <VendorDetail vendor={vendor} onUpdateVendor={handleUpdateVendor} />
     </div>
   );
 }

@@ -12,7 +12,7 @@ import {
 import { Search01Icon as Search } from "hugeicons-react";
 import { Plus } from "lucide-react";
 import { cn } from "../ui/utils";
-import { CreateVendorModal } from "./CreateVenderModule";
+import { VendorFormModal } from "./VendorFormModule.jsx";
 import {
   CR_STYLES,
   FilterIcon,
@@ -414,7 +414,7 @@ export function VendorRegistry({ vendors: propVendors, onSelectVendor }) {
           </div>
         </div>
       </div>
-      <CreateVendorModal open={isCreateOpen} onOpenChange={setIsCreateOpen} />
+      <VendorFormModal open={isCreateOpen} onOpenChange={setIsCreateOpen} />
     </>
   );
 }

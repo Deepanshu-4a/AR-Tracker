@@ -1,7 +1,14 @@
 import { useMemo, useState } from "react";
-import { ChevronDown, Search } from "lucide-react";
 import { cn } from "../ui/utils";
 
+function fmtBal(n) {
+  const num = Number(n);
+  if (Number.isNaN(num)) return "—";
+  return new Intl.NumberFormat("en-US", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  }).format(num);
+}
 
 export function VendorRelationshipSidebar({
   vendors,
@@ -11,15 +18,34 @@ export function VendorRelationshipSidebar({
   const [q, setQ] = useState("");
 
   const data = useMemo(() => {
-    
     const list =
       vendors?.length
         ? vendors
         : [
-            { id: "V-001", businessName: "AANIS TECH SOLUTIONS, LLC", openBalance: 18180.03, att: "" },
-            { id: "V-002", businessName: "Innosof Corporation.", openBalance: 0, att: "" },
-            { id: "V-003", businessName: "VSoft Corporation Inc", openBalance: 0, att: "" },
-            { id: "V-004", businessName: "KFORCE", openBalance: 0, att: "" },
+            {
+              id: "V-001",
+              businessName: "AANIS TECH SOLUTIONS, LLC",
+              openBalance: 18180.03,
+              att: "",
+            },
+            {
+              id: "V-002",
+              businessName: "Innosof Corporation.",
+              openBalance: 0,
+              att: "",
+            },
+            {
+              id: "V-003",
+              businessName: "VSoft Corporation Inc",
+              openBalance: 0,
+              att: "",
+            },
+            {
+              id: "V-004",
+              businessName: "KFORCE",
+              openBalance: 0,
+              att: "",
+            },
           ];
 
     const norm = list.map((v) => {
@@ -32,12 +58,14 @@ export function VendorRelationshipSidebar({
 
     const query = q.trim().toLowerCase();
     const filtered = query
-      ? norm.filter((v) => v._name.toLowerCase().includes(query) || v._id.toLowerCase().includes(query))
+      ? norm.filter(
+          (v) =>
+            v._name.toLowerCase().includes(query) ||
+            v._id.toLowerCase().includes(query),
+        )
       : norm;
 
-    // Sort by name
     filtered.sort((a, b) => a._name.localeCompare(b._name));
-
     return filtered;
   }, [vendors, q]);
 
@@ -51,79 +79,120 @@ export function VendorRelationshipSidebar({
   }
 
   return (
-    <div className="rounded-2xl border border-border/60 bg-card shadow-sm overflow-hidden">
-      {/* Search */}
-      <div className="p-3 border-b border-border/50 bg-muted/20">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="Search vendors..."
-            className="w-full h-10 pl-9 pr-3 rounded-xl border border-border bg-background text-sm outline-none focus:ring-2 focus:ring-ring/30"
-          />
-        </div>
-      </div>
+    <div className="w-[300px] shrink-0">
+      <div className="rounded-2xl border border-border/60 bg-card shadow-lg overflow-hidden">
+        <div className="h-[760px] overflow-y-auto overflow-x-hidden">
+          <div className="p-3 pb-0">
+            <input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Search vendors..."
+              className="w-full rounded-2xl border border-border bg-background px-3 py-2.5 text-xs outline-none focus:ring-2 focus:ring-ring/30"
+            />
+          </div>
 
-      {/* Header (table-like) */}
-      <div className="grid grid-cols-[minmax(0,1fr)_70px_48px] gap-2 px-3 py-2 border-b border-border/50 bg-muted/30">
-        <div className="flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-          Name <ChevronDown className="w-3.5 h-3.5 opacity-60" />
-        </div>
-        <div className="text-right text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-          Bal.
-        </div>
-        <div className="text-right text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-          Att.
-        </div>
-      </div>
+          <div className="p-3">
+            <div className="rounded-2xl border border-border/60 overflow-hidden bg-white shadow-sm">
+              <table className="w-full text-xs table-fixed">
+                <thead className="bg-muted/30 text-muted-foreground text-[11px] uppercase tracking-wide">
+                  <tr>
+                    <Th className="w-[60%] px-3 py-2">Name</Th>
+                    <Th className="w-[26%] text-right px-2 py-2">Balan.</Th>
+                    <Th className="w-[14%] text-center px-2 py-2">Att.</Th>
+                  </tr>
+                </thead>
 
-      {/* List */}
-      <div className="max-h-[calc(100vh-260px)] overflow-y-auto">
-        {data.length ? (
-          data.map((v) => {
-            const active = String(selectedId ?? "") === v._id;
-            return (
-              <button
-                key={v._id}
-                type="button"
-                onClick={() => pick(v)}
-                className={cn(
-                  "w-full text-left grid grid-cols-[minmax(0,1fr)_70px_48px] gap-2 px-3 py-2 border-b border-border/40",
-                  "hover:bg-muted/30 transition-colors",
-                  active && "bg-muted/50",
-                )}
-              >
-                <div className="min-w-0">
-                  <div className={cn("truncate text-sm", active ? "font-semibold" : "font-medium")}>
-                    {v._name}
-                  </div>
-                  <div className="text-[11px] text-muted-foreground truncate">
-                    {v._id}
-                  </div>
-                </div>
+                <tbody>
+                  {data.map((v, i) => {
+                    const isActive = String(selectedId ?? "") === v._id;
 
-                <div className="text-right text-sm tabular-nums">
-                  {v._bal ? (
-                    v._bal.toLocaleString(undefined, {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })
-                  ) : (
-                    <span className="text-muted-foreground">0</span>
+                    return (
+                      <tr
+                        key={v._id}
+                        className={cn(
+                          "border-t transition-colors",
+                          isActive
+                            ? "bg-orange-500 text-white"
+                            : i % 2 === 0
+                              ? "bg-white"
+                              : "bg-muted/10",
+                          !isActive && "hover:bg-muted/30",
+                        )}
+                        onClick={() => pick(v)}
+                        style={{ cursor: "pointer" }}
+                      >
+                        <Td
+                          className={cn(
+                            "px-3 py-2",
+                            isActive ? "" : "text-slate-700",
+                          )}
+                        >
+                          <div className="min-w-0">
+                            <div className="truncate font-medium leading-tight text-[11px]">
+                              {v._name}
+                            </div>
+                            <div
+                              className={cn(
+                                "truncate text-[10px] leading-tight mt-0.5",
+                                isActive
+                                  ? "text-white/80"
+                                  : "text-muted-foreground",
+                              )}
+                            >
+                              {v._id}
+                            </div>
+                          </div>
+                        </Td>
+
+                        <Td
+                          className={cn(
+                            "text-right tabular-nums font-medium px-2 py-2 leading-tight text-[11px]",
+                            isActive ? "" : "text-slate-700",
+                          )}
+                        >
+                          {fmtBal(v._bal)}
+                        </Td>
+
+                        <Td
+                          className={cn(
+                            "text-center px-2 py-2 leading-tight text-[11px]",
+                            isActive ? "" : "text-slate-700",
+                          )}
+                        >
+                          {v._att ?? ""}
+                        </Td>
+                      </tr>
+                    );
+                  })}
+
+                  {data.length === 0 && (
+                    <tr className="border-t">
+                      <td
+                        colSpan={3}
+                        className="px-3 py-6 text-center text-xs text-muted-foreground"
+                      >
+                        No vendors found
+                      </td>
+                    </tr>
                   )}
-                </div>
-
-                <div className="text-right text-sm text-muted-foreground">
-                  {v._att ? v._att : ""}
-                </div>
-              </button>
-            );
-          })
-        ) : (
-          <div className="p-6 text-sm text-muted-foreground">No vendors found.</div>
-        )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
+}
+
+function Th({ children, className }) {
+  return (
+    <th className={cn("text-left font-medium whitespace-nowrap", className)}>
+      {children}
+    </th>
+  );
+}
+
+function Td({ children, className }) {
+  return <td className={cn("whitespace-nowrap", className)}>{children}</td>;
 }

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { cn } from "../ui/utils";
 
 /* ─── MOCK DATA  ───────────────────────── */
@@ -8,6 +8,7 @@ const mockVendorToDos = [
     priority: "High",
     date: "2026-03-01",
     type: "Compliance",
+    owner: "Sarah Lee",
     details:
       "Collect updated W-9 from Alpha Supplies (request latest EIN and address confirmation as well).",
   },
@@ -16,6 +17,7 @@ const mockVendorToDos = [
     priority: "Medium",
     date: "2026-03-05",
     type: "Billing",
+    owner: "Michael Chen",
     details:
       "Confirm invoice remittance details and verify ACH details with Bright Logistics before processing.",
   },
@@ -24,6 +26,7 @@ const mockVendorToDos = [
     priority: "Low",
     date: "2026-02-20",
     type: "Onboarding",
+    owner: "Anita Sharma",
     details:
       "Add CloudParts Inc. to approved vendor list and share onboarding packet with procurement.",
   },
@@ -40,9 +43,19 @@ function normalizeIncoming(rows) {
     priority: r.priority ?? "Medium",
     date: r.date ?? "—",
     type: r.type ?? "Task",
+    owner: r.owner ?? "—",
     details: r.details ?? "—",
   }));
 }
+
+const emptyTodo = {
+  done: false,
+  priority: "Medium",
+  date: "",
+  type: "Task",
+  owner: "",
+  details: "",
+};
 
 export function VendorToDos({ todos: propToDos }) {
   const baseRows = useMemo(() => {
@@ -50,18 +63,22 @@ export function VendorToDos({ todos: propToDos }) {
     return normalizeIncoming(src);
   }, [propToDos]);
 
-  
   const [rows, setRows] = useState(baseRows);
+  const [showAdd, setShowAdd] = useState(false);
+  const [expandedIds, setExpandedIds] = useState(() => new Set());
+  const [newTodo, setNewTodo] = useState(emptyTodo);
+  const [editingId, setEditingId] = useState(null);
+  const [editTodo, setEditTodo] = useState(emptyTodo);
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
- 
-  useMemo(() => {
+  const [typeFilter, setTypeFilter] = useState("all");
+  const [ownerFilter, setOwnerFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [dateFilter, setDateFilter] = useState("all");
+
+  useEffect(() => {
     setRows(baseRows);
   }, [baseRows]);
-
-  const [showAdd, setShowAdd] = useState(false);
-
- 
-  const [expandedIds, setExpandedIds] = useState(() => new Set());
 
   function toggleExpanded(id) {
     setExpandedIds((prev) => {
@@ -72,19 +89,6 @@ export function VendorToDos({ todos: propToDos }) {
     });
   }
 
-  const [newTodo, setNewTodo] = useState({
-    done: false,
-    priority: "Medium",
-    date: "",
-    type: "Task",
-    details: "",
-  });
-
- 
-  const [typeFilter, setTypeFilter] = useState("all");
-  const [statusFilter, setStatusFilter] = useState("all"); // all | open | done
-  const [dateFilter, setDateFilter] = useState("all"); // all | overdue | today | next7
-
   const typeOptions = useMemo(() => {
     const set = new Set();
     rows.forEach((r) => {
@@ -92,6 +96,15 @@ export function VendorToDos({ todos: propToDos }) {
       if (t) set.add(t);
     });
     if (!set.size) set.add("Task");
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
+  }, [rows]);
+
+  const ownerOptions = useMemo(() => {
+    const set = new Set();
+    rows.forEach((r) => {
+      const owner = String(r.owner ?? "").trim();
+      if (owner && owner !== "—") set.add(owner);
+    });
     return Array.from(set).sort((a, b) => a.localeCompare(b));
   }, [rows]);
 
@@ -107,9 +120,11 @@ export function VendorToDos({ todos: propToDos }) {
 
     return rows.filter((r) => {
       const tp = String(r.type ?? "Task").toLowerCase();
+      const owner = String(r.owner ?? "—").toLowerCase();
       const isDone = Boolean(r.done);
 
       const typeOk = typeFilter === "all" || tp === typeFilter;
+      const ownerOk = ownerFilter === "all" || owner === ownerFilter;
 
       const statusOk =
         statusFilter === "all" ||
@@ -119,19 +134,28 @@ export function VendorToDos({ todos: propToDos }) {
       let dateOk = true;
       if (dateFilter !== "all") {
         const d = r.date && r.date !== "—" ? new Date(r.date) : null;
-        if (!d || Number.isNaN(d.getTime())) dateOk = false;
-        else {
+        if (!d || Number.isNaN(d.getTime())) {
+          dateOk = false;
+        } else {
           const d0 = new Date(d.getFullYear(), d.getMonth(), d.getDate());
           if (dateFilter === "overdue") dateOk = d0 < startOfDay;
-          if (dateFilter === "today")
+          if (dateFilter === "today") {
             dateOk = d0.getTime() === startOfDay.getTime();
-          if (dateFilter === "next7") dateOk = d0 >= startOfDay && d0 <= next7;
+          }
+          if (dateFilter === "next7") {
+            dateOk = d0 >= startOfDay && d0 <= next7;
+          }
         }
       }
 
-      return typeOk && statusOk && dateOk;
+      return typeOk && ownerOk && statusOk && dateOk;
     });
-  }, [rows, typeFilter, statusFilter, dateFilter]);
+  }, [rows, typeFilter, ownerFilter, statusFilter, dateFilter]);
+
+  function resetAddForm() {
+    setNewTodo(emptyTodo);
+    setShowAdd(false);
+  }
 
   function handleAddTodo() {
     const details = String(newTodo.details || "").trim();
@@ -143,19 +167,12 @@ export function VendorToDos({ todos: propToDos }) {
       priority: newTodo.priority || "Medium",
       date: String(newTodo.date || "").trim() || "—",
       type: String(newTodo.type || "Task").trim() || "Task",
+      owner: String(newTodo.owner || "").trim() || "—",
       details,
     };
 
     setRows((prev) => [row, ...prev]);
-
-    setNewTodo({
-      done: false,
-      priority: "Medium",
-      date: "",
-      type: "Task",
-      details: "",
-    });
-    setShowAdd(false);
+    resetAddForm();
   }
 
   function toggleDoneById(id) {
@@ -164,9 +181,84 @@ export function VendorToDos({ todos: propToDos }) {
     );
   }
 
+  function handleDeleteTodo(id) {
+    setRows((prev) => prev.filter((r) => r.id !== id));
+    if (editingId === id) {
+      setEditingId(null);
+      setEditTodo(emptyTodo);
+    }
+    setExpandedIds((prev) => {
+      const next = new Set(prev);
+      next.delete(id);
+      return next;
+    });
+    setDeleteTarget(null);
+  }
+
+  function startEdit(todo) {
+    setShowAdd(false);
+    setEditingId(todo.id);
+    setEditTodo({
+      done: Boolean(todo.done),
+      priority: todo.priority ?? "Medium",
+      date: todo.date && todo.date !== "—" ? todo.date : "",
+      type: todo.type ?? "Task",
+      owner: todo.owner ?? "",
+      details: todo.details ?? "",
+    });
+  }
+
+  function cancelEdit() {
+    setEditingId(null);
+    setEditTodo(emptyTodo);
+  }
+
+  function saveEdit(id) {
+    const details = String(editTodo.details || "").trim();
+    if (!details) return;
+
+    setRows((prev) =>
+      prev.map((r) =>
+        r.id === id
+          ? {
+              ...r,
+              done: Boolean(editTodo.done),
+              priority: editTodo.priority || "Medium",
+              date: String(editTodo.date || "").trim() || "—",
+              type: String(editTodo.type || "Task").trim() || "Task",
+              owner: String(editTodo.owner || "").trim() || "—",
+              details,
+            }
+          : r,
+      ),
+    );
+
+    cancelEdit();
+  }
+
   return (
     <div className="flex flex-col h-full min-w-0 space-y-4">
-      {/* ================= FILTER BAR ================= */}
+      <style>
+        {`
+        .todo-scroll::-webkit-scrollbar {
+          height: 8px;
+        }
+
+        .todo-scroll::-webkit-scrollbar-track {
+          background: transparent;
+        }
+
+        .todo-scroll::-webkit-scrollbar-thumb {
+          background: rgba(100,116,139,0.35);
+          border-radius: 999px;
+        }
+
+        .todo-scroll::-webkit-scrollbar-thumb:hover {
+          background: rgba(100,116,139,0.55);
+        }
+        `}
+      </style>
+
       <div className="flex flex-wrap items-center gap-6 border-b border-border pb-4 text-sm">
         <Filter label="Type">
           <select
@@ -178,6 +270,21 @@ export function VendorToDos({ todos: propToDos }) {
             {typeOptions.map((t) => (
               <option key={t} value={t.toLowerCase()}>
                 {t}
+              </option>
+            ))}
+          </select>
+        </Filter>
+
+        <Filter label="Owner">
+          <select
+            value={ownerFilter}
+            onChange={(e) => setOwnerFilter(e.target.value)}
+            className="border border-border rounded-md px-2 py-1 bg-background text-sm"
+          >
+            <option value="all">All</option>
+            {ownerOptions.map((owner) => (
+              <option key={owner} value={owner.toLowerCase()}>
+                {owner}
               </option>
             ))}
           </select>
@@ -212,6 +319,7 @@ export function VendorToDos({ todos: propToDos }) {
           className="border border-border rounded-md px-3 py-1 bg-background text-sm"
           onClick={() => {
             setTypeFilter("all");
+            setOwnerFilter("all");
             setStatusFilter("all");
             setDateFilter("all");
           }}
@@ -220,228 +328,333 @@ export function VendorToDos({ todos: propToDos }) {
         </button>
 
         <button
-          className="ml-auto border border-border rounded-md px-3 py-1 bg-background text-sm"
-          onClick={() => setShowAdd((v) => !v)}
+          className="ml-auto border border-border rounded-md px-3 py-1 bg-background text-sm hover:cursor-pointer"
+          onClick={() => {
+            setEditingId(null);
+            setShowAdd((v) => !v);
+          }}
         >
           + Add
         </button>
       </div>
 
-      {/*  */}
       {showAdd && (
-        <div className="border border-border rounded-2xl p-4 bg-background">
-          {/* Row 1 */}
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-3 text-sm">
-            <div className="md:col-span-3">
-              <label className="block text-xs uppercase text-muted-foreground mb-1">
-                Done
-              </label>
-              <div className="h-10 flex items-center gap-2 border border-border rounded-xl px-3 bg-background">
-                <input
-                  type="checkbox"
-                  checked={newTodo.done}
-                  onChange={(e) =>
-                    setNewTodo((p) => ({ ...p, done: e.target.checked }))
-                  }
-                  className="h-4 w-4 accent-emerald-600"
-                />
-                <span className="text-sm text-muted-foreground">Mark done</span>
-              </div>
-            </div>
-
-            <div className="md:col-span-3">
-              <label className="block text-xs uppercase text-muted-foreground mb-1">
-                Priority
-              </label>
-              <select
-                value={newTodo.priority}
-                onChange={(e) =>
-                  setNewTodo((p) => ({ ...p, priority: e.target.value }))
-                }
-                className="w-full h-10 border border-border rounded-xl px-3 bg-background text-sm"
-              >
-                <option>High</option>
-                <option>Medium</option>
-                <option>Low</option>
-              </select>
-            </div>
-
-            <div className="md:col-span-3">
-              <label className="block text-xs uppercase text-muted-foreground mb-1">
-                Date
-              </label>
-              <input
-                type="date"
-                value={newTodo.date}
-                onChange={(e) =>
-                  setNewTodo((p) => ({ ...p, date: e.target.value }))
-                }
-                className="w-full h-10 border border-border rounded-xl px-3 bg-background"
-              />
-            </div>
-
-            <div className="md:col-span-3">
-              <label className="block text-xs uppercase text-muted-foreground mb-1">
-                Type
-              </label>
-              <input
-                value={newTodo.type}
-                onChange={(e) =>
-                  setNewTodo((p) => ({ ...p, type: e.target.value }))
-                }
-                className="w-full h-10 border border-border rounded-xl px-3 bg-background"
-                placeholder="Task"
-              />
-            </div>
-          </div>
-
-          {/* Row 2: DETAILS */}
-          <div className="mt-3">
-            <label className="block text-xs uppercase text-muted-foreground mb-1">
-              Details
-            </label>
-            <input
-              value={newTodo.details}
-              onChange={(e) =>
-                setNewTodo((p) => ({ ...p, details: e.target.value }))
-              }
-              className="w-full h-10 border border-border rounded-xl px-3 bg-background"
-              placeholder="e.g., Collect updated W-9"
-            />
-          </div>
-
-          {/* Actions */}
-          <div className="mt-4 flex items-center gap-2">
-            <button
-              className="border border-border rounded-xl px-4 py-2 bg-background text-sm"
-              onClick={handleAddTodo}
-            >
-              Add
-            </button>
-            <button
-              className="border border-border rounded-xl px-4 py-2 bg-background text-sm"
-              onClick={() => {
-                setShowAdd(false);
-                setNewTodo({
-                  done: false,
-                  priority: "Medium",
-                  date: "",
-                  type: "Task",
-                  details: "",
-                });
-              }}
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
+        <TodoForm
+          title="Add To-Do"
+          value={newTodo}
+          onChange={setNewTodo}
+          onPrimary={handleAddTodo}
+          primaryLabel="Add"
+          onSecondary={resetAddForm}
+          secondaryLabel="Cancel"
+        />
       )}
 
-      {/* ================= TABLE ================= */}
-      <div className="border border-border rounded-xl overflow-hidden">
-        <table className="w-full text-sm table-fixed">
-          <thead className="bg-muted/40 text-muted-foreground text-xs uppercase tracking-wide">
-            <tr>
-              <Th className="w-[10%]">Done</Th>
-              <Th className="w-[16%]">Priority</Th>
-              <Th className="w-[16%]">Date</Th>
-              <Th className="w-[18%]">Type</Th>
-              <Th className="w-[40%]">Details</Th>
-            </tr>
-          </thead>
+      {editingId && (
+        <TodoForm
+          title="Edit To-Do"
+          value={editTodo}
+          onChange={setEditTodo}
+          onPrimary={() => saveEdit(editingId)}
+          primaryLabel="Save"
+          onSecondary={cancelEdit}
+          secondaryLabel="Cancel"
+        />
+      )}
 
-          <tbody>
-            {filtered.map((t, i) => {
-              const isExpanded = expandedIds.has(t.id);
+      <div className="border border-border rounded-xl overflow-hidden bg-white">
+        <div className="overflow-x-auto todo-scroll scroll-smooth">
+          <table className="w-full min-w-[1100px] text-sm border-collapse">
+            <thead className="bg-muted/40 text-muted-foreground text-xs uppercase tracking-wide">
+              <tr>
+                <Th className="min-w-[80px]">Done</Th>
+                <Th className="min-w-[120px]">Priority</Th>
+                <Th className="min-w-[130px]">Date</Th>
+                <Th className="min-w-[130px]">Type</Th>
+                <Th className="min-w-[180px]">Owner</Th>
+                <Th className="min-w-[320px]">Details</Th>
+                <Th className="min-w-[140px]">Actions</Th>
+              </tr>
+            </thead>
 
-              return (
-                <tr
-                  key={t.id ?? `${t.details}-${t.date}-${i}`}
-                  className={cn(
-                    "border-t hover:bg-muted/30 transition-colors",
-                    i % 2 === 0 ? "bg-white" : "bg-muted/10",
-                  )}
-                >
-                  {/* DONE (toggle done/undone) */}
-                  <Td>
-                    <input
-                      type="checkbox"
-                      checked={Boolean(t.done)}
-                      onChange={() => toggleDoneById(t.id)}
-                      className="h-4 w-4 accent-emerald-600"
-                      title={t.done ? "Mark as not done" : "Mark as done"}
-                    />
-                  </Td>
+            <tbody>
+              {filtered.map((t, i) => {
+                const isExpanded = expandedIds.has(t.id);
 
-                  {/* PRIORITY */}
-                  <Td>
-                    <span
-                      className={cn(
-                        "px-2 py-0.5 rounded-full text-xs font-medium",
-                        String(t.priority).toLowerCase() === "high" &&
-                          "bg-red-100 text-red-700",
-                        String(t.priority).toLowerCase() === "medium" &&
-                          "bg-yellow-100 text-yellow-700",
-                        String(t.priority).toLowerCase() === "low" &&
-                          "bg-slate-100 text-slate-700",
-                      )}
-                    >
-                      {t.priority ?? "—"}
-                    </span>
-                  </Td>
+                return (
+                  <tr
+                    key={t.id ?? `${t.details}-${t.date}-${i}`}
+                    className={cn(
+                      "border-t hover:bg-muted/30 transition-colors align-top",
+                      i % 2 === 0 ? "bg-white" : "bg-muted/10",
+                    )}
+                  >
+                    <Td>
+                      <input
+                        type="checkbox"
+                        checked={Boolean(t.done)}
+                        onChange={() => toggleDoneById(t.id)}
+                        className="h-4 w-4 accent-emerald-600"
+                        title={t.done ? "Mark as not done" : "Mark as done"}
+                      />
+                    </Td>
 
-                  {/* DATE */}
-                  <Td className="text-slate-700 whitespace-nowrap">
-                    {t.date ?? "—"}
-                  </Td>
-
-                  {/* TYPE */}
-                  <Td className="text-slate-700 truncate">{t.type ?? "Task"}</Td>
-
-                  {/* DETAILS */}
-                  <td className="px-3 py-2 align-top">
-                    <div className="flex flex-col gap-1">
-                      <div
+                    <Td>
+                      <span
                         className={cn(
-                          "text-slate-700 font-medium break-words whitespace-normal",
-                          !isExpanded && "line-clamp-2",
+                          "px-2 py-0.5 rounded-full text-xs font-medium",
+                          String(t.priority).toLowerCase() === "high" &&
+                            "bg-red-100 text-red-700",
+                          String(t.priority).toLowerCase() === "medium" &&
+                            "bg-yellow-100 text-yellow-700",
+                          String(t.priority).toLowerCase() === "low" &&
+                            "bg-slate-100 text-slate-700",
                         )}
                       >
-                        {t.details ?? "—"}
-                      </div>
+                        {t.priority ?? "—"}
+                      </span>
+                    </Td>
 
-                      {String(t.details || "").length > 80 && (
-                        <button
-                          className="text-xs text-muted-foreground hover:text-foreground w-fit"
-                          onClick={() => toggleExpanded(t.id)}
-                          type="button"
+                    <Td className="text-slate-700 whitespace-nowrap">
+                      {t.date ?? "—"}
+                    </Td>
+
+                    <Td className="text-slate-700 whitespace-normal break-words">
+                      {t.type ?? "Task"}
+                    </Td>
+
+                    <Td className="text-slate-700 whitespace-normal break-words">
+                      {t.owner ?? "—"}
+                    </Td>
+
+                    <td className="px-3 py-2 align-top">
+                      <div className="flex flex-col gap-1">
+                        <div
+                          className={cn(
+                            "text-slate-700 font-medium break-words whitespace-normal",
+                            !isExpanded && "line-clamp-2",
+                          )}
                         >
-                          {isExpanded ? "Show less" : "Show more"}
+                          {t.details ?? "—"}
+                        </div>
+
+                        {String(t.details || "").length > 80 && (
+                          <button
+                            className="text-xs text-muted-foreground hover:text-foreground w-fit"
+                            onClick={() => toggleExpanded(t.id)}
+                            type="button"
+                          >
+                            {isExpanded ? "Show less" : "Show more"}
+                          </button>
+                        )}
+                      </div>
+                    </td>
+
+                    <Td className="whitespace-normal">
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          type="button"
+                          className="border border-border rounded-md px-2 py-1 text-xs bg-background hover:bg-muted hover:cursor-pointer"
+                          onClick={() => startEdit(t)}
+                        >
+                          Edit
                         </button>
-                      )}
-                    </div>
+                        <button
+                          type="button"
+                          className="border border-red-200 text-red-700 rounded-md px-2 py-1 text-xs bg-red-50 hover:bg-red-100 hover:cursor-pointer"
+                          onClick={() => setDeleteTarget(t)}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </Td>
+                  </tr>
+                );
+              })}
+
+              {filtered.length === 0 && (
+                <tr className="border-t">
+                  <td
+                    colSpan={7}
+                    className="px-3 py-8 text-center text-sm text-muted-foreground"
+                  >
+                    No To-Dos found
                   </td>
                 </tr>
-              );
-            })}
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
 
-            {filtered.length === 0 && (
-              <tr className="border-t">
-                <td
-                  colSpan={5}
-                  className="px-3 py-8 text-center text-sm text-muted-foreground"
-                >
-                  No To-Dos found
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+      {deleteTarget && (
+        <DeleteConfirmModal
+          todo={deleteTarget}
+          onCancel={() => setDeleteTarget(null)}
+          onConfirm={() => handleDeleteTodo(deleteTarget.id)}
+        />
+      )}
+    </div>
+  );
+}
+
+function TodoForm({
+  title,
+  value,
+  onChange,
+  onPrimary,
+  primaryLabel,
+  onSecondary,
+  secondaryLabel,
+}) {
+  return (
+    <div className="border border-border rounded-2xl p-4 bg-background">
+      <div className="mb-3 text-sm font-medium text-slate-700">{title}</div>
+
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-3 text-sm">
+        <div className="md:col-span-3">
+          <label className="block text-xs uppercase text-muted-foreground mb-1">
+            Done
+          </label>
+          <div className="h-10 flex items-center gap-2 border border-border rounded-xl px-3 bg-background">
+            <input
+              type="checkbox"
+              checked={value.done}
+              onChange={(e) =>
+                onChange((p) => ({ ...p, done: e.target.checked }))
+              }
+              className="h-4 w-4 accent-emerald-600"
+            />
+            <span className="text-sm text-muted-foreground">Mark done</span>
+          </div>
+        </div>
+
+        <div className="md:col-span-3">
+          <label className="block text-xs uppercase text-muted-foreground mb-1">
+            Priority
+          </label>
+          <select
+            value={value.priority}
+            onChange={(e) =>
+              onChange((p) => ({ ...p, priority: e.target.value }))
+            }
+            className="w-full h-10 border border-border rounded-xl px-3 bg-background text-sm"
+          >
+            <option>High</option>
+            <option>Medium</option>
+            <option>Low</option>
+          </select>
+        </div>
+
+        <div className="md:col-span-3">
+          <label className="block text-xs uppercase text-muted-foreground mb-1">
+            Date
+          </label>
+          <input
+            type="date"
+            value={value.date}
+            onChange={(e) => onChange((p) => ({ ...p, date: e.target.value }))}
+            className="w-full h-10 border border-border rounded-xl px-3 bg-background"
+          />
+        </div>
+
+        <div className="md:col-span-3">
+          <label className="block text-xs uppercase text-muted-foreground mb-1">
+            Type
+          </label>
+          <input
+            value={value.type}
+            onChange={(e) => onChange((p) => ({ ...p, type: e.target.value }))}
+            className="w-full h-10 border border-border rounded-xl px-3 bg-background"
+            placeholder="Task"
+          />
+        </div>
+      </div>
+
+      <div className="mt-3 grid grid-cols-1 md:grid-cols-12 gap-3">
+        <div className="md:col-span-4">
+          <label className="block text-xs uppercase text-muted-foreground mb-1">
+            Owner
+          </label>
+          <input
+            value={value.owner}
+            onChange={(e) => onChange((p) => ({ ...p, owner: e.target.value }))}
+            className="w-full h-10 border border-border rounded-xl px-3 bg-background"
+            placeholder="e.g., Sarah Lee"
+          />
+        </div>
+
+        <div className="md:col-span-8">
+          <label className="block text-xs uppercase text-muted-foreground mb-1">
+            Details
+          </label>
+          <input
+            value={value.details}
+            onChange={(e) =>
+              onChange((p) => ({ ...p, details: e.target.value }))
+            }
+            className="w-full h-10 border border-border rounded-xl px-3 bg-background"
+            placeholder="e.g., Collect updated W-9"
+          />
+        </div>
+      </div>
+
+      <div className="mt-4 flex items-center gap-2">
+        <button
+          className="border border-border rounded-xl px-4 py-2 bg-background text-sm hover:cursor-pointer"
+          onClick={onPrimary}
+        >
+          {primaryLabel}
+        </button>
+        <button
+          className="border border-border rounded-xl px-4 py-2 bg-background text-sm hover:cursor-pointer"
+          onClick={onSecondary}
+        >
+          {secondaryLabel}
+        </button>
       </div>
     </div>
   );
 }
 
+function DeleteConfirmModal({ todo, onCancel, onConfirm }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+      <div className="w-full max-w-md rounded-2xl border border-border bg-background p-5 shadow-xl">
+        <div className="text-base font-semibold text-slate-800">
+          Delete To-Do?
+        </div>
+
+        <p className="mt-2 text-sm text-muted-foreground">
+          Are you sure you want to delete this to-do for{" "}
+          <span className="font-medium text-slate-700">{todo.owner ?? "—"}</span>
+          ?
+        </p>
+
+        <div className="mt-3 rounded-xl bg-muted/40 p-3 text-sm text-slate-700 break-words">
+          {todo.details ?? "—"}
+        </div>
+
+        <div className="mt-5 flex items-center justify-end gap-2">
+          <button
+            type="button"
+            className="border border-border rounded-xl px-4 py-2 bg-background text-sm hover:cursor-pointer"
+            onClick={onCancel}
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            className="border border-red-200 rounded-xl px-4 py-2 bg-red-50 text-sm text-red-700 hover:bg-red-100 hover:cursor-pointer"
+            onClick={onConfirm}
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function Filter({ label, children }) {
   return (

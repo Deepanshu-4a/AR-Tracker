@@ -67,7 +67,7 @@ export function CustomerProfileSidebar({ customer, onBack }) {
         <Button
           variant="ghost"
           onClick={onBack}
-          className="px-0 text-muted-foreground hover:text-foreground"
+          className="px-0 text-muted-foreground hover:text-foreground hover:cursor-pointer"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Customer Center

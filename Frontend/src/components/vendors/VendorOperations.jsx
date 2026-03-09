@@ -40,13 +40,13 @@ export function VendorOperations() {
                 <TabsList className="grid grid-cols-2 w-full bg-muted rounded-xl p-1">
                   <TabsTrigger
                     value="vendors"
-                    className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                    className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm hover:cursor-pointer"
                   >
                     Vendors
                   </TabsTrigger>
                   <TabsTrigger
                     value="transactions"
-                    className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                    className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm hover:cursor-pointer"
                   >
                     Transactions
                   </TabsTrigger>
@@ -147,7 +147,7 @@ function VendorOperationsTransactions({ view }) {
 
       <div className="mt-6">
        
-        <VendorTransactions view={view} />
+        {/* <VendorTransactions view={view} /> */}
       </div>
     </div>
   );

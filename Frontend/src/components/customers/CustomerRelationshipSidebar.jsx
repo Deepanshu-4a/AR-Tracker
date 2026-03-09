@@ -151,7 +151,7 @@ export function CustomerRelationshipSidebar({ items, selectedId, onSelect }) {
               type="button"
               onClick={() => setActiveTab("customers")}
               className={cn(
-                "flex-1 px-3 py-2 text-xs font-semibold border-r border-border/60",
+                "flex-1 px-3 py-2 text-xs font-semibold border-r border-border/60 hover:cursor-pointer",
                 activeTab === "customers"
                   ? "bg-white text-slate-900"
                   : "bg-muted/10 text-muted-foreground hover:bg-muted/20"
@@ -164,7 +164,7 @@ export function CustomerRelationshipSidebar({ items, selectedId, onSelect }) {
               type="button"
               onClick={() => setActiveTab("transactions")}
               className={cn(
-                "flex-1 px-3 py-2 text-xs font-semibold",
+                "flex-1 px-3 py-2 text-xs font-semibold  hover:cursor-pointer",
                 activeTab === "transactions"
                   ? "bg-white text-slate-900"
                   : "bg-muted/10 text-muted-foreground hover:bg-muted/20"

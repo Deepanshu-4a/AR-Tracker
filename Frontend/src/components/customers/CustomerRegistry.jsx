@@ -10,8 +10,7 @@ import {
 } from "../ui/tooltip";
 import { Search01Icon as Search } from "hugeicons-react";
 import { Plus, Download } from "lucide-react";
-import { CreateCustomerModal } from "./CreateCustomerModal";
-
+import { CustomerFormModal } from "./CustomerFormModal.jsx";
 import {
   mockCustomers,
   SCROLL_COLS,
@@ -479,7 +478,7 @@ export function CustomerRegistry({
         </div>
       </div>
 
-      <CreateCustomerModal open={isCreateOpen} onOpenChange={setIsCreateOpen} />
+      <CustomerFormModal open={isCreateOpen} onOpenChange={setIsCreateOpen} />
     </>
   );
 }

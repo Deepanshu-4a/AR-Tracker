@@ -5,6 +5,7 @@ import {
   Mail,
   Phone,
   ShieldCheck,
+  Pencil,
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "../ui/avatar";
 import { Badge } from "../ui/badge";
@@ -14,7 +15,7 @@ import { Button } from "../ui/button";
 /* CUSTOMER PROFILE SIDEBAR                             */
 /* ===================================================== */
 
-export function CustomerProfileSidebar({ customer, onBack }) {
+export function CustomerProfileSidebar({ customer, onBack,onEdit }) {
   if (!customer) return null;
 
   const initials = customer.name
@@ -89,6 +90,22 @@ export function CustomerProfileSidebar({ customer, onBack }) {
               Customer ID {customer.id}
             </p>
           </div>
+           <div className="relative group">
+                <button
+                  type="button"
+                  onClick={onEdit}
+                  className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border/60 bg-background text-muted-foreground transition hover:bg-muted hover:text-foreground cursor-pointer"
+                >
+                  <Pencil className="h-4 w-4" />
+                </button>
+
+                {/* Tooltip */}
+                <div className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="rounded-md bg-slate-900 px-2 py-1 text-[11px] text-white shadow-md whitespace-nowrap">
+                    Edit Customer
+                  </div>
+                </div>
+              </div>
         </div>
 
         {/* ================= ENHANCED RISK PROFILE ================= */}

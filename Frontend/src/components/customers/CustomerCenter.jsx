@@ -13,9 +13,10 @@ import { Users, Plus, Download, FileText } from "lucide-react";
 import { CreateEstimateModal } from "../CreateEstimateModal";
 import { RightSidePanel } from "../shared/RightSidePanel";
 import { CustomerPayments } from "./CustomerPayments";
-import { CreateCustomerModal } from "./CreateCustomerModal";
+import {CustomerFormModal} from "./CustomerFormModal";
 import { CustomerInvoices } from "./CustomerInvoices"; 
 import { CustomerBillingRules } from "./CustomerBillingRules";
+
 
 export function CustomerCenter({ onViewInvoice }) {
   const [searchTerm, setSearchTerm] = useState("");
@@ -216,7 +217,7 @@ export function CustomerCenter({ onViewInvoice }) {
       </div>
 
       {/* MODALS */}
-      <CreateCustomerModal open={isCreateOpen} onOpenChange={setIsCreateOpen} />
+      <CustomerFormModal open={isCreateOpen} onOpenChange={setIsCreateOpen} />
       <CreateEstimateModal
         open={isEstimateOpen}
         onOpenChange={setIsEstimateOpen}

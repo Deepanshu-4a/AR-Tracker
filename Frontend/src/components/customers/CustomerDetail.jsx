@@ -9,33 +9,33 @@ import { CustomerContacts } from "./CustomerContacts";
 import { CustomerToDos } from "./CustomerToDos";
 import { CustomerPayments } from "./CustomerPayments";
 import { CustomerInvoices } from "./CustomerInvoices";
-
+import { CustomerFormModal } from "./CustomerFormModal";
 const DETAIL_TABS = [
   { id: "transactions", label: "Transactions" },
   { id: "payment history", label: "Payment History" },
-  {id:"invoice history",label:"Invoice History"},
+  { id: "invoice history", label: "Invoice History" },
   { id: "estimates", label: "Estimates" },
   { id: "contacts", label: "Contacts" },
   { id: "todos", label: "ToDo's" },
 ];
 
-export function CustomerDetail({ customer, onBack }) {
+export function CustomerDetail({ customer, onBack, onUpdateCustomer }) {
   const [activeTab, setActiveTab] = useState("transactions");
   const [contextCollapsed, setContextCollapsed] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
 
   if (!customer) return null;
 
   const renderActiveTab = () => {
     switch (activeTab) {
-
       case "estimates":
         return <CustomerEstimates customerId={customer.id} />;
 
       case "payment history":
-        return <CustomerPayments customerId={customer.id}/>;
+        return <CustomerPayments customerId={customer.id} />;
 
       case "invoice history":
-        return <CustomerInvoices customerId={customer.id}/>;
+        return <CustomerInvoices customerId={customer.id} />;
 
       case "transactions":
         return <CustomerTransactions customerId={customer.id} />;
@@ -51,59 +51,72 @@ export function CustomerDetail({ customer, onBack }) {
     }
   };
 
-return (
-  <div className="h-full w-full max-w-none px-8">
-    <div
-      className={cn(
-        "grid gap-8 transition-all duration-300",
-        contextCollapsed
-          ? "grid-cols-[280px_minmax(0,1fr)]"
-          : "grid-cols-[280px_minmax(0,1fr)_260px]",
-      )}
-    >
-      {/* ================= LEFT SIDEBAR ================= */}
-      <CustomerProfileSidebar customer={customer} onBack={onBack} />
+  return (
+    <>
+      <div className="h-full w-full max-w-none px-8">
+        <div
+          className={cn(
+            "grid gap-8 transition-all duration-300",
+            contextCollapsed
+              ? "grid-cols-[280px_minmax(0,1fr)]"
+              : "grid-cols-[280px_minmax(0,1fr)_260px]",
+          )}
+        >
+          {/* ================= LEFT SIDEBAR ================= */}
+          <CustomerProfileSidebar
+            customer={customer}
+            onBack={onBack}
+            onEdit={() => setEditOpen(true)}
+          />
 
-      {/* ================= CENTER ================= */}
-      <div className="min-w-0 flex flex-col">
-        {/* Tabs */}
-        <div className="border-b border-border">
-          <div className="flex gap-8">
-            {DETAIL_TABS.map((tab) => (
-              <DetailTab
-                key={tab.id}
-                id={tab.id}
-                label={tab.label}
-                isActive={activeTab === tab.id}
-                onSelect={setActiveTab}
-              />
-            ))}
+          {/* ================= CENTER ================= */}
+          <div className="min-w-0 flex flex-col">
+            {/* Tabs */}
+            <div className="border-b border-border">
+              <div className="flex gap-8">
+                {DETAIL_TABS.map((tab) => (
+                  <DetailTab
+                    key={tab.id}
+                    id={tab.id}
+                    label={tab.label}
+                    isActive={activeTab === tab.id}
+                    onSelect={setActiveTab}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 pt-8">{renderActiveTab()}</div>
           </div>
+
+          {/* ================= RIGHT CONTEXT ================= */}
+          {!contextCollapsed && (
+            <RightSidePanel
+              customer={customer}
+              collapsed={false}
+              onToggle={() => setContextCollapsed(true)}
+            />
+          )}
+
+          {contextCollapsed && (
+            <RightSidePanel
+              customer={customer}
+              collapsed={true}
+              onToggle={() => setContextCollapsed(false)}
+            />
+          )}
         </div>
-
-        {/* Content */}
-        <div className="flex-1 pt-8">{renderActiveTab()}</div>
       </div>
-
-      {/* ================= RIGHT CONTEXT ================= */}
-      {!contextCollapsed && (
-        <RightSidePanel
-          customer={customer}
-          collapsed={false}
-          onToggle={() => setContextCollapsed(true)}
-        />
-      )}
-
-      {contextCollapsed && (
-        <RightSidePanel
-          customer={customer}
-          collapsed={true}
-          onToggle={() => setContextCollapsed(false)}
-        />
-      )}
-    </div>
-  </div>
-);
+      <CustomerFormModal
+        open={editOpen}
+        onOpenChange={setEditOpen}
+        mode="edit"
+        initialData={customer}
+        onSave={onUpdateCustomer}
+      />
+    </>
+  );
 }
 
 /* ================= TAB ================= */

@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { cn } from "../ui/utils";
+import { Pencil, Plus, Trash2, X } from "lucide-react";
+import { Button } from "../ui/button";
 
 /* ─── MOCK DATA  ───────────────────────── */
 const mockVendorToDos = [
@@ -327,15 +329,17 @@ export function VendorToDos({ todos: propToDos }) {
           Clear
         </button>
 
-        <button
-          className="ml-auto border border-border rounded-md px-3 py-1 bg-background text-sm hover:cursor-pointer"
+        <Button
+          type="button"
           onClick={() => {
             setEditingId(null);
             setShowAdd((v) => !v);
           }}
+          className="ml-auto inline-flex items-center gap-2 hover:cursor-pointer"
         >
-          + Add
-        </button>
+          {showAdd ? <X className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+          {showAdd ? "Close" : "Add To-Do"}
+        </Button>
       </div>
 
       {showAdd && (
@@ -344,7 +348,7 @@ export function VendorToDos({ todos: propToDos }) {
           value={newTodo}
           onChange={setNewTodo}
           onPrimary={handleAddTodo}
-          primaryLabel="Add"
+          primaryLabel="Save To-Do"
           onSecondary={resetAddForm}
           secondaryLabel="Cancel"
         />
@@ -356,7 +360,7 @@ export function VendorToDos({ todos: propToDos }) {
           value={editTodo}
           onChange={setEditTodo}
           onPrimary={() => saveEdit(editingId)}
-          primaryLabel="Save"
+          primaryLabel="Save Changes"
           onSecondary={cancelEdit}
           secondaryLabel="Cancel"
         />
@@ -508,7 +512,7 @@ function TodoForm({
   secondaryLabel,
 }) {
   return (
-    <div className="border border-border rounded-2xl p-4 bg-background">
+    <div className="border border-border rounded-xl bg-white p-4">
       <div className="mb-3 text-sm font-medium text-slate-700">{title}</div>
 
       <div className="grid grid-cols-1 md:grid-cols-12 gap-3 text-sm">
@@ -599,19 +603,22 @@ function TodoForm({
         </div>
       </div>
 
-      <div className="mt-4 flex items-center gap-2">
-        <button
-          className="border border-border rounded-xl px-4 py-2 bg-background text-sm hover:cursor-pointer"
-          onClick={onPrimary}
-        >
-          {primaryLabel}
-        </button>
-        <button
-          className="border border-border rounded-xl px-4 py-2 bg-background text-sm hover:cursor-pointer"
+      <div className="flex justify-end gap-2 mt-4">
+        <Button
+          className="hover:cursor-pointer"
+          type="button"
+          variant="outline"
           onClick={onSecondary}
         >
           {secondaryLabel}
-        </button>
+        </Button>
+        <Button
+          className="hover:cursor-pointer"
+          type="button"
+          onClick={onPrimary}
+        >
+          {primaryLabel}
+        </Button>
       </div>
     </div>
   );

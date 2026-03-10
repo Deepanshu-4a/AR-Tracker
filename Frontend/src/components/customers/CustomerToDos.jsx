@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { cn } from "../ui/utils";
+import { Pencil, Plus, Trash2, X } from "lucide-react";
+import { Button } from "../ui/button";
 
 const mockToDos = [
   {
@@ -329,15 +331,17 @@ export function CustomerToDos({ todos: propToDos }) {
           Clear
         </button>
 
-        <button
-          className="ml-auto border border-border rounded-md px-3 py-1 bg-background text-sm hover:cursor-pointer"
+        <Button
+          type="button"
           onClick={() => {
             setEditingId(null);
             setShowAdd((v) => !v);
           }}
+          className="ml-auto inline-flex items-center gap-2 hover:cursor-pointer"
         >
-          + Add
-        </button>
+          {showAdd ? <X className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+          {showAdd ? "Close" : "Add To-Do"}
+        </Button>
       </div>
 
       {showAdd && (
@@ -346,7 +350,7 @@ export function CustomerToDos({ todos: propToDos }) {
           value={newTodo}
           onChange={setNewTodo}
           onPrimary={handleAddTodo}
-          primaryLabel="Add"
+          primaryLabel="Save To-Do"
           onSecondary={resetAddForm}
           secondaryLabel="Cancel"
         />
@@ -358,7 +362,7 @@ export function CustomerToDos({ todos: propToDos }) {
           value={editTodo}
           onChange={setEditTodo}
           onPrimary={() => saveEdit(editingId)}
-          primaryLabel="Save"
+          primaryLabel="Save Changes"
           onSecondary={cancelEdit}
           secondaryLabel="Cancel"
         />
@@ -459,14 +463,14 @@ export function CustomerToDos({ todos: propToDos }) {
                           className="border border-border rounded-md px-2 py-1 text-xs bg-background hover:bg-muted hover:cursor-pointer"
                           onClick={() => startEdit(t)}
                         >
-                          Edit
+                          <Pencil className="h-4 w-4" />
                         </button>
                         <button
                           type="button"
                           className="border border-red-200 text-red-700 rounded-md px-2 py-1 text-xs bg-red-50 hover:bg-red-100 hover:cursor-pointer"
                           onClick={() => setDeleteTarget(t)}
                         >
-                          Delete
+                          <Trash2 className="h-4 w-4" />
                         </button>
                       </div>
                     </Td>
@@ -510,7 +514,7 @@ function TodoForm({
   secondaryLabel,
 }) {
   return (
-    <div className="border border-border rounded-2xl p-4 bg-background">
+    <div className="border border-border rounded-xl bg-white p-4">
       <div className="mb-3 text-sm font-medium text-slate-700">{title}</div>
 
       <div className="grid grid-cols-1 md:grid-cols-12 gap-3 text-sm">
@@ -601,19 +605,22 @@ function TodoForm({
         </div>
       </div>
 
-      <div className="mt-4 flex items-center gap-2">
-        <button
-          className="border border-border rounded-xl px-4 py-2 bg-background text-sm cursor-pointer"
-          onClick={onPrimary}
-        >
-          {primaryLabel}
-        </button>
-        <button
-          className="border border-border rounded-xl px-4 py-2 bg-background text-sm cursor-pointer"
+      <div className="flex justify-end gap-2 mt-4">
+        <Button
+          className="hover:cursor-pointer"
+          type="button"
+          variant="outline"
           onClick={onSecondary}
         >
           {secondaryLabel}
-        </button>
+        </Button>
+        <Button
+          className="hover:cursor-pointer"
+          type="button"
+          onClick={onPrimary}
+        >
+          {primaryLabel}
+        </Button>
       </div>
     </div>
   );

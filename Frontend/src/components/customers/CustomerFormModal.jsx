@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { X, Minus, Square } from "lucide-react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -12,29 +12,124 @@ import { SalesTaxSettingsTab } from "./tabs/SalesTaxSettingsTab";
 import { AdditionalInfoTab } from "./tabs/AdditionalInfoTab";
 import { JobInfoTab } from "./tabs/JobInfoTab";
 
+const emptyCustomerForm = {
+  customerName: "",
+  openingBalance: "",
+  asOfDate: "",
+  addressInfo: {},
+  paymentSettings: {},
+  salesTax: {},
+  additionalInfo: {},
+  jobInfo: {},
+};
+
 export function CustomerFormModal({
   open,
   onOpenChange,
   mode = "create",
-  initialData,
+  initialData = null,
   onSave,
 }) {
   const [activeTab, setActiveTab] = useState("address");
   const [isMaximized, setIsMaximized] = useState(false);
+  const [formData, setFormData] = useState(emptyCustomerForm);
 
-  const [formData, setFormData] = useState({
-    customerName: "",
-    openingBalance: "",
-    asOfDate: "",
-    addressInfo: {},
-    paymentSettings: {},
-    salesTax: {},
-    additionalInfo: {},
-    jobInfo: {},
-  });
+  useEffect(() => {
+    if (!open) return;
+
+    setActiveTab("address");
+
+    if (mode === "edit" && initialData) {
+      setFormData({
+        customerName:
+          initialData.customerName ??
+          initialData.businessName ??
+          initialData.name ??
+          "",
+        openingBalance: initialData.openingBalance ?? "",
+        asOfDate: initialData.asOfDate ?? "",
+
+        addressInfo: {
+          ...(initialData.addressInfo ?? {}),
+          companyName:
+            initialData.addressInfo?.companyName ??
+            initialData.businessName ??
+            initialData.customerName ??
+            "",
+          mainPhone:
+            initialData.addressInfo?.mainPhone ??
+            initialData.phone ??
+            "",
+          mainEmail:
+            initialData.addressInfo?.mainEmail ??
+            initialData.email ??
+            "",
+          website:
+            initialData.addressInfo?.website ??
+            initialData.website ??
+            "",
+        },
+
+        paymentSettings: {
+          ...(initialData.paymentSettings ?? {}),
+          paymentTerms:
+            initialData.paymentSettings?.paymentTerms ??
+            initialData.netTerms ??
+            initialData.paymentTerms ??
+            "",
+          printNameOnCheckAs:
+            initialData.paymentSettings?.printNameOnCheckAs ??
+            initialData.businessName ??
+            initialData.customerName ??
+            "",
+        },
+
+        salesTax: {
+          ...(initialData.salesTax ?? {}),
+          customerTaxId:
+            initialData.salesTax?.customerTaxId ??
+            initialData.customerTaxId ??
+            initialData.taxId ??
+            "",
+        },
+
+        additionalInfo: {
+          ...(initialData.additionalInfo ?? {}),
+        },
+
+        jobInfo: {
+          ...(initialData.jobInfo ?? {}),
+        },
+      });
+    } else {
+      setFormData(emptyCustomerForm);
+    }
+  }, [open, mode, initialData]);
 
   const handleSave = () => {
-    console.log("Customer Data:", formData);
+    const payload = {
+      ...initialData,
+      ...formData,
+      businessName: formData.customerName,
+      customerName: formData.customerName,
+
+      phone:
+        formData.addressInfo?.mainPhone ??
+        initialData?.phone ??
+        "",
+
+      email:
+        formData.addressInfo?.mainEmail ??
+        initialData?.email ??
+        "",
+
+      website:
+        formData.addressInfo?.website ??
+        initialData?.website ??
+        "",
+    };
+
+    onSave?.(payload);
     onOpenChange(false);
   };
 
@@ -62,7 +157,6 @@ export function CustomerFormModal({
           }
         `}
       >
-        {/* ===== HEADER ===== */}
         <div
           className={`
             relative flex items-center px-6 py-3
@@ -95,7 +189,6 @@ export function CustomerFormModal({
           </div>
         </div>
 
-        {/* ===== TOP SECTION ===== */}
         <div className="px-8 py-3 border-b">
           <div className="grid grid-cols-12 gap-4 items-end">
             <div className="col-span-6">
@@ -143,16 +236,14 @@ export function CustomerFormModal({
             </div>
 
             <div className="col-span-1 flex items-center">
-              <button className="text-xs text-primary hover:underline">
+              <button className="text-xs text-primary hover:underline cursor-pointer">
                 Help
               </button>
             </div>
           </div>
         </div>
 
-        {/* ===== BODY ===== */}
         <div className="flex flex-1 overflow-hidden">
-          {/* Sidebar */}
           <div className="w-60 border-r bg-muted/40 p-3 space-y-1">
             {tabs.map((tab) => (
               <button
@@ -169,7 +260,6 @@ export function CustomerFormModal({
             ))}
           </div>
 
-          {/* Content*/}
           <div className="flex-1 p-6 bg-card overflow-hidden">
             <div
               className={activeTab === "address" ? "block h-full" : "hidden"}
@@ -208,7 +298,6 @@ export function CustomerFormModal({
           </div>
         </div>
 
-        {/* ===== FOOTER ===== */}
         <div
           className={`
             flex justify-end gap-3 px-8 py-3 border-t bg-muted/40
@@ -216,7 +305,7 @@ export function CustomerFormModal({
           `}
         >
           <Button
-            variant="outline "
+            variant="outline"
             onClick={() => onOpenChange(false)}
             className="h-9 cursor-pointer"
           >

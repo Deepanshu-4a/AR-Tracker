@@ -18,11 +18,50 @@ const emptyVendorForm = {
   openingBalance: "",
   asOfDate: "",
   isInactive: false,
-  addressInfo: {},
-  paymentSettings: {},
-  salesTax: {},
-  additionalInfo: {},
-  jobInfo: {},
+
+  addressInfo: {
+    companyName: "",
+    title: "",
+    firstName: "",
+    middleInitial: "",
+    lastName: "",
+    jobTitle: "",
+    mainPhone: "",
+    fax: "",
+    workPhone: "",
+    mainEmail: "",
+    mobile: "",
+    ccEmail: "",
+    website: "",
+    other1: "",
+    billingAddress: "",
+    shippingAddress: "",
+    defaultShipping: false,
+  },
+
+  paymentSettings: {
+    accountNo: "",
+    creditLimit: "",
+    paymentTerms: "net_30",
+    billingRateLevel: "standard",
+    printNameOnCheckAs: "",
+  },
+
+  salesTax: {
+    vendorTaxId: "",
+    eligibleFor1099: false,
+  },
+
+  additionalInfo: {
+    vendorType: "",
+    customFields: [],
+  },
+
+  accountSettings: {
+    prefillAccount1: "",
+    prefillAccount2: "",
+    prefillAccount3: "",
+  },
 };
 
 export function VendorFormModal({
@@ -34,7 +73,6 @@ export function VendorFormModal({
 }) {
   const [activeTab, setActiveTab] = useState("address");
   const [isMaximized, setIsMaximized] = useState(false);
-
   const [formData, setFormData] = useState(emptyVendorForm);
 
   useEffect(() => {
@@ -44,21 +82,132 @@ export function VendorFormModal({
 
     if (mode === "edit" && initialData) {
       setFormData({
-        vendorName:
-          initialData.vendorName ??
-          initialData.businessName ??
-          "",
+        vendorName: initialData.vendorName ?? initialData.businessName ?? "",
         openingBalance: initialData.openingBalance ?? "",
         asOfDate: initialData.asOfDate ?? "",
         isInactive:
           typeof initialData.isInactive === "boolean"
             ? initialData.isInactive
             : initialData.status === "Inactive",
-        addressInfo: initialData.addressInfo ?? {},
-        paymentSettings: initialData.paymentSettings ?? {},
-        salesTax: initialData.salesTax ?? {},
-        additionalInfo: initialData.additionalInfo ?? {},
-        jobInfo: initialData.jobInfo ?? {},
+
+        addressInfo: {
+          companyName:
+            initialData.addressInfo?.companyName ??
+            initialData.businessName ??
+            "",
+          title: initialData.addressInfo?.title ?? "",
+          firstName: initialData.addressInfo?.firstName ?? "",
+          middleInitial: initialData.addressInfo?.middleInitial ?? "",
+          lastName: initialData.addressInfo?.lastName ?? "",
+          jobTitle:
+            initialData.addressInfo?.jobTitle ??
+            initialData.jobTitle ??
+            "",
+          mainPhone:
+            initialData.addressInfo?.mainPhone ??
+            initialData.phone ??
+            "",
+          fax:
+            initialData.addressInfo?.fax ??
+            initialData.fax ??
+            "",
+          workPhone:
+            initialData.addressInfo?.workPhone ??
+            initialData.workPhone ??
+            "",
+          mainEmail:
+            initialData.addressInfo?.mainEmail ??
+            initialData.email ??
+            "",
+          mobile:
+            initialData.addressInfo?.mobile ??
+            initialData.mobile ??
+            "",
+          ccEmail:
+            initialData.addressInfo?.ccEmail ??
+            initialData.ccEmail ??
+            "",
+          website:
+            initialData.addressInfo?.website ??
+            initialData.website ??
+            "",
+          other1:
+            initialData.addressInfo?.other1 ??
+            initialData.other1 ??
+            "",
+          billingAddress:
+            initialData.addressInfo?.billingAddress ??
+            initialData.billingAddress ??
+            "",
+          shippingAddress:
+            initialData.addressInfo?.shippingAddress ??
+            initialData.shippingAddress ??
+            "",
+          defaultShipping:
+            initialData.addressInfo?.defaultShipping ??
+            initialData.defaultShipping ??
+            false,
+        },
+
+        paymentSettings: {
+          accountNo:
+            initialData.paymentSettings?.accountNo ??
+            initialData.accountNo ??
+            "",
+          creditLimit:
+            initialData.paymentSettings?.creditLimit ??
+            initialData.creditLimit ??
+            "",
+          paymentTerms:
+            initialData.paymentSettings?.paymentTerms ??
+            initialData.netTerms ??
+            initialData.paymentTerms ??
+            "net_30",
+          billingRateLevel:
+            initialData.paymentSettings?.billingRateLevel ??
+            initialData.billingRateLevel ??
+            "standard",
+          printNameOnCheckAs:
+            initialData.paymentSettings?.printNameOnCheckAs ??
+            initialData.businessName ??
+            "",
+        },
+
+        salesTax: {
+          vendorTaxId:
+            initialData.salesTax?.vendorTaxId ??
+            initialData.vendorTaxId ??
+            initialData.taxId ??
+            "",
+          eligibleFor1099:
+            initialData.salesTax?.eligibleFor1099 ??
+            initialData.eligibleFor1099 ??
+            false,
+        },
+
+        additionalInfo: {
+          vendorType:
+            initialData.additionalInfo?.vendorType ??
+            initialData.vendorType ??
+            "",
+          customFields:
+            initialData.additionalInfo?.customFields ?? [],
+        },
+
+        accountSettings: {
+          prefillAccount1:
+            initialData.accountSettings?.prefillAccount1 ??
+            initialData.prefillAccount1 ??
+            "",
+          prefillAccount2:
+            initialData.accountSettings?.prefillAccount2 ??
+            initialData.prefillAccount2 ??
+            "",
+          prefillAccount3:
+            initialData.accountSettings?.prefillAccount3 ??
+            initialData.prefillAccount3 ??
+            "",
+        },
       });
     } else {
       setFormData(emptyVendorForm);
@@ -71,6 +220,26 @@ export function VendorFormModal({
       ...formData,
       businessName: formData.vendorName,
       status: formData.isInactive ? "Inactive" : "Active",
+      phone:
+        formData.addressInfo?.mainPhone ||
+        initialData?.phone ||
+        "",
+      email:
+        formData.addressInfo?.mainEmail ||
+        initialData?.email ||
+        "",
+      website:
+        formData.addressInfo?.website ||
+        initialData?.website ||
+        "",
+      netTerms:
+        formData.paymentSettings?.paymentTerms ||
+        initialData?.netTerms ||
+        "net_30",
+      vendorTaxId:
+        formData.salesTax?.vendorTaxId ||
+        initialData?.vendorTaxId ||
+        "",
     };
 
     onSave?.(payload);
